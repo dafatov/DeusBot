@@ -53,11 +53,21 @@
 
 		<!-- Discord -->
 		<JDA.version>5.0.1</JDA.version>
+		<lavaplayer.version>2.2.1</lavaplayer.version>
 
 		<!-- Plugins -->
 		<git-commit-id.version>9.0.0</git-commit-id.version>
 		<maven-compiler.version>3.12.1</maven-compiler.version>
+		<lavalink.youtube-common.version>1.4.0</lavalink.youtube-common.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>arbjergDev</id>
+			<name>Lavalink Repository</name>
+			<url>https://maven.lavalink.dev/releases</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- Main -->
@@ -119,6 +129,16 @@
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
 			<version>${JDA.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.arbjerg</groupId>
+			<artifactId>lavaplayer</artifactId>
+			<version>${lavaplayer.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>dev.lavalink.youtube</groupId>
+			<artifactId>common</artifactId>
+			<version>${lavalink.youtube-common.version}</version>
 		</dependency>
 
 		<!-- Test -->

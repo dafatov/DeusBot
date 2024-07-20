@@ -8,4 +8,6 @@ public interface CommandAdapter {
     void notify(MessageData content);
 
     String getLatency();
+
+    void connectPlayer();
 }

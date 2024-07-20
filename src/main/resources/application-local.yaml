@@ -18,3 +18,7 @@ logging:
     ru.demetrious.deus.bot: DEBUG
     org.hibernate:
       orm.jdbc.bind: TRACE
+    com:
+      sedmelluq:
+        discord:
+          lavaplayer: DEBUG
