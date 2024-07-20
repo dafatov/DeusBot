@@ -1,25 +1,23 @@
 package ru.demetrious.deus.bot.adapter.inbound.jda;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.mapper.MessageDataMapper;
+import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.domain.MessageData;
 
+import static java.util.Optional.ofNullable;
 import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
 
 @Slf4j
@@ -27,6 +25,7 @@ import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
 public class CommandAdapterImpl implements CommandAdapter {
     private final MessageDataMapper messageDataMapper;
     private final SlashCommandInteractionEvent event;
+    private final Player player;
 
     @Override
     public void notify(String content) {
@@ -58,43 +57,19 @@ public class CommandAdapterImpl implements CommandAdapter {
 
     @Override
     public void connectPlayer() {
-        VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel().asVoiceChannel();
-        AudioManager audioManager = event.getGuild().getAudioManager();
+        VoiceChannel voiceChannel = ofNullable(event.getMember())
+            .map(Member::getVoiceState)
+            .map(GuildVoiceState::getChannel)
+            .map(AudioChannelUnion::asVoiceChannel)
+            .orElseThrow();
+        AudioManager audioManager = ofNullable(event.getGuild())
+            .map(Guild::getAudioManager)
+            .orElseThrow();
+
+        audioManager.setSendingHandler(player.getAudioSendHandler());
         audioManager.openAudioConnection(voiceChannel);
 
-        DefaultAudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
-        AudioPlayer player = audioPlayerManager.createPlayer();
-
-        TrackScheduler trackScheduler = new TrackScheduler(player);
-        player.addListener(trackScheduler);
-        audioManager.setSendingHandler(new AudioPlayerSendHandler(player));
-
-        audioPlayerManager.registerSourceManager(new YoutubeAudioSourceManager());
-        audioPlayerManager.registerSourceManager(new HttpAudioSourceManager());
-
-        audioPlayerManager.loadItem("https://hls-01-radiorecord.hostingradio.ru/record-progr/playlist.m3u8", new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack audioTrack) {
-                trackScheduler.queue(audioTrack);
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist audioPlaylist) {
-                for (AudioTrack audioTrack : audioPlaylist.getTracks()) {
-                    trackScheduler.queue(audioTrack);
-                }
-            }
-
-            @Override
-            public void noMatches() {
-                log.warn("Load no matches");
-            }
-
-            @Override
-            public void loadFailed(FriendlyException e) {
-                log.error("Load failed", e);
-            }
-        });
+        player.add("https://hls-01-radiorecord.hostingradio.ru/record-progr/playlist.m3u8");
     }
 
     // ===================================================================================================================
