@@ -6,13 +6,13 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import ru.demetrious.deus.bot.adapter.inbound.jda.factory.CommandAdapterFactory;
 import ru.demetrious.deus.bot.app.command.api.Command;
-
-import static ru.demetrious.deus.bot.adapter.inbound.jda.factory.CommandAdapterFactory.create;
 
 @RequiredArgsConstructor
 @Component
 public class ListenerAdapterImpl extends ListenerAdapter {
+    private final CommandAdapterFactory commandAdapterFactory;
     private final List<Command> commandList;
 
     @Override
@@ -23,6 +23,6 @@ public class ListenerAdapterImpl extends ListenerAdapter {
             .filter(command -> command.getData().getName().equals(event.getName()))
             .findFirst()
             .orElseThrow()
-            .execute(create(event));
+            .execute(commandAdapterFactory.create(event));
     }
 }
