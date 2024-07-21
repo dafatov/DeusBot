@@ -2,12 +2,11 @@ package ru.demetrious.deus.bot.app.player.api;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
-import net.dv8tion.jda.api.audio.AudioSendHandler;
 
-public interface Player {
-    AudioSendHandler getAudioSendHandler();
+public interface Scheduler {
+    void enqueue(AudioTrack audioTrack);
 
-    void add(String identifier);
+    void next();
 
     List<AudioTrack> getQueue();
 }

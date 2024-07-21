@@ -7,24 +7,22 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.player.TrackScheduler;
+import ru.demetrious.deus.bot.app.player.api.Scheduler;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class AudioLoadResultHandlerImpl implements AudioLoadResultHandler {
-    private final TrackScheduler trackScheduler;
+    private final Scheduler scheduler;
 
     @Override
     public void trackLoaded(AudioTrack audioTrack) {
-        trackScheduler.queue(audioTrack);
+        scheduler.enqueue(audioTrack);
     }
 
     @Override
     public void playlistLoaded(AudioPlaylist audioPlaylist) {
-        for (AudioTrack audioTrack : audioPlaylist.getTracks()) {
-            trackScheduler.queue(audioTrack);
-        }
+        audioPlaylist.getTracks().forEach(scheduler::enqueue);
     }
 
     @Override

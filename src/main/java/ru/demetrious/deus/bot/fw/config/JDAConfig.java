@@ -30,13 +30,14 @@ public class JDAConfig {
     private String version;
 
     @Bean
-    public JDA jda() {
+    public JDA jda() throws InterruptedException {
         return createDefault(token)
             .disableCache(EMOJI, STICKER, SCHEDULED_EVENTS)
             .setEnabledIntents(GUILD_MEMBERS, GUILD_MESSAGES, GUILD_VOICE_STATES, MESSAGE_CONTENT)
             .setActivity(playing(format("/help | v{0}", version)))
             .setStatus(DO_NOT_DISTURB)
             .addEventListeners(listenerAdapter)
-            .build();
+            .build()
+            .awaitReady();
     }
 }

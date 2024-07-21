@@ -1,40 +1,34 @@
 package ru.demetrious.deus.bot.app.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import jakarta.annotation.PostConstruct;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.demetrious.deus.bot.app.player.api.Scheduler;
 
 @RequiredArgsConstructor
 @Component
-public class TrackScheduler extends AudioEventAdapter {
+public class SchedulerImpl implements Scheduler {
     private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
     private final AudioPlayer audioPlayer;
 
-    @PostConstruct
-    private void init() {
-        audioPlayer.addListener(this);
-    }
-
-    public void queue(AudioTrack audioTrack) {
+    @Override
+    public void enqueue(AudioTrack audioTrack) {
         if (!audioPlayer.startTrack(audioTrack, true)) {
             queue.offer(audioTrack);
         }
     }
 
-    public void nextTrack() {
+    @Override
+    public void next() {
         audioPlayer.startTrack(queue.poll(), false);
     }
 
     @Override
-    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason.mayStartNext) {
-            nextTrack();
-        }
+    public List<AudioTrack> getQueue() {
+        return queue.stream().toList();
     }
 }

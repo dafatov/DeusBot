@@ -1,5 +1,7 @@
 package ru.demetrious.deus.bot.adapter.inbound.jda;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +72,11 @@ public class CommandAdapterImpl implements CommandAdapter {
         audioManager.openAudioConnection(voiceChannel);
 
         player.add("https://hls-01-radiorecord.hostingradio.ru/record-progr/playlist.m3u8");
+    }
+
+    @Override
+    public List<AudioTrack> getQueue() {
+        return player.getQueue();
     }
 
     // ===================================================================================================================

@@ -12,18 +12,18 @@ import ru.demetrious.deus.bot.app.command.api.Command;
 
 @Slf4j
 @RequiredArgsConstructor
-@Profile("!local")
+@Profile("local")
 @Configuration
-public class CommandsConfig {
+public class CommandsConfigLocal {
     private final JDA jda;
     private final CommandDataMapper commandDataMapper;
     private final List<Command> commandList;
 
     @PostConstruct
     public void updateCommand() {
-        jda.updateCommands()
+        jda.getGuilds().forEach(guild -> guild.updateCommands()
             .addCommands(commandDataMapper.mapCommand(commandList.stream().map(Command::getData).toList()))
-            .onSuccess(commandList -> log.debug("Init commands: {}", commandList))
-            .queue();
+            .onSuccess(commandList -> log.debug("Init guild({}) commands: {}", guild.getName(), commandList))
+            .queue());
     }
 }
