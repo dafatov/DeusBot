@@ -23,7 +23,7 @@ public class QueueCommand extends PlayerCommand {
 
     @Override
     public void execute(CommandAdapter commandAdapter) {
-        final Player player = getPlayer(commandAdapter);
+        final Player player = getPlayer(commandAdapter.getGuildId());
 
         log.debug("queue: {}", player.getQueue());
     }

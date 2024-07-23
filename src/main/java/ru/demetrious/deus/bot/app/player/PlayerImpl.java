@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.handler.AudioSendHandlerImpl;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.api.Scheduler;
@@ -29,9 +28,7 @@ public class PlayerImpl implements Player {
     private final Scheduler scheduler;
 
     @Override
-    public void connect(CommandAdapter commandAdapter) {
-        VoiceChannel voiceChannel = commandAdapter.getVoiceChannel();
-        AudioManager audioManager = commandAdapter.getAudioManager();
+    public void connect(VoiceChannel voiceChannel, AudioManager audioManager) {
 
         if (audioManager.isConnected()) {
             return;
