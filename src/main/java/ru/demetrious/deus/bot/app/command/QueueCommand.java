@@ -2,7 +2,7 @@ package ru.demetrious.deus.bot.app.command;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.player.api.Jukebox;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -22,8 +22,8 @@ public class QueueCommand extends PlayerCommand {
     }
 
     @Override
-    public void execute(CommandAdapter commandAdapter) {
-        final Player player = getPlayer(commandAdapter.getGuildId());
+    public void execute(SlashCommandAdapter slashCommandAdapter) {
+        final Player player = getPlayer(slashCommandAdapter.getGuildId());
 
         log.debug("queue: {}", player.getQueue());
     }

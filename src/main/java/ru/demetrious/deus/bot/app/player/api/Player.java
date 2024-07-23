@@ -5,11 +5,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
 import java.util.Optional;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.managers.AudioManager;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 
 public interface Player {
-    void connect(VoiceChannel voiceChannel, AudioManager audioManager);
+    void connect(GenericInteractionAdapter genericInteractionAdapter);
 
     Optional<AudioItem> add(AudioReference reference);
 

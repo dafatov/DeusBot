@@ -1,6 +1,5 @@
 package ru.demetrious.deus.bot.adapter.inbound.jda;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +10,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
-import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.interactions.modals.ModalMapping;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
+import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import ru.demetrious.deus.bot.adapter.inbound.jda.api.OnModalAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.mapper.MessageDataMapper;
 import ru.demetrious.deus.bot.domain.MessageData;
 
@@ -27,9 +26,10 @@ import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
 
 @Slf4j
 @RequiredArgsConstructor
-public class OnModalAdapterImpl implements OnModalAdapter {
+public abstract class GenericInteractionAdapterImpl<Event extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback, Interaction extends IDeferrableCallback>
+    implements GenericInteractionAdapter<Interaction> {
+    protected final Event event;
     private final MessageDataMapper messageDataMapper;
-    private final ModalInteractionEvent event;
 
     @Override
     public void notify(MessageData messageData) {
@@ -45,16 +45,8 @@ public class OnModalAdapterImpl implements OnModalAdapter {
             }
         } catch (Exception e) {
             log.warn("Cannot reply onModal interaction", e);
-            event.getChannel().sendMessage(content).queue();
+            ((MessageChannelUnion) requireNonNull(event.getChannel())).sendMessage(content).queue();
         }
-    }
-
-    @Override
-    public List<String> getValues() {
-        return event.getInteraction().getValues().stream()
-            .map(ModalMapping::getAsString)
-            .filter(StringUtils::isNotBlank)
-            .toList();
     }
 
     @Override
@@ -83,11 +75,15 @@ public class OnModalAdapterImpl implements OnModalAdapter {
             .orElseThrow();
     }
 
+    @SuppressWarnings("unchecked")
+    public Interaction getInteraction() {
+        return (Interaction) event.getInteraction();
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
-    @NotNull
     private Optional<VoiceChannel> getVoiceChannelOptional() {
         return ofNullable(event.getMember())
             .map(Member::getVoiceState)
@@ -96,7 +92,7 @@ public class OnModalAdapterImpl implements OnModalAdapter {
     }
 
     private Boolean isDeferred() throws InterruptedException, ExecutionException {
-        return event.getInteraction().getHook().retrieveOriginal().submit()
+        return getInteraction().getHook().retrieveOriginal().submit()
             .thenApply(Message::getFlags)
             .thenApply(messageFlags -> messageFlags.contains(LOADING))
             .get();

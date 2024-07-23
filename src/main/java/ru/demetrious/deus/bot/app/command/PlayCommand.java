@@ -7,17 +7,15 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.track.YoutubeAudioTrack;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
-import ru.demetrious.deus.bot.adapter.inbound.jda.api.OnModalAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.ModalAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.player.api.Jukebox;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.domain.AddedInfo;
@@ -67,68 +65,47 @@ public class PlayCommand extends PlayerCommand {
     }
 
     @Override
-    public void execute(CommandAdapter commandAdapter) {
-        play(
-            commandAdapter.getStringOption("string"),
-            commandAdapter.getAttachmentOption("attachment"),
-            commandAdapter.getGuildId(),
-            commandAdapter.getVoiceChannel(),
-            commandAdapter.getAudioManager(),
-            commandAdapter::notify,
-            commandAdapter::isUnequalChannels,
-            commandAdapter::showModal
-        );
+    public void execute(SlashCommandAdapter slashCommandAdapter) {
+        play(slashCommandAdapter, slashCommandAdapter.getStringOption("string"),
+            slashCommandAdapter.getAttachmentOption("attachment"), slashCommandAdapter::showModal);
     }
 
     @Override
-    public boolean isDeferReply(CommandAdapter commandAdapter) {
-        return commandAdapter.getStringOption("string").isPresent() || commandAdapter.getAttachmentOption("attachment").isPresent();
+    public boolean isDeferReply(SlashCommandAdapter slashCommandAdapter) {
+        return slashCommandAdapter.getStringOption("string").isPresent() || slashCommandAdapter.getAttachmentOption("attachment").isPresent();
     }
 
     @Override
-    public void onModal(OnModalAdapter onModalAdapter) {
-        List<String> values = onModalAdapter.getValues();
+    public void onModal(ModalAdapter modalAdapter) {
+        List<String> values = modalAdapter.getValues();
 
-        values.forEach(value -> play(
-            of(value),
-            empty(),
-            onModalAdapter.getGuildId(),
-            onModalAdapter.getVoiceChannel(),
-            onModalAdapter.getAudioManager(),
-            onModalAdapter::notify,
-            onModalAdapter::isUnequalChannels,
-            null
-        ));
+        values.forEach(value -> play(modalAdapter, of(value), empty(), null));
     }
 
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
-    private void play(Optional<String> identifierOptional,
-                      Optional<Attachment> attachmentOptional,
-                      String guildId, VoiceChannel voiceChannel, AudioManager audioManager, Consumer<MessageData> notifyConsumer,
-                      BooleanSupplier isUnequalChannelsRunnable,
+    private void play(GenericInteractionAdapter genericInteractionAdapter, Optional<String> identifierOptional, Optional<Attachment> attachmentOptional,
                       Consumer<Modal> showModalConsumer) {
-
         if (identifierOptional.isPresent() && attachmentOptional.isPresent()) {
             MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setColor(WARNING)
                 .setTitle("Некорректное состояние команды \"play\"")
                 .setDescription("Обратитесь к администратору для выяснения обстоятельств")));
 
-            notifyConsumer.accept(messageData);
+            genericInteractionAdapter.notify(messageData);
             log.warn("Некорректное состояние команды \"play\"");
             return;
         }
 
-        if (isUnequalChannelsRunnable.getAsBoolean()) {
+        if (genericInteractionAdapter.isUnequalChannels()) {
             MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setColor(WARNING)
                 .setTitle("Канал не тот")
                 .setDescription("Мда.. шиза.. перепутать каналы это надо уметь")));
 
-            notifyConsumer.accept(messageData);
+            genericInteractionAdapter.notify(messageData);
             log.warn("Не совпадают каналы");
             return;
         }
@@ -148,7 +125,7 @@ public class PlayCommand extends PlayerCommand {
             return;
         }
 
-        final Player player = getPlayer(guildId);
+        final Player player = getPlayer(genericInteractionAdapter.getGuildId());
         int queueSize = player.getQueue().size();
         boolean hasLive = hasLive(player.getQueue());
         Long remained = player.getRemaining();
@@ -165,12 +142,12 @@ public class PlayCommand extends PlayerCommand {
                 .setTitle("Душный запрос")
                 .setDescription(NOT_FOUND_DESCRIPTION)));
 
-            notifyConsumer.accept(messageData);
+            genericInteractionAdapter.notify(messageData);
             log.info(NOT_FOUND_DESCRIPTION);
             return;
         }
 
-        player.connect(voiceChannel, audioManager);
+        player.connect(genericInteractionAdapter);
 
         AddedInfo added = getAddedInfo(addedOptional.get());
         String description = getDescription(added, queueSize, getRemained(hasLive, remained));
@@ -181,7 +158,7 @@ public class PlayCommand extends PlayerCommand {
             .setUrl(added.getUrl())
             .setThumbnail(added.getPreview())));
 
-        notifyConsumer.accept(messageData);
+        genericInteractionAdapter.notify(messageData);
         log.info("Композиция успешно добавлена в очередь");
     }
 
@@ -239,7 +216,7 @@ public class PlayCommand extends PlayerCommand {
         }
     }
 
-    private static void setPreview(AudioTrack audioTrack, AddedInfo addedInfo) {
+    private void setPreview(AudioTrack audioTrack, AddedInfo addedInfo) {
         if (audioTrack instanceof YoutubeAudioTrack youtubeAudioTrack) {
             addedInfo.setPreview(format("https://i3.ytimg.com/vi/{0}/hqdefault.jpg", youtubeAudioTrack.getIdentifier()));
         }
