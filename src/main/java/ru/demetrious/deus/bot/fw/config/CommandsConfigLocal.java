@@ -23,7 +23,7 @@ public class CommandsConfigLocal {
     public void updateCommand() {
         jda.getGuilds().forEach(guild -> guild.updateCommands()
             .addCommands(commandDataMapper.mapCommand(commandList.stream().map(Command::getData).toList()))
-            .onSuccess(commandList -> log.debug("Init guild({}) commands: {}", guild.getName(), commandList))
+            .onSuccess(commandList -> log.info("Init guild({}) commands: {}", guild.getName(), commandList))
             .queue());
     }
 }

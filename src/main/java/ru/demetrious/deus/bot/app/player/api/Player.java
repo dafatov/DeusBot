@@ -1,13 +1,18 @@
 package ru.demetrious.deus.bot.app.player.api;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioItem;
+import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
-import net.dv8tion.jda.api.audio.AudioSendHandler;
+import java.util.Optional;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
 
 public interface Player {
-    AudioSendHandler getAudioSendHandler();
+    void connect(CommandAdapter commandAdapter);
 
-    void add(String identifier);
+    Optional<AudioItem> add(AudioReference reference);
 
     List<AudioTrack> getQueue();
+
+    Long getRemaining();
 }

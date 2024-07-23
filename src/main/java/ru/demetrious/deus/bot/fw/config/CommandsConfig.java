@@ -23,7 +23,7 @@ public class CommandsConfig {
     public void updateCommand() {
         jda.updateCommands()
             .addCommands(commandDataMapper.mapCommand(commandList.stream().map(Command::getData).toList()))
-            .onSuccess(commandList -> log.debug("Init commands: {}", commandList))
+            .onSuccess(commandList -> log.info("Init commands: {}", commandList))
             .queue();
     }
 }

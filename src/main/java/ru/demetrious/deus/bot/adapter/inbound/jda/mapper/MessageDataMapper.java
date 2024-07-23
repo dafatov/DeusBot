@@ -26,7 +26,9 @@ public interface MessageDataMapper {
             .setTitle(messageEmbed.getTitle())
             .setDescription(messageEmbed.getDescription())
             .setTimestamp(messageEmbed.getTimestamp())
-            .setColor(messageEmbed.getColor())
+            .setColor(messageEmbed.getColor().getValue())
+            .setUrl(messageEmbed.getUrl())
+            .setThumbnail(messageEmbed.getThumbnail())
             .build();
     }
 

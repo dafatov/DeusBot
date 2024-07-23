@@ -1,16 +1,19 @@
 package ru.demetrious.deus.bot.app.command;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.CommandAdapter;
-import ru.demetrious.deus.bot.app.command.api.Command;
+import ru.demetrious.deus.bot.app.player.api.Jukebox;
+import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.domain.CommandData;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
-public class QueueCommand implements Command {
+public class QueueCommand extends PlayerCommand {
+    public QueueCommand(Jukebox jukebox) {
+        super(jukebox);
+    }
+
     @Override
     public CommandData getData() {
         return new CommandData()
@@ -20,6 +23,8 @@ public class QueueCommand implements Command {
 
     @Override
     public void execute(CommandAdapter commandAdapter) {
-        log.debug("queue: {}", commandAdapter.getQueue());
+        final Player player = getPlayer(commandAdapter);
+
+        log.debug("queue: {}", player.getQueue());
     }
 }
