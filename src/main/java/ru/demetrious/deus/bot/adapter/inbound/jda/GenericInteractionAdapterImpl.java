@@ -51,8 +51,7 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
 
     @Override
     public AudioManager getAudioManager() {
-        return getGuild()
-            .map(Guild::getAudioManager)
+        return getAudioManagerOptional()
             .orElseThrow();
     }
 
@@ -63,12 +62,6 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
     }
 
     @Override
-    public boolean isUnequalChannels() {
-        return getVoiceChannelOptional().isEmpty() ||
-            getAudioManager().isConnected() && !getVoiceChannel().equals(requireNonNull(getAudioManager().getConnectedChannel()).asVoiceChannel());
-    }
-
-    @Override
     public String getGuildId() {
         return getGuild()
             .map(Guild::getId)
@@ -76,13 +69,38 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public Interaction getInteraction() {
         return (Interaction) event.getInteraction();
+    }
+
+    @Override
+    public boolean isNotConnectedSameChannel() {
+        return getVoiceChannelOptional().isEmpty()
+            || !getAudioManager().isConnected() || isNotSameChannels();
+    }
+
+    @Override
+    public boolean isNotCanConnect() {
+        return getVoiceChannelOptional().isEmpty()
+            || getAudioManager().isConnected() && isNotSameChannels();
     }
 
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
+
+    private Optional<AudioManager> getAudioManagerOptional() {
+        return getGuild()
+            .map(Guild::getAudioManager);
+    }
+
+    private boolean isNotSameChannels() {
+        return !getAudioManagerOptional()
+            .map(AudioManager::getConnectedChannel)
+            .map(AudioChannelUnion::asVoiceChannel)
+            .equals(getVoiceChannelOptional());
+    }
 
     private Optional<VoiceChannel> getVoiceChannelOptional() {
         return ofNullable(event.getMember())

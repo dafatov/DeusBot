@@ -29,7 +29,7 @@ public class PlayerImpl implements Player {
     private final Scheduler scheduler;
 
     @Override
-    public void connect(GenericInteractionAdapter genericInteractionAdapter) {
+    public void connect(GenericInteractionAdapter<?> genericInteractionAdapter) {
         VoiceChannel voiceChannel = genericInteractionAdapter.getVoiceChannel();
         AudioManager audioManager = genericInteractionAdapter.getAudioManager();
 
@@ -80,5 +80,10 @@ public class PlayerImpl implements Player {
         }
 
         return queueDuration + playingTrack.getDuration() - playingTrack.getPosition();
+    }
+
+    @Override
+    public void clear() {
+        scheduler.clear();
     }
 }

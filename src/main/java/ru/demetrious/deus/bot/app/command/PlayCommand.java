@@ -86,7 +86,7 @@ public class PlayCommand extends PlayerCommand {
     // = Implementation
     // ===================================================================================================================
 
-    private void play(GenericInteractionAdapter genericInteractionAdapter, Optional<String> identifierOptional, Optional<Attachment> attachmentOptional,
+    private void play(GenericInteractionAdapter<?> genericInteractionAdapter, Optional<String> identifierOptional, Optional<Attachment> attachmentOptional,
                       Consumer<Modal> showModalConsumer) {
         if (identifierOptional.isPresent() && attachmentOptional.isPresent()) {
             MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
@@ -99,14 +99,8 @@ public class PlayCommand extends PlayerCommand {
             return;
         }
 
-        if (genericInteractionAdapter.isUnequalChannels()) {
-            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-                .setColor(WARNING)
-                .setTitle("Канал не тот")
-                .setDescription("Мда.. шиза.. перепутать каналы это надо уметь")));
-
-            genericInteractionAdapter.notify(messageData);
-            log.warn("Не совпадают каналы");
+        if (genericInteractionAdapter.isNotCanConnect()) {
+            notifyIsNotCanConnect(genericInteractionAdapter);
             return;
         }
 

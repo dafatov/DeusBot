@@ -8,11 +8,13 @@ import java.util.Optional;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 
 public interface Player {
-    void connect(GenericInteractionAdapter genericInteractionAdapter);
+    void connect(GenericInteractionAdapter<?> genericInteractionAdapter);
 
     Optional<AudioItem> add(AudioReference reference);
 
     List<AudioTrack> getQueue();
 
     Long getRemaining();
+
+    void clear();
 }

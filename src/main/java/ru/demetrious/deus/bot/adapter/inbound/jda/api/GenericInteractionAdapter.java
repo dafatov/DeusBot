@@ -11,9 +11,11 @@ public interface GenericInteractionAdapter<Interaction> {
 
     VoiceChannel getVoiceChannel();
 
-    boolean isUnequalChannels();
-
     String getGuildId();
 
     Interaction getInteraction();
+
+    boolean isNotConnectedSameChannel();
+
+    boolean isNotCanConnect();
 }

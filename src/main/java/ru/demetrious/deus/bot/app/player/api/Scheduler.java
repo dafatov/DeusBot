@@ -9,4 +9,6 @@ public interface Scheduler {
     void next();
 
     List<AudioTrack> getQueue();
+
+    void clear();
 }

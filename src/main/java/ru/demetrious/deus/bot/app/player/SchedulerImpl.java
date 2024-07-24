@@ -31,4 +31,9 @@ public class SchedulerImpl implements Scheduler {
     public List<AudioTrack> getQueue() {
         return queue.stream().toList();
     }
+
+    @Override
+    public void clear() {
+        queue.clear();
+    }
 }
