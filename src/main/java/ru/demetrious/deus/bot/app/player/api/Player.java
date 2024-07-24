@@ -17,4 +17,10 @@ public interface Player {
     Long getRemaining();
 
     void clear();
+
+    boolean isNotPlaying();
+
+    boolean isPlayingLive();
+
+    boolean loop();
 }

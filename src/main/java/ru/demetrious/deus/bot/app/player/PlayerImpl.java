@@ -18,6 +18,7 @@ import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.api.Scheduler;
 
 import static dev.lavalink.youtube.YoutubeAudioSourceManager.SEARCH_PREFIX;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.reduceDuration;
 
@@ -72,7 +73,7 @@ public class PlayerImpl implements Player {
 
     @Override
     public Long getRemaining() {
-        AudioTrack playingTrack = audioPlayer.getPlayingTrack();
+        AudioTrack playingTrack = getPlayingTrack();
         Long queueDuration = reduceDuration(getQueue());
 
         if (playingTrack == null) {
@@ -85,5 +86,28 @@ public class PlayerImpl implements Player {
     @Override
     public void clear() {
         scheduler.clear();
+    }
+
+    @Override
+    public boolean isNotPlaying() {
+        return isNull(getPlayingTrack());
+    }
+
+    @Override
+    public boolean isPlayingLive() {
+        return getPlayingTrack().getInfo().isStream;
+    }
+
+    @Override
+    public boolean loop() {
+        return scheduler.setLoop(!scheduler.getLoop());
+    }
+
+    // ===================================================================================================================
+    // = Implementation
+    // ===================================================================================================================
+
+    private AudioTrack getPlayingTrack() {
+        return audioPlayer.getPlayingTrack();
     }
 }

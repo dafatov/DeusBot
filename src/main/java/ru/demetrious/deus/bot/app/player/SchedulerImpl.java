@@ -15,6 +15,8 @@ public class SchedulerImpl implements Scheduler {
     private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
     private final AudioPlayer audioPlayer;
 
+    private boolean isLoop;
+
     @Override
     public void enqueue(AudioTrack audioTrack) {
         if (!audioPlayer.startTrack(audioTrack, true)) {
@@ -35,5 +37,15 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public void clear() {
         queue.clear();
+    }
+
+    @Override
+    public boolean setLoop(boolean isLoop) {
+        return this.isLoop = isLoop;
+    }
+
+    @Override
+    public boolean getLoop() {
+        return isLoop;
     }
 }

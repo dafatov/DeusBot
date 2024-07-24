@@ -11,4 +11,8 @@ public interface Scheduler {
     List<AudioTrack> getQueue();
 
     void clear();
+
+    boolean setLoop(boolean isLoop);
+
+    boolean getLoop();
 }

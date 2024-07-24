@@ -16,7 +16,11 @@ public class AudioEventAdapterImpl extends AudioEventAdapter {
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
-            scheduler.next();
+            if (scheduler.getLoop()) {
+                player.startTrack(track.makeClone(), false);
+            } else {
+                scheduler.next();
+            }
         }
     }
 }

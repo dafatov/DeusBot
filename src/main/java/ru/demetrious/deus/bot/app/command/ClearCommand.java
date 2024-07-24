@@ -10,8 +10,6 @@ import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
-import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
-
 @Slf4j
 @Component
 public class ClearCommand extends PlayerCommand {
@@ -30,14 +28,8 @@ public class ClearCommand extends PlayerCommand {
     public void execute(SlashCommandAdapter slashCommandAdapter) {
         Player player = getPlayer(slashCommandAdapter.getGuildId());
 
-        if (player.getQueue().isEmpty()) {
-            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-                .setColor(WARNING)
-                .setTitle("Мир музыки пуст")
-                .setDescription("Может ли существовать мир без музыки? Каким бы он был...\nАх да! Таким, в котором сейчас живешь ты~~")));
-
-            slashCommandAdapter.notify(messageData);
-            log.warn("Не выполнена команда. Очередь пуста");
+        if (player.isNotPlaying()) {
+            notifyIsNotPlaying(slashCommandAdapter);
             return;
         }
 
