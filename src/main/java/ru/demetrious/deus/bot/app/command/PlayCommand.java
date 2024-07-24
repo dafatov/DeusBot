@@ -19,6 +19,7 @@ import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.player.api.Jukebox;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.domain.AddedInfo;
+import ru.demetrious.deus.bot.app.player.domain.YoutubeAudioPlaylist;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
@@ -201,6 +202,10 @@ public class PlayCommand extends PlayerCommand {
                 .setTitle(audioPlaylist.getName())
                 .setDuration(reduceDuration(audioPlaylist.getTracks()))
                 .setLive(hasLive(audioPlaylist.getTracks()));
+
+            if (audioPlaylist instanceof YoutubeAudioPlaylist youtubeAudioPlaylist) {
+                addedInfo.setUrl("https://www.youtube.com/playlist?list=" + youtubeAudioPlaylist.getPlaylistId());
+            }
 
             audioPlaylist.getTracks().stream().findFirst()
                 .ifPresent(audioTrack -> setPreview(audioTrack, addedInfo));
