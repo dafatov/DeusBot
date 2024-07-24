@@ -25,6 +25,6 @@ public class QueueCommand extends PlayerCommand {
     public void execute(SlashCommandAdapter slashCommandAdapter) {
         final Player player = getPlayer(slashCommandAdapter.getGuildId());
 
-        log.debug("queue: {}", player.getQueue());
+        log.debug("queue: {}", player.getQueue().stream().map(r -> r.getInfo().title).toList());
     }
 }

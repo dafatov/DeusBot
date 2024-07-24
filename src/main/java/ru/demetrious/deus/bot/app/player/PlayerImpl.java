@@ -103,6 +103,16 @@ public class PlayerImpl implements Player {
         return scheduler.setLoop(!scheduler.getLoop());
     }
 
+    @Override
+    public boolean isValidIndex(Integer index) {
+        return index >= 0 && index < scheduler.getQueue().size();
+    }
+
+    @Override
+    public AudioTrack move(Integer target, Integer position) {
+        return scheduler.move(target, position);
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================

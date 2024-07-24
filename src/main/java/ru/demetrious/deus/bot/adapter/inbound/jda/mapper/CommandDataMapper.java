@@ -19,7 +19,7 @@ public interface CommandDataMapper {
 
     default net.dv8tion.jda.api.interactions.commands.build.OptionData mapOption(OptionData optionData) {
         return new net.dv8tion.jda.api.interactions.commands.build.OptionData(mapOptionType(optionData.getType()), optionData.getName(),
-            optionData.getDescription());
+            optionData.getDescription(), optionData.isRequired());
     }
 
     net.dv8tion.jda.api.interactions.commands.OptionType mapOptionType(OptionData.Type type);

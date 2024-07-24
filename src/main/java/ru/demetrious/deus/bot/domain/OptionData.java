@@ -9,8 +9,9 @@ public class OptionData {
     private String name;
     private String description;
     private Type type;
+    private boolean isRequired = false;
 
     public enum Type {
-        STRING, ATTACHMENT
+        STRING, INTEGER, ATTACHMENT
     }
 }

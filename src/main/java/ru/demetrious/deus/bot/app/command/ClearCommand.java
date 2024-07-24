@@ -26,7 +26,7 @@ public class ClearCommand extends PlayerCommand {
 
     @Override
     public void execute(SlashCommandAdapter slashCommandAdapter) {
-        Player player = getPlayer(slashCommandAdapter.getGuildId());
+        final Player player = getPlayer(slashCommandAdapter.getGuildId());
 
         if (player.isNotPlaying()) {
             notifyIsNotPlaying(slashCommandAdapter);

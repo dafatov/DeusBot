@@ -15,4 +15,6 @@ public interface Scheduler {
     boolean setLoop(boolean isLoop);
 
     boolean getLoop();
+
+    AudioTrack move(Integer target, Integer position);
 }

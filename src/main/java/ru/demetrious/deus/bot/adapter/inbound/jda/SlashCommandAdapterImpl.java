@@ -26,18 +26,32 @@ public class SlashCommandAdapterImpl extends GenericInteractionAdapterImpl<Slash
 
     @Override
     public Optional<String> getStringOption(String name) {
-        return ofNullable(event.getOption(name))
+        return getOption(name)
             .map(OptionMapping::getAsString);
     }
 
     @Override
     public Optional<Attachment> getAttachmentOption(String name) {
-        return ofNullable(event.getOption(name))
+        return getOption(name)
             .map(OptionMapping::getAsAttachment);
     }
 
     @Override
     public void showModal(Modal modal) {
         event.replyModal(modal).queue();
+    }
+
+    @Override
+    public Optional<Integer> getIntegerOption(String name) {
+        return getOption(name)
+            .map(OptionMapping::getAsInt);
+    }
+
+    // ===================================================================================================================
+    // = Implementation
+    // ===================================================================================================================
+
+    private Optional<OptionMapping> getOption(String name) {
+        return ofNullable(event.getOption(name));
     }
 }

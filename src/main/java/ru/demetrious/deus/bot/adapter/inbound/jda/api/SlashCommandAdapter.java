@@ -13,4 +13,6 @@ public interface SlashCommandAdapter extends GenericInteractionAdapter<SlashComm
     Optional<Message.Attachment> getAttachmentOption(String name);
 
     void showModal(Modal modal);
+
+    Optional<Integer> getIntegerOption(String name);
 }

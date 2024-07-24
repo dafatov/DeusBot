@@ -23,4 +23,8 @@ public interface Player {
     boolean isPlayingLive();
 
     boolean loop();
+
+    boolean isValidIndex(Integer index);
+
+    AudioTrack move(Integer target, Integer position);
 }

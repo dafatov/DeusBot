@@ -2,9 +2,8 @@ package ru.demetrious.deus.bot.app.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.player.api.Scheduler;
@@ -12,7 +11,7 @@ import ru.demetrious.deus.bot.app.player.api.Scheduler;
 @RequiredArgsConstructor
 @Component
 public class SchedulerImpl implements Scheduler {
-    private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
+    private final List<AudioTrack> queue = new LinkedList<>();
     private final AudioPlayer audioPlayer;
 
     private boolean isLoop;
@@ -20,18 +19,18 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public void enqueue(AudioTrack audioTrack) {
         if (!audioPlayer.startTrack(audioTrack, true)) {
-            queue.offer(audioTrack);
+            queue.add(audioTrack);
         }
     }
 
     @Override
     public void next() {
-        audioPlayer.startTrack(queue.poll(), false);
+        audioPlayer.startTrack(queue.remove(0), false);
     }
 
     @Override
     public List<AudioTrack> getQueue() {
-        return queue.stream().toList();
+        return queue;
     }
 
     @Override
@@ -47,5 +46,13 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public boolean getLoop() {
         return isLoop;
+    }
+
+    @Override
+    public AudioTrack move(Integer target, Integer position) {
+        AudioTrack audioTrack = queue.remove(target.intValue());
+
+        queue.add(position, audioTrack);
+        return audioTrack;
     }
 }
