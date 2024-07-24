@@ -27,4 +27,6 @@ public interface Player {
     boolean isValidIndex(Integer index);
 
     AudioTrack move(Integer target, Integer position);
+
+    boolean pause();
 }

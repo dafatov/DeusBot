@@ -10,8 +10,6 @@ import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
-import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
-
 @Slf4j
 @Component
 public class LoopCommand extends PlayerCommand {
@@ -41,13 +39,7 @@ public class LoopCommand extends PlayerCommand {
         }
 
         if (player.isPlayingLive()) {
-            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-                .setColor(WARNING)
-                .setTitle("Живая музыка")
-                .setDescription("Зациклить то, что и так играет 24/7. Ты мой работодатель? Сорян, но не выйдет, а выйдет - уволюсь")));
-
-            slashCommandAdapter.notify(messageData);
-            log.warn("Играет стрим");
+            notifyIsLive(slashCommandAdapter);
             return;
         }
 

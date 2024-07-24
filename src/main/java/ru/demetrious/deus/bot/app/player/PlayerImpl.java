@@ -113,6 +113,14 @@ public class PlayerImpl implements Player {
         return scheduler.move(target, position);
     }
 
+    @Override
+    public boolean pause() {
+        boolean isPause = !audioPlayer.isPaused();
+
+        audioPlayer.setPaused(isPause);
+        return isPause;
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================

@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.command.api.Command;
 import ru.demetrious.deus.bot.app.player.api.Jukebox;
 import ru.demetrious.deus.bot.app.player.api.Player;
@@ -39,5 +40,15 @@ public abstract class PlayerCommand implements Command {
 
         genericInteractionAdapter.notify(messageData);
         log.warn("Плеер не играет");
+    }
+
+    protected void notifyIsLive(SlashCommandAdapter slashCommandAdapter) {
+        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            .setColor(WARNING)
+            .setTitle("Живая музыка")
+            .setDescription("Зациклить то, что и так играет 24/7. Ты мой работодатель? Сорян, но не выйдет, а выйдет - уволюсь")));
+
+        slashCommandAdapter.notify(messageData);
+        log.warn("Играет стрим");
     }
 }
