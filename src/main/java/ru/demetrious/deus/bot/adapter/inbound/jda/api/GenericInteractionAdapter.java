@@ -4,6 +4,8 @@ import ru.demetrious.deus.bot.adapter.inbound.jda.handler.AudioSendHandlerImpl;
 import ru.demetrious.deus.bot.domain.MessageData;
 
 public interface GenericInteractionAdapter {
+    void notify(MessageData messageData, boolean isEphemeral);
+
     void notify(MessageData messageData);
 
     String getGuildId();

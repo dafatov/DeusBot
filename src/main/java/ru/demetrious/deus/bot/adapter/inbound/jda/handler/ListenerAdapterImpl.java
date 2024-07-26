@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
@@ -25,7 +26,9 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.text.MessageFormat.format;
+import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +38,9 @@ public class ListenerAdapterImpl extends ListenerAdapter {
     private final ModalAdapterFactory modalAdapterFactory;
     private final ButtonAdapterFactory buttonAdapterFactory;
     private final List<Command> commandList;
+
+    @Value("${devs.ids:}")
+    private List<String> devUserIdList;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -78,6 +84,11 @@ public class ListenerAdapterImpl extends ListenerAdapter {
                 .findFirst()
                 .orElseThrow();
 
+            if (!devUserIdList.isEmpty() && !devUserIdList.contains(event.getUser().getId())) {
+                notifyInDev(commandName, adapter);
+                return;
+            }
+
             if (adapter instanceof SlashCommandAdapter slashCommandAdapter && command.isDeferReply(slashCommandAdapter)) {
                 log.debug("Deferring command \"{}\"", commandName);
                 event.deferReply().queue();
@@ -85,15 +96,32 @@ public class ListenerAdapterImpl extends ListenerAdapter {
 
             executeConsumer.accept(command, adapter);
         } catch (Exception e) {
-            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-                .setColor(ERROR)
-                .setTitle("Что-то пошло не так...")
-                .setDescription(format(
-                    "Произошла ошибка с {0} команды \"{1}\". {2}", errorText,
-                    commandName, "Сообщите администратору точное время возникновения проблемы для быстрой диагностики проблемы."))));
-
-            adapter.notify(messageData);
-            log.error(format("Произошла ошибка с {0} команды \"{1}\"", errorText, commandName), e);
+            notifyError(commandName, errorText, adapter, e);
         }
+    }
+
+    private <Adapter extends GenericInteractionAdapter> void notifyError(String commandName, String errorText, Adapter adapter, Exception e) {
+        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            .setColor(ERROR)
+            .setTitle("Что-то пошло не так...")
+            .setDescription(format(
+                "Произошла ошибка с {0} команды \"{1}\". {2}", errorText,
+                commandName, "Сообщите администратору точное время возникновения проблемы для быстрой диагностики проблемы."))));
+
+        adapter.notify(messageData, true);
+        log.error(format("Произошла ошибка с {0} команды \"{1}\"", errorText, commandName), e);
+    }
+
+    private <Adapter extends GenericInteractionAdapter> void notifyInDev(String commandName, Adapter adapter) {
+        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            .setColor(WARNING)
+            .setTitle("Бот немного занят")
+            .setDescription(format("Бот сейчас не может выполнять команды кого-либо кроме _{0}_, так как активно разрабатывается/тестируется\n" +
+                "Вы всегда (||нет||) можете воспользоваться старой версией бота <@905052906296852500>", devUserIdList.stream()
+                .map("<@%s>"::formatted)
+                .collect(joining(", "))))));
+
+        adapter.notify(messageData, true);
+        log.warn(format("Произошла попытка запуска команды \"{0}\" во время тестирования", commandName));
     }
 }

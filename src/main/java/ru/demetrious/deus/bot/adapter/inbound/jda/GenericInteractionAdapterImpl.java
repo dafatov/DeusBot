@@ -34,21 +34,35 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
     protected final MessageDataMapper messageDataMapper;
 
     @Override
-    public void notify(MessageData messageData) {
+    public void notify(MessageData messageData, boolean isEphemeral) {
         MessageCreateData content = messageDataMapper.mapToMessageCreate(messageData);
 
         try {
             if (event.isAcknowledged() && isDeferred()) {
-                event.getHook().editOriginal(messageDataMapper.mapToMessageEdit(messageData)).queue();
+                event.getHook()
+                    .editOriginal(messageDataMapper.mapToMessageEdit(messageData))
+                    .queue();
             } else if (event.isAcknowledged() && !isDeferred()) {
-                event.getHook().sendMessage(content).queue();
+                event.getHook()
+                    .sendMessage(content)
+                    .setEphemeral(isEphemeral)
+                    .queue();
             } else {
-                event.reply(content).queue();
+                event.reply(content)
+                    .setEphemeral(isEphemeral)
+                    .queue();
             }
         } catch (Exception e) {
             log.warn("Cannot reply onModal interaction", e);
-            ((MessageChannelUnion) requireNonNull(event.getChannel())).sendMessage(content).queue();
+            ((MessageChannelUnion) requireNonNull(event.getChannel()))
+                .sendMessage(content)
+                .queue();
         }
+    }
+
+    @Override
+    public void notify(MessageData messageData) {
+        notify(messageData, false);
     }
 
     @Override

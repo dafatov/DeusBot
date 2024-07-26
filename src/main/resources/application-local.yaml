@@ -22,3 +22,6 @@ logging:
       sedmelluq:
         discord:
           lavaplayer: DEBUG
+
+devs:
+  ids: ${DEVS_DISCORD_IDS:}
