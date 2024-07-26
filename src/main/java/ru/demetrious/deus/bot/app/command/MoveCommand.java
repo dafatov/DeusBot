@@ -14,7 +14,7 @@ import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.OptionData;
 
 import static java.text.MessageFormat.format;
-import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
+import static java.util.stream.Stream.of;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 
 @Slf4j
@@ -59,17 +59,8 @@ public class MoveCommand extends PlayerCommand {
             return;
         }
 
-        if (target.filter(player::isValidIndex).equals(position.filter(player::isValidIndex))) {
-            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-                .setColor(WARNING)
-                .setTitle("Ты это.. Вселенной ошибся, чел.")
-                .setDescription(format(
-                    "Типа знаешь вселенная расширяется, а твой мозг походу нет. Ну вышел ты за пределы размеров очереди или решил написать одинаковые индексы.\n" +
-                        "Диапазон значений _от 1 до {0}_",
-                    player.getQueue().size()))));
-
-            slashCommandAdapter.notify(messageData);
-            log.info("Выход за пределы очереди");
+        if (of(target, position).flatMap(Optional::stream).distinct().filter(player::isValidIndex).count() < 2) {
+            notifyUnbound(slashCommandAdapter);
             return;
         }
 

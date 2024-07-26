@@ -13,12 +13,13 @@ import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
+import static java.text.MessageFormat.format;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 
 @Slf4j
 @RequiredArgsConstructor
 public abstract class PlayerCommand implements Command {
-    protected final Jukebox jukebox;
+    private final Jukebox jukebox;
 
     protected Player getPlayer(String guildId) {
         return jukebox.getPlayer(guildId);
@@ -32,6 +33,19 @@ public abstract class PlayerCommand implements Command {
 
         genericInteractionAdapter.notify(messageData);
         log.warn("Не совпадают каналы");
+    }
+
+    protected void notifyUnbound(GenericInteractionAdapter genericInteractionAdapter) {
+        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            .setColor(WARNING)
+            .setTitle("Ты это.. Вселенной ошибся, чел.")
+            .setDescription(format(
+                "Типа знаешь вселенная расширяется, а твой мозг походу нет. Ну вышел ты за пределы размеров очереди или решил написать одинаковые индексы.\n" +
+                    "Диапазон значений _от 1 по {0}_",
+                getPlayer(genericInteractionAdapter.getGuildId()).getQueue().size()))));
+
+        genericInteractionAdapter.notify(messageData);
+        log.warn("Выход за пределы очереди");
     }
 
     protected void notifyIsNotPlaying(GenericInteractionAdapter genericInteractionAdapter) {

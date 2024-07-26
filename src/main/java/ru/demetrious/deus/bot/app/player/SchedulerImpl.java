@@ -29,7 +29,7 @@ public class SchedulerImpl implements Scheduler {
         if (queue.isEmpty()) {
             audioPlayer.stopTrack();
         } else {
-            audioPlayer.startTrack(queue.remove(0), false);
+            audioPlayer.startTrack(remove(0), false);
         }
     }
 
@@ -59,7 +59,7 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public AudioTrack move(Integer target, Integer position) {
-        AudioTrack audioTrack = queue.remove(target.intValue());
+        AudioTrack audioTrack = remove(target);
 
         queue.add(position, audioTrack);
         return audioTrack;
@@ -68,5 +68,10 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public void shuffle() {
         throw new NotImplementedException("Shuffle not implemented");
+    }
+
+    @Override
+    public AudioTrack remove(Integer target) {
+        return queue.remove(target.intValue());
     }
 }

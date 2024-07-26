@@ -28,6 +28,8 @@ public interface Player {
 
     boolean isPaused();
 
+    boolean isNotValidIndex(Integer index);
+
     boolean isValidIndex(Integer index);
 
     AudioTrack move(Integer target, Integer position);
@@ -39,4 +41,6 @@ public interface Player {
     void skip();
 
     void shuffle();
+
+    AudioTrack remove(Integer target);
 }

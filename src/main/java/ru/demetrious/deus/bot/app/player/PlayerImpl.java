@@ -112,6 +112,11 @@ public class PlayerImpl implements Player {
     }
 
     @Override
+    public boolean isNotValidIndex(Integer index) {
+        return !isValidIndex(index);
+    }
+
+    @Override
     public boolean isValidIndex(Integer index) {
         return index >= 0 && index < scheduler.getQueue().size();
     }
@@ -142,6 +147,11 @@ public class PlayerImpl implements Player {
     @Override
     public void shuffle() {
         scheduler.shuffle();
+    }
+
+    @Override
+    public AudioTrack remove(Integer target) {
+        return scheduler.remove(target);
     }
 
     // ===================================================================================================================

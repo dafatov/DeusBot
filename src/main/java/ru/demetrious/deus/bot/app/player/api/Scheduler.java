@@ -21,4 +21,6 @@ public interface Scheduler {
     AudioTrack move(Integer target, Integer position);
 
     void shuffle();
+
+    AudioTrack remove(Integer target);
 }
