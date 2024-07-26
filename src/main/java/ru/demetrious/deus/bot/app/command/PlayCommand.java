@@ -4,14 +4,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import dev.lavalink.youtube.track.YoutubeAudioTrack;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.ModalAdapter;
@@ -20,21 +16,26 @@ import ru.demetrious.deus.bot.app.player.api.Jukebox;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.domain.AddedInfo;
 import ru.demetrious.deus.bot.app.player.domain.YoutubeAudioPlaylist;
+import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
+import ru.demetrious.deus.bot.domain.ModalComponent;
+import ru.demetrious.deus.bot.domain.ModalData;
 import ru.demetrious.deus.bot.domain.OptionData;
+import ru.demetrious.deus.bot.domain.TextInputComponent;
+import ru.demetrious.deus.bot.fw.utils.PlayerUtils;
 
 import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.IntStream.rangeClosed;
-import static net.dv8tion.jda.api.entities.Message.Attachment;
-import static net.dv8tion.jda.api.interactions.components.text.TextInputStyle.SHORT;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationWords;
+import static ru.demetrious.deus.bot.adapter.inbound.jda.mapper.ModalDataMapper.MAX_COMPONENTS;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.ATTACHMENT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
+import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.SHORT;
 import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.hasLive;
 import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.reduceDuration;
 
@@ -87,8 +88,8 @@ public class PlayCommand extends PlayerCommand {
     // = Implementation
     // ===================================================================================================================
 
-    private void play(GenericInteractionAdapter<?> genericInteractionAdapter, Optional<String> identifierOptional, Optional<Attachment> attachmentOptional,
-                      Consumer<Modal> showModalConsumer) {
+    private void play(GenericInteractionAdapter genericInteractionAdapter, Optional<String> identifierOptional, Optional<AttachmentOption> attachmentOptional,
+                      Consumer<ModalData> showModalConsumer) {
         if (identifierOptional.isPresent() && attachmentOptional.isPresent()) {
             MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setColor(WARNING)
@@ -106,16 +107,20 @@ public class PlayCommand extends PlayerCommand {
         }
 
         if (identifierOptional.isEmpty() && attachmentOptional.isEmpty()) {
-            Modal modal = Modal.create("play", "Добавление в очередь плеера")
-                .addComponents(rangeClosed(1, Modal.MAX_COMPONENTS)
-                    .mapToObj(index -> ActionRow.of(TextInput.create(String.valueOf(index), "#" + index, SHORT)
-                        .setPlaceholder(STRING_OPTION_DESCRIPTION)
-                        .setRequired(index == 1)
-                        .build()))
-                    .toList())
-                .build();
+            ModalData modalData = new ModalData()
+                .setCustomId("play")
+                .setTitle("Добавление в очередь плеера")
+                .setComponents(rangeClosed(1, MAX_COMPONENTS)
+                    .mapToObj(index -> new ModalComponent()
+                        .setTextInputs(List.of(new TextInputComponent()
+                            .setId(String.valueOf(index))
+                            .setLabel("#" + index)
+                            .setStyle(SHORT)
+                            .setPlaceholder(STRING_OPTION_DESCRIPTION)
+                            .setRequired(index == 1))))
+                    .toList());
 
-            showModalConsumer.accept(modal);
+            showModalConsumer.accept(modalData);
             log.info("Успешно открыто модальное окно для добавления композиций в очередь");
             return;
         }
@@ -129,7 +134,7 @@ public class PlayCommand extends PlayerCommand {
             .map(identifier -> new AudioReference(identifier, identifier))
             .or(() -> attachmentOptional
                 .map(attachment -> new AudioReference(attachment.getUrl(), attachment.getFileName())))
-            .get());
+            .get(), genericInteractionAdapter.getAuthorId());
 
         if (addedOptional.isEmpty()) {
             MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
@@ -194,7 +199,7 @@ public class PlayCommand extends PlayerCommand {
                 .setDuration(audioTrack.getDuration())
                 .setLive(audioTrack.getInfo().isStream);
 
-            setPreview(audioTrack, addedInfo);
+            PlayerUtils.getPreview(audioTrack).ifPresent(addedInfo::setPreview);
             return addedInfo;
         } else if (audioItem instanceof AudioPlaylist audioPlaylist) {
             AddedInfo addedInfo = new AddedInfo()
@@ -208,16 +213,11 @@ public class PlayCommand extends PlayerCommand {
             }
 
             audioPlaylist.getTracks().stream().findFirst()
-                .ifPresent(audioTrack -> setPreview(audioTrack, addedInfo));
+                .flatMap(PlayerUtils::getPreview)
+                .ifPresent(addedInfo::setPreview);
             return addedInfo;
         } else {
             throw new IllegalStateException("Unknown audioItem class: " + audioItem.getClass());
-        }
-    }
-
-    private void setPreview(AudioTrack audioTrack, AddedInfo addedInfo) {
-        if (audioTrack instanceof YoutubeAudioTrack youtubeAudioTrack) {
-            addedInfo.setPreview(format("https://i3.ytimg.com/vi/{0}/hqdefault.jpg", youtubeAudioTrack.getIdentifier()));
         }
     }
 }

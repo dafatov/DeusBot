@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
+import ru.demetrious.deus.bot.adapter.inbound.jda.handler.AudioSendHandlerImpl;
 import ru.demetrious.deus.bot.adapter.inbound.jda.mapper.MessageDataMapper;
 import ru.demetrious.deus.bot.domain.MessageData;
 
@@ -26,10 +27,11 @@ import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class GenericInteractionAdapterImpl<Event extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback, Interaction extends IDeferrableCallback>
-    implements GenericInteractionAdapter<Interaction> {
+public abstract class GenericInteractionAdapterImpl<Event extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback,
+    Interaction extends IDeferrableCallback> implements GenericInteractionAdapter {
+
     protected final Event event;
-    private final MessageDataMapper messageDataMapper;
+    protected final MessageDataMapper messageDataMapper;
 
     @Override
     public void notify(MessageData messageData) {
@@ -50,28 +52,10 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
     }
 
     @Override
-    public AudioManager getAudioManager() {
-        return getAudioManagerOptional()
-            .orElseThrow();
-    }
-
-    @Override
-    public VoiceChannel getVoiceChannel() {
-        return getVoiceChannelOptional()
-            .orElseThrow();
-    }
-
-    @Override
     public String getGuildId() {
         return getGuild()
             .map(Guild::getId)
             .orElseThrow();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Interaction getInteraction() {
-        return (Interaction) event.getInteraction();
     }
 
     @Override
@@ -86,9 +70,41 @@ public abstract class GenericInteractionAdapterImpl<Event extends GenericInterac
             || getAudioManager().isConnected() && isNotSameChannels();
     }
 
+    @Override
+    public String getAuthorId() {
+        return event.getUser().getId();
+    }
+
+    @Override
+    public void connectPlayer(AudioSendHandlerImpl audioSendHandler) {
+        AudioManager audioManager = getAudioManager();
+
+        if (audioManager.isConnected()) {
+            return;
+        }
+
+        audioManager.setSendingHandler(audioSendHandler);
+        audioManager.openAudioConnection(getVoiceChannel());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Interaction getInteraction() {
+        return (Interaction) event.getInteraction();
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
+
+    private AudioManager getAudioManager() {
+        return getAudioManagerOptional()
+            .orElseThrow();
+    }
+
+    private VoiceChannel getVoiceChannel() {
+        return getVoiceChannelOptional()
+            .orElseThrow();
+    }
 
     private Optional<AudioManager> getAudioManagerOptional() {
         return getGuild()

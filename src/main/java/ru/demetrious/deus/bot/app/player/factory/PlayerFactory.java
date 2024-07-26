@@ -9,7 +9,6 @@ import ru.demetrious.deus.bot.app.player.SchedulerImpl;
 import ru.demetrious.deus.bot.app.player.api.Player;
 import ru.demetrious.deus.bot.app.player.handler.AudioEventAdapterImpl;
 
-// TODO: тот же костыль (что и в CommandAdapterFactory)?
 @RequiredArgsConstructor
 @Component
 public class PlayerFactory {

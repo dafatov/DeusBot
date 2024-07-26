@@ -7,8 +7,6 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class MessageData {
-    private String content;
-    private List<MessageEmbed> embeds = new ArrayList<>();
-    private List<MessageComponent> components = new ArrayList<>();
+public class MessageComponent {
+    private List<ButtonComponent> buttons = new ArrayList<>();
 }

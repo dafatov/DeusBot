@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.app.command.api;
 
+import ru.demetrious.deus.bot.adapter.inbound.jda.api.ButtonAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.ModalAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -15,5 +16,9 @@ public interface Command {
 
     default void onModal(ModalAdapter modalAdapter) {
         throw new IllegalStateException("Command onModal is not implemented");
+    }
+
+    default void onButton(ButtonAdapter buttonAdapter) {
+        throw new IllegalStateException("Command onButton is not implemented");
     }
 }

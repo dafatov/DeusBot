@@ -12,9 +12,13 @@ public interface Scheduler {
 
     void clear();
 
-    boolean setLoop(boolean isLoop);
+    boolean setLooped(boolean isLooped);
 
-    boolean getLoop();
+    boolean isLooped();
+
+    boolean isPaused();
 
     AudioTrack move(Integer target, Integer position);
+
+    void shuffle();
 }

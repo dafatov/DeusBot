@@ -8,9 +8,9 @@ import java.util.Optional;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 
 public interface Player {
-    void connect(GenericInteractionAdapter<?> genericInteractionAdapter);
+    void connect(GenericInteractionAdapter genericInteractionAdapter);
 
-    Optional<AudioItem> add(AudioReference reference);
+    Optional<AudioItem> add(AudioReference reference, String userId);
 
     List<AudioTrack> getQueue();
 
@@ -24,9 +24,19 @@ public interface Player {
 
     boolean loop();
 
+    boolean isLooped();
+
+    boolean isPaused();
+
     boolean isValidIndex(Integer index);
 
     AudioTrack move(Integer target, Integer position);
 
     boolean pause();
+
+    AudioTrack getPlayingTrack();
+
+    void skip();
+
+    void shuffle();
 }

@@ -8,9 +8,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.GenericInteractionAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.handler.AudioSendHandlerImpl;
@@ -30,20 +29,12 @@ public class PlayerImpl implements Player {
     private final Scheduler scheduler;
 
     @Override
-    public void connect(GenericInteractionAdapter<?> genericInteractionAdapter) {
-        VoiceChannel voiceChannel = genericInteractionAdapter.getVoiceChannel();
-        AudioManager audioManager = genericInteractionAdapter.getAudioManager();
-
-        if (audioManager.isConnected()) {
-            return;
-        }
-
-        audioManager.setSendingHandler(new AudioSendHandlerImpl(audioPlayer));
-        audioManager.openAudioConnection(voiceChannel);
+    public void connect(GenericInteractionAdapter genericInteractionAdapter) {
+        genericInteractionAdapter.connectPlayer(new AudioSendHandlerImpl(audioPlayer));
     }
 
     @Override
-    public Optional<AudioItem> add(AudioReference reference) {
+    public Optional<AudioItem> add(AudioReference reference, String userId) {
         AudioItem audioItem = audioPlayerManager.loadItemSync(reference);
 
         if (audioItem == null) {
@@ -51,16 +42,19 @@ public class PlayerImpl implements Player {
         }
 
         if (audioItem instanceof AudioTrack audioTrack) {
+            audioTrack.setUserData(userId);
             scheduler.enqueue(audioTrack);
         } else if (audioItem instanceof AudioPlaylist audioPlaylist) {
             if (audioPlaylist.isSearchResult()) {
                 Optional<AudioTrack> audioTrack = audioPlaylist.getTracks().stream().findFirst();
 
-                audioTrack.ifPresent(scheduler::enqueue);
+                audioTrack.map(setUserId(userId)).ifPresent(scheduler::enqueue);
                 return audioTrack.map(track -> track);
             }
 
-            audioPlaylist.getTracks().forEach(scheduler::enqueue);
+            audioPlaylist.getTracks().stream()
+                .map(setUserId(userId))
+                .forEach(scheduler::enqueue);
         }
 
         return ofNullable(audioItem);
@@ -95,12 +89,26 @@ public class PlayerImpl implements Player {
 
     @Override
     public boolean isPlayingLive() {
+        if (isNotPlaying()) {
+            return false;
+        }
+
         return getPlayingTrack().getInfo().isStream;
     }
 
     @Override
     public boolean loop() {
-        return scheduler.setLoop(!scheduler.getLoop());
+        return scheduler.setLooped(!isLooped());
+    }
+
+    @Override
+    public boolean isLooped() {
+        return scheduler.isLooped();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return scheduler.isPaused();
     }
 
     @Override
@@ -121,11 +129,29 @@ public class PlayerImpl implements Player {
         return isPause;
     }
 
+    @Override
+    public AudioTrack getPlayingTrack() {
+        return audioPlayer.getPlayingTrack();
+    }
+
+    @Override
+    public void skip() {
+        scheduler.next();
+    }
+
+    @Override
+    public void shuffle() {
+        scheduler.shuffle();
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
-    private AudioTrack getPlayingTrack() {
-        return audioPlayer.getPlayingTrack();
+    private Function<AudioTrack, AudioTrack> setUserId(String userId) {
+        return audioTrack -> {
+            audioTrack.setUserData(userId);
+            return audioTrack;
+        };
     }
 }

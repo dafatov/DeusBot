@@ -5,18 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import ru.demetrious.deus.bot.adapter.inbound.jda.api.SlashCommandAdapter;
 import ru.demetrious.deus.bot.adapter.inbound.jda.mapper.MessageDataMapper;
+import ru.demetrious.deus.bot.adapter.inbound.jda.mapper.ModalDataMapper;
+import ru.demetrious.deus.bot.domain.AttachmentOption;
+import ru.demetrious.deus.bot.domain.ModalData;
 
 import static java.util.Optional.ofNullable;
-import static net.dv8tion.jda.api.entities.Message.Attachment;
 
 @Slf4j
 public class SlashCommandAdapterImpl extends GenericInteractionAdapterImpl<SlashCommandInteractionEvent, SlashCommandInteraction>
     implements SlashCommandAdapter {
-    public SlashCommandAdapterImpl(MessageDataMapper messageDataMapper, SlashCommandInteractionEvent slashCommandInteractionEvent) {
+    private final ModalDataMapper modalDataMapper;
+
+    public SlashCommandAdapterImpl(MessageDataMapper messageDataMapper, SlashCommandInteractionEvent slashCommandInteractionEvent,
+                                   ModalDataMapper modalDataMapper) {
         super(slashCommandInteractionEvent, messageDataMapper);
+        this.modalDataMapper = modalDataMapper;
     }
 
     @Override
@@ -31,14 +36,15 @@ public class SlashCommandAdapterImpl extends GenericInteractionAdapterImpl<Slash
     }
 
     @Override
-    public Optional<Attachment> getAttachmentOption(String name) {
+    public Optional<AttachmentOption> getAttachmentOption(String name) {
         return getOption(name)
-            .map(OptionMapping::getAsAttachment);
+            .map(OptionMapping::getAsAttachment)
+            .map(messageDataMapper::mapAttachmentOption);
     }
 
     @Override
-    public void showModal(Modal modal) {
-        event.replyModal(modal).queue();
+    public void showModal(ModalData modal) {
+        event.replyModal(modalDataMapper.mapModal(modal)).queue();
     }
 
     @Override

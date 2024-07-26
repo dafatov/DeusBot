@@ -19,6 +19,7 @@ public class MessageEmbed {
     private String thumbnail;
     private Instant timestamp = now();
     private ColorEnum color = INFO;
+    private String footer;
 
     @Getter
     @RequiredArgsConstructor

@@ -1,18 +1,17 @@
 package ru.demetrious.deus.bot.adapter.inbound.jda.api;
 
 import java.util.Optional;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import ru.demetrious.deus.bot.domain.AttachmentOption;
+import ru.demetrious.deus.bot.domain.ModalData;
 
-public interface SlashCommandAdapter extends GenericInteractionAdapter<SlashCommandInteraction> {
+public interface SlashCommandAdapter extends GenericInteractionAdapter {
     String getLatency();
 
     Optional<String> getStringOption(String name);
 
-    Optional<Message.Attachment> getAttachmentOption(String name);
+    Optional<AttachmentOption> getAttachmentOption(String name);
 
-    void showModal(Modal modal);
+    void showModal(ModalData modal);
 
     Optional<Integer> getIntegerOption(String name);
 }

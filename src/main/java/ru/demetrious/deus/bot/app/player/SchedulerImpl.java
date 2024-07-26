@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.player.api.Scheduler;
 
@@ -14,7 +15,7 @@ public class SchedulerImpl implements Scheduler {
     private final List<AudioTrack> queue = new LinkedList<>();
     private final AudioPlayer audioPlayer;
 
-    private boolean isLoop;
+    private boolean isLooped;
 
     @Override
     public void enqueue(AudioTrack audioTrack) {
@@ -25,7 +26,11 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public void next() {
-        audioPlayer.startTrack(queue.remove(0), false);
+        if (queue.isEmpty()) {
+            audioPlayer.stopTrack();
+        } else {
+            audioPlayer.startTrack(queue.remove(0), false);
+        }
     }
 
     @Override
@@ -38,14 +43,18 @@ public class SchedulerImpl implements Scheduler {
         queue.clear();
     }
 
-    @Override
-    public boolean setLoop(boolean isLoop) {
-        return this.isLoop = isLoop;
+    public boolean setLooped(boolean isLooped) {
+        return this.isLooped = isLooped;
     }
 
     @Override
-    public boolean getLoop() {
-        return isLoop;
+    public boolean isLooped() {
+        return isLooped;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return audioPlayer.isPaused();
     }
 
     @Override
@@ -54,5 +63,10 @@ public class SchedulerImpl implements Scheduler {
 
         queue.add(position, audioTrack);
         return audioTrack;
+    }
+
+    @Override
+    public void shuffle() {
+        throw new NotImplementedException("Shuffle not implemented");
     }
 }
