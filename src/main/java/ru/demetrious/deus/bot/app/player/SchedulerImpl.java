@@ -2,10 +2,10 @@ package ru.demetrious.deus.bot.app.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.player.api.Scheduler;
 
@@ -67,7 +67,7 @@ public class SchedulerImpl implements Scheduler {
 
     @Override
     public void shuffle() {
-        throw new NotImplementedException("Shuffle not implemented");
+        Collections.shuffle(queue);
     }
 
     @Override
