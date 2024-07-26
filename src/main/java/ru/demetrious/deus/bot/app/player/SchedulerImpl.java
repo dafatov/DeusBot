@@ -25,12 +25,16 @@ public class SchedulerImpl implements Scheduler {
     }
 
     @Override
-    public void next() {
+    public AudioTrack next() {
+        AudioTrack playingTrack = audioPlayer.getPlayingTrack();
+
         if (queue.isEmpty()) {
             audioPlayer.stopTrack();
         } else {
             audioPlayer.startTrack(remove(0), false);
         }
+
+        return playingTrack;
     }
 
     @Override

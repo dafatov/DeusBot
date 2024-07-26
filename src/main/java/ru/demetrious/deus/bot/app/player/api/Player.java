@@ -38,7 +38,7 @@ public interface Player {
 
     AudioTrack getPlayingTrack();
 
-    void skip();
+    AudioTrack skip();
 
     void shuffle();
 

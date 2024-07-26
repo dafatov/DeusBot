@@ -6,7 +6,7 @@ import java.util.List;
 public interface Scheduler {
     void enqueue(AudioTrack audioTrack);
 
-    void next();
+    AudioTrack next();
 
     List<AudioTrack> getQueue();
 

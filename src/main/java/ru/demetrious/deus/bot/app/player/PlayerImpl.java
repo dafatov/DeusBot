@@ -140,8 +140,8 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public void skip() {
-        scheduler.next();
+    public AudioTrack skip() {
+        return scheduler.next();
     }
 
     @Override
