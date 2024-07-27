@@ -6,4 +6,5 @@
 
 ```dotenv
 DISCORD_TOKEN=
+DEVS_DISCORD_IDS=
 ```

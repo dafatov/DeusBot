@@ -27,7 +27,7 @@
 
 	<properties>
 		<!-- Service -->
-		<revision>2.0.0</revision>
+		<revision>2.0.1</revision>
 
 		<!-- Engines -->
 		<java.version>17</java.version>
@@ -180,7 +180,6 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring-boot-starter.version}</version>
 				</plugin>
 
 				<!-- Compiler -->
@@ -227,6 +226,11 @@
 					</execution>
 				</executions>
 				<configuration>
+					<image>
+						<env>
+							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+						</env>
+					</image>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
