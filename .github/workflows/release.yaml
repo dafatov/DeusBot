@@ -8,6 +8,7 @@ on:
         default: patch
         description: Semver options to bump version while releasing
         options:
+          - debug
           - patch
           - minor
           - major
@@ -24,6 +25,8 @@ jobs:
 
     outputs:
       version: ${{ steps.bump.outputs.version }}
+
+    if: ${{ inputs.semver }} != debug
 
     steps:
       - uses: actions/checkout@v4

@@ -27,7 +27,7 @@
 
 	<properties>
 		<!-- Service -->
-		<revision>2.0.2</revision>
+		<revision></revision>
 
 		<!-- Engines -->
 		<java.version>17</java.version>
@@ -210,6 +210,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot-starter.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -229,8 +230,6 @@
 					<image>
 						<env>
 							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-							<BPL_JVM_THREAD_COUNT>50</BPL_JVM_THREAD_COUNT>
-							<BPL_JVM_CLASS_ADJUSTMENT>50%</BPL_JVM_CLASS_ADJUSTMENT>
 						</env>
 					</image>
 					<excludes>
