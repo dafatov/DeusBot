@@ -32,6 +32,9 @@ function bump {
       local bv=$((parts[2] + 1))
       new_version="${parts[0]}.${parts[1]}.${bv}"
       ;;
+    debug)
+      new_version="${old}"
+      ;;
   esac
 }
 
