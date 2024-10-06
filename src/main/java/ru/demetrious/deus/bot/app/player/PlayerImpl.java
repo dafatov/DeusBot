@@ -19,7 +19,7 @@ import ru.demetrious.deus.bot.app.player.api.Scheduler;
 import static dev.lavalink.youtube.YoutubeAudioSourceManager.SEARCH_PREFIX;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
-import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.reduceDuration;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 
 @RequiredArgsConstructor
 @Component

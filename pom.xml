@@ -55,7 +55,7 @@
 		<!-- Discord -->
 		<JDA.version>5.0.1</JDA.version>
 		<lavaplayer.version>2.2.1</lavaplayer.version>
-		<lavalink.youtube-common.version>1.4.0</lavalink.youtube-common.version>
+		<lavalink.youtube-common.version>1.8.2</lavalink.youtube-common.version>
 
 		<!-- Plugins -->
 		<git-commit-id.version>9.0.0</git-commit-id.version>

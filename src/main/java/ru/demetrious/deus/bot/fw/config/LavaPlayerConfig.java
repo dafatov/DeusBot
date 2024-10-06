@@ -9,12 +9,18 @@ import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.Android;
 import dev.lavalink.youtube.clients.Music;
 import dev.lavalink.youtube.clients.TvHtml5Embedded;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.demetrious.deus.bot.app.player.source.client.Web;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Configuration
 public class LavaPlayerConfig {
+    @Value("${youtube.refresh-token}")
+    private String youtubeRefreshToken;
+
     @Bean
     public AudioPlayerManager audioPlayerManager() {
         DefaultAudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
@@ -34,8 +40,12 @@ public class LavaPlayerConfig {
     // ===================================================================================================================
 
     private AudioSourceManager[] getAudioSourceManagers() {
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(new Music(), new Web(), new Android(), new TvHtml5Embedded());
+
+        youtubeAudioSourceManager.useOauth2(youtubeRefreshToken, isNotBlank(youtubeRefreshToken));
+
         return new AudioSourceManager[]{
-            new YoutubeAudioSourceManager(new Music(), new Web(), new Android(), new TvHtml5Embedded()),
+            youtubeAudioSourceManager,
             new HttpAudioSourceManager()
         };
     }

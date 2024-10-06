@@ -10,3 +10,6 @@ spring:
 
 discord:
   token: ${DISCORD_TOKEN}
+
+youtube:
+  refresh-token: ${YOUTUBE_REFRESH_TOKEN}

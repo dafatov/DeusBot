@@ -16,12 +16,9 @@ spring:
 logging:
   level:
     ru.demetrious.deus.bot: DEBUG
-    org.hibernate:
-      orm.jdbc.bind: TRACE
-    com:
-      sedmelluq:
-        discord:
-          lavaplayer: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    com.sedmelluq.discord.lavaplayer: DEBUG
+    dev.lavalink.youtube: DEBUG
 
 devs:
   ids: ${DEVS_DISCORD_IDS:}

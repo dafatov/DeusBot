@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.fw.utils;
+package ru.demetrious.deus.bot.utils;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.track.YoutubeAudioTrack;

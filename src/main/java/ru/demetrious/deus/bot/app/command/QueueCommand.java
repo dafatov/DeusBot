@@ -23,8 +23,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.getFormatDuration;
-import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.getPreview;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.getFormatDuration;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.getPreview;
 
 @Slf4j
 @Component

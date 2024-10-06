@@ -24,7 +24,7 @@ import ru.demetrious.deus.bot.domain.ModalComponent;
 import ru.demetrious.deus.bot.domain.ModalData;
 import ru.demetrious.deus.bot.domain.OptionData;
 import ru.demetrious.deus.bot.domain.TextInputComponent;
-import ru.demetrious.deus.bot.fw.utils.PlayerUtils;
+import ru.demetrious.deus.bot.utils.PlayerUtils;
 
 import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
@@ -36,8 +36,8 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.ATTACHMENT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.SHORT;
-import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.hasLive;
-import static ru.demetrious.deus.bot.fw.utils.PlayerUtils.reduceDuration;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.hasLive;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 
 @Slf4j
 @Component
