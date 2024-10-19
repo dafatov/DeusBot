@@ -129,6 +129,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
           private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host_fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
           command: |
-            docker container rm deus-bot
-            docker run -m 800M --restart=always --name deus-bot -e DATABASE_URL=${{ vars.DATABASE_URL }} -e DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ vars.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ vars.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ vars.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
+            docker container rm ${{ env.IMAGE_NAME }}
+            docker run -m 800M --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ secrets.DATABASE_URL }} -e DATABASE_USERNAME=${{ vars.vars.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ vars.vars.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ vars.vars.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ vars.vars.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ vars.vars.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
