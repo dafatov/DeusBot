@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import dev.lavalink.youtube.clients.Android;
 import dev.lavalink.youtube.clients.Music;
 import dev.lavalink.youtube.clients.TvHtml5Embedded;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +39,7 @@ public class LavaPlayerConfig {
     // ===================================================================================================================
 
     private AudioSourceManager[] getAudioSourceManagers() {
-        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(new Music(), new Web(), new Android(), new TvHtml5Embedded());
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(new Music(), new Web(), new TvHtml5Embedded());
 
         youtubeAudioSourceManager.useOauth2(youtubeRefreshToken, isNotBlank(youtubeRefreshToken));
 

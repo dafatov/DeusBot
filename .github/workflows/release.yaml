@@ -122,11 +122,13 @@ jobs:
       - install
       - release
 
-    if: false
-
-    env:
-      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
-
     steps:
-      - name: Deploy Spring Boot app docker image to onRender
-        run: curl -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}&imgURL=${{ needs.install.outputs.url }}"
+      - name: Run multiple remote commands via SSH
+        uses: D3rHase/ssh-command-action@latest
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command: |
+            docker container rm deus-bot
+            docker run -m 800M --restart=always --name deus-bot -e DATABASE_URL=${{ vars.DATABASE_URL }} -e DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ vars.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ vars.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ vars.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}

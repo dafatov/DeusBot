@@ -3,6 +3,8 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DATABASE_MAX_POOL}
   jpa:
     hibernate:
       ddl-auto: validate
