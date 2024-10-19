@@ -113,6 +113,7 @@ jobs:
           body: Docker-image можно найти по [ссылке](https://${{ needs.install.outputs.url }})
           tag: v${{ needs.bump.outputs.version }}
           generateReleaseNotes: true
+          allowUpdates: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -120,6 +121,8 @@ jobs:
     needs:
       - install
       - release
+
+    if: false
 
     env:
       RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
