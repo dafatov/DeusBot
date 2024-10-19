@@ -153,7 +153,6 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -172,7 +171,6 @@ jobs:
           host: ${{ env.SSH_HOST }}
           user: ${{ env.SSH_USER }}
           private_key: ${{ env.SSH_PRIVATE_KEY }}
-          host_fingerprint: ${{ env.SSH_HOST_FINGERPRINT }}
           command: |
             echo ${{ secrets.SSH_HOST }}
             echo ${{ env.SSH_HOST }}
