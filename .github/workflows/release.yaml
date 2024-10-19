@@ -122,14 +122,28 @@ jobs:
       - install
       - release
 
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_MAX_POOL: ${{ secrets.DATABASE_MAX_POOL }}
+      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+
     steps:
       - name: Run multiple remote commands via SSH
         uses: D3rHase/ssh-command-action@latest
         with:
-          host: ${{ secrets.SSH_HOST }}
-          user: ${{ secrets.SSH_USER }}
-          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host_fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
+          host: ${{ env.SSH_HOST }}
+          user: ${{ env.SSH_USER }}
+          private_key: ${{ env.SSH_PRIVATE_KEY }}
+          host_fingerprint: ${{ env.SSH_HOST_FINGERPRINT }}
           command: |
+            echo ${{ secrets.SSH_HOST }}
+            echo ${{ env.SSH_HOST }}
             docker container rm ${{ env.IMAGE_NAME }}
-            docker run -m 800M --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ secrets.DATABASE_URL }} -e DATABASE_USERNAME=${{ vars.vars.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ vars.vars.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ vars.vars.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ vars.vars.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ vars.vars.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
+            docker run -m 800M --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ env.DATABASE_URL }} -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ env.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
