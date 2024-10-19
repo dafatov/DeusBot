@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: Run multiple remote commands via SSH
-        uses: appleboy/ssh-action@latest
+        uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
