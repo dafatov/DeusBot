@@ -125,7 +125,6 @@ jobs:
 
     needs:
       - bump
-      - install
 
     if: ${{ !inputs.skipRelease }}
 
