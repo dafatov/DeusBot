@@ -13,6 +13,24 @@ on:
           - minor
           - major
 
+      skipInstall:
+        required: false
+        type: boolean
+        default: false
+        description: Skip install job
+
+      skipRelease:
+        required: false
+        type: boolean
+        default: false
+        description: Skip release job
+
+      skipDeploy:
+        required: false
+        type: boolean
+        default: false
+        description: Skip deploy job
+
 env:
   IMAGE_NAME: deus-bot
 
@@ -61,6 +79,8 @@ jobs:
 
     needs: bump
 
+    if: ${{ !inputs.skipInstall }}
+
     outputs:
       url: ${{ steps.getImageUrl.outputs.url }}
 
@@ -107,6 +127,8 @@ jobs:
       - bump
       - install
 
+    if: ${{ !inputs.skipRelease }}
+
     steps:
       - uses: ncipollo/release-action@v1
         with:
@@ -122,6 +144,8 @@ jobs:
       - install
       - release
 
+    if: ${{ !inputs.skipDeploy }}
+
     env:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
@@ -135,7 +159,11 @@ jobs:
       YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
 
     steps:
+      - name: Get command
+        id: getCommand
+        run: echo "docker run -m 800M --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ env.DATABASE_URL }} -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ env.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}"
       - name: Run multiple remote commands via SSH
+        if: false
         uses: D3rHase/ssh-command-action@latest
         with:
           host: ${{ env.SSH_HOST }}
