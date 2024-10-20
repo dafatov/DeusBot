@@ -145,4 +145,4 @@ jobs:
           script: |
             docker stop ${{ env.IMAGE_NAME }}
             docker container rm ${{ env.IMAGE_NAME }}
-            docker run -m ${{ env.CONTAINER_MEMORY_LIMIT }} --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ env.DATABASE_URL }} -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ env.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
+            docker run -d -m ${{ env.CONTAINER_MEMORY_LIMIT }} --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ env.DATABASE_URL }} -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ env.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
