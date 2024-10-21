@@ -15,9 +15,11 @@ import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MEMBERS;
 import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MESSAGES;
 import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_VOICE_STATES;
 import static net.dv8tion.jda.api.requests.GatewayIntent.MESSAGE_CONTENT;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.ACTIVITY;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.EMOJI;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.SCHEDULED_EVENTS;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.STICKER;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.VOICE_STATE;
 
 @RequiredArgsConstructor
 @Configuration
@@ -32,7 +34,7 @@ public class JDAConfig {
     @Bean
     public JDA jda() throws InterruptedException {
         return createDefault(token)
-            .disableCache(EMOJI, STICKER, SCHEDULED_EVENTS)
+            .disableCache(ACTIVITY, EMOJI, SCHEDULED_EVENTS, STICKER, VOICE_STATE)
             .setEnabledIntents(GUILD_MEMBERS, GUILD_MESSAGES, GUILD_VOICE_STATES, MESSAGE_CONTENT)
             .setActivity(playing(format("/help | v{0}", version)))
             .setStatus(DO_NOT_DISTURB)
