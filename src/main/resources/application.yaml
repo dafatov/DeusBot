@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DATABASE_MAX_POOL}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+discord:
+  token: ${DISCORD_TOKEN}
+
+youtube:
+  refresh-token: ${YOUTUBE_REFRESH_TOKEN}
