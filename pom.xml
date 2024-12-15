@@ -53,9 +53,9 @@
 		<commons-lang3.version>3.15.0</commons-lang3.version>
 
 		<!-- Discord -->
-		<JDA.version>5.0.1</JDA.version>
-		<lavaplayer.version>2.2.1</lavaplayer.version>
-		<lavalink.youtube-common.version>1.8.2</lavalink.youtube-common.version>
+		<JDA.version>5.2.1</JDA.version>
+		<lavaplayer.version>2.2.2</lavaplayer.version>
+		<lavalink.youtube-common.version>1.11.1</lavalink.youtube-common.version>
 
 		<!-- Plugins -->
 		<git-commit-id.version>9.0.0</git-commit-id.version>
@@ -293,26 +293,6 @@
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 					<commitIdGenerationMode>full</commitIdGenerationMode>
 					<abbrevLength>6</abbrevLength>
-				</configuration>
-			</plugin>
-
-			<!-- Maven Clean -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<excludeDefaultDirectories>true</excludeDefaultDirectories>
-					<filesets>
-						<fileset>
-							<directory>target</directory>
-							<includes>
-								<include>**</include>
-							</includes>
-							<excludes>
-								<exclude>generated-sources/**</exclude>
-							</excludes>
-						</fileset>
-					</filesets>
 				</configuration>
 			</plugin>
 		</plugins>

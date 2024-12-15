@@ -11,7 +11,7 @@ import dev.lavalink.youtube.clients.TvHtml5Embedded;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.demetrious.deus.bot.app.player.source.client.Web;
+import ru.demetrious.deus.bot.app.impl.player.impl.client.Web;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

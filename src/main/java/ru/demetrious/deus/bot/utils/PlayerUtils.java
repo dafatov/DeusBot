@@ -4,15 +4,14 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.track.YoutubeAudioTrack;
 import java.util.List;
 import java.util.Optional;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
 import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
-import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDuration;
 
-@NoArgsConstructor(access = PRIVATE)
+@UtilityClass
 public class PlayerUtils {
     public static Long reduceDuration(List<AudioTrack> audioTrackList) {
         return audioTrackList.stream().reduce(0L, (duration, audioTrack) -> duration + audioTrack.getDuration(), Long::sum);
