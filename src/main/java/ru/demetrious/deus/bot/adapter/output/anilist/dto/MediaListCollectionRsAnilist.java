@@ -34,6 +34,8 @@ public class MediaListCollectionRsAnilist implements ResponseRsAnilist {
             public static class Media {
                 private Integer id;
                 private Integer idMal;
+                @EqualsAndHashCode.Exclude
+                private Integer episodes;
             }
         }
     }

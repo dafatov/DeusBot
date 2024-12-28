@@ -1,7 +1,12 @@
 package ru.demetrious.deus.bot.adapter.output.anilist.dto;
 
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import static java.lang.String.join;
+import static java.util.Objects.nonNull;
 
 /**
  * GraphQl mutation dto
@@ -19,6 +24,20 @@ public class SaveMediaListEntryAnilist implements MutationAnilist {
 
     @Override
     public String serialize() {
-        return "SaveMediaListEntry(status:%s,mediaId:%d,progress:%d,score:%s,repeat:%d){id}".formatted(status, mediaId, progress, score, repeat);
+        Set<String> fields = new HashSet<>();
+
+        if (nonNull(status)) {
+            fields.add("status:" + status);
+        }
+        fields.add("mediaId:" + mediaId);
+        fields.add("progress:" + progress);
+        if (nonNull(status)) {
+            fields.add("score:" + score);
+        }
+        if (nonNull(status)) {
+            fields.add("repeat:" + repeat);
+        }
+
+        return "SaveMediaListEntry(%s){id}".formatted(join(",", fields));
     }
 }

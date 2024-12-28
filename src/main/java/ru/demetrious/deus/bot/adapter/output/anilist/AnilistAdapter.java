@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ import static ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist.c
 public class AnilistAdapter implements ImportAnimeOutbound {
     private static final Supplier<String> RANDOM_KEY_SUPPLIER = () -> randomAlphabetic(7);
     private static final int PER_PAGE = 50;
-    private static final int PER_REQUEST = 250;
+    private static final int PER_REQUEST = 150;
 
     private final AnilistClient anilistClient;
 
@@ -114,18 +115,31 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
     private Map<String, SaveMediaListEntryAnilist> mapSaveMediaMutations(List<Entries> entriesList) {
         return entriesList.stream()
-            .map(this::mapSaveMediaMutation)
+            .flatMap(this::mapSaveMediaMutation)
             .collect(toMap(h -> RANDOM_KEY_SUPPLIER.get(), identity()));
     }
 
-    private SaveMediaListEntryAnilist mapSaveMediaMutation(Entries entries) {
-        return new SaveMediaListEntryAnilist(
+    private Stream<SaveMediaListEntryAnilist> mapSaveMediaMutation(Entries entries) {
+        SaveMediaListEntryAnilist saveMediaListEntryAnilist = new SaveMediaListEntryAnilist(
             entries.getStatus(),
             entries.getMedia().getId(),
             entries.getProgress(),
             entries.getScore(),
             entries.getRepeat()
         );
+
+        if (COMPLETED == entries.getStatus() && entries.getProgress() < entries.getMedia().getEpisodes()) {
+            log.debug("Added duplicate mutation for idMal={}", entries.getMedia().getIdMal());
+            return Stream.of(saveMediaListEntryAnilist, new SaveMediaListEntryAnilist(
+                null,
+                entries.getMedia().getId(),
+                entries.getProgress(),
+                null,
+                null
+            ));
+        }
+
+        return Stream.of(saveMediaListEntryAnilist);
     }
 
     private Map<Integer, Integer> getExistingNewIdsMap(List<Entries> changedAndNewAnimes) {
@@ -157,7 +171,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
     private Entries mapTargetAnime(Map<String, String> animeProperties) {
         return new Entries(
             null,
-            new Media(null, parseInt(animeProperties.get("series_animedb_id"))),
+            new Media(null, parseInt(animeProperties.get("series_animedb_id")), parseInt(animeProperties.get("series_episodes"))),
             parseInt(animeProperties.get("my_watched_episodes")),
             parseInt(animeProperties.get("my_times_watched")),
             parseDouble(animeProperties.get("my_score")),

@@ -94,6 +94,7 @@ public class LinkAuthorizationComponent {
 
     public @NotNull String getUrl(String userId, String registrationId) {
         try {
+            //TODO как-то сделать для стендов урлы (скорее всего через env)
             return new URIBuilder("http://localhost:8080")
                 .setPath("/oauth2/authorization/%s".formatted(registrationId))
                 .addParameter(QUERY_DISCORD_USER_ID, userId)
