@@ -15,7 +15,7 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
-import static ru.demetrious.deus.bot.fw.config.SpringConfig.SCOPE_THREAD;
+import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
 @Slf4j
 @RequiredArgsConstructor

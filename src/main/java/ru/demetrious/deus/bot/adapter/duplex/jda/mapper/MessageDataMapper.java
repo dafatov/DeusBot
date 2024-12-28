@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
@@ -18,6 +19,7 @@ import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.ButtonComponent;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
+import ru.demetrious.deus.bot.domain.MessageFile;
 
 import static java.time.Instant.from;
 import static java.util.Arrays.stream;
@@ -27,12 +29,19 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.values;
 
 @Mapper
 public interface MessageDataMapper {
-    default MessageCreateData mapToMessageCreate(MessageData commandData) {
+    default MessageCreateData mapToMessageCreate(MessageData messageData) {
         return new MessageCreateBuilder()
-            .setContent(commandData.getContent())
-            .setEmbeds(mapEmbed(commandData.getEmbeds()))
-            .setComponents(mapComponent(commandData.getComponents()))
+            .setContent(messageData.getContent())
+            .setEmbeds(mapEmbed(messageData.getEmbeds()))
+            .setComponents(mapComponent(messageData.getComponents()))
+            .setFiles(mapFile(messageData.getFiles()))
             .build();
+    }
+
+    List<FileUpload> mapFile(List<MessageFile> messageFiles);
+
+    default FileUpload mapFile(MessageFile messageFile) {
+        return FileUpload.fromData(messageFile.getData(), messageFile.getName());
     }
 
     List<LayoutComponent> mapComponent(List<MessageComponent> components);
@@ -44,14 +53,17 @@ public interface MessageDataMapper {
     List<net.dv8tion.jda.api.interactions.components.ItemComponent> mapButton(List<ButtonComponent> items);
 
     default net.dv8tion.jda.api.interactions.components.ItemComponent mapButton(ButtonComponent buttonComponent) {
-        return Button.of(mapButtonStyle(buttonComponent.getStyle()), buttonComponent.getId(), mapEmoji(buttonComponent.getEmoji()))
+        return Button.of(mapButtonStyle(buttonComponent.getStyle()), buttonComponent.getId(), buttonComponent.getLabel(), mapEmoji(buttonComponent.getEmoji()))
             .withDisabled(buttonComponent.isDisabled());
     }
 
     ButtonStyle mapButtonStyle(ButtonComponent.StyleEnum style);
 
     default Emoji mapEmoji(ButtonComponent.EmojiEnum emoji) {
-        return Emoji.fromFormatted(emoji.getValue());
+        return ofNullable(emoji)
+            .map(ButtonComponent.EmojiEnum::getValue)
+            .map(Emoji::fromFormatted)
+            .orElse(null);
     }
 
     List<MessageEmbed> mapEmbed(List<ru.demetrious.deus.bot.domain.MessageEmbed> embeds);
@@ -86,11 +98,12 @@ public interface MessageDataMapper {
                 .orElse(null));
     }
 
-    default MessageEditData mapToMessageEdit(MessageData commandData) {
+    default MessageEditData mapToMessageEdit(MessageData messageData) {
         return new MessageEditBuilder()
-            .setContent(commandData.getContent())
-            .setEmbeds(mapEmbed(commandData.getEmbeds()))
-            .setComponents(mapComponent(commandData.getComponents()))
+            .setContent(messageData.getContent())
+            .setEmbeds(mapEmbed(messageData.getEmbeds()))
+            .setComponents(mapComponent(messageData.getComponents()))
+            .setFiles(mapFile(messageData.getFiles()))
             .build();
     }
 

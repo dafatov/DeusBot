@@ -9,6 +9,56 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  security:
+    oauth2:
+      client:
+        registration:
+          shikimori:
+            client-name: Shikimori
+            client-id: ${SHIKIMORI_OAUTH2_CLIENT-ID}
+            client-secret: ${SHIKIMORI_OAUTH2_CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
+            provider: shikimori
+          discord:
+            client-name: Discord
+            client-id: ${DISCORD_OAUTH2_CLIENT-ID}
+            client-secret: ${DISCORD_OAUTH2_CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
+            provider: discord
+            scope:
+              - identify
+          anilist:
+            client-name: Anilist
+            client-id: ${ANILIST_OAUTH2_CLIENT-ID}
+            client-secret: ${ANILIST_OAUTH2_CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
+            provider: anilist
+        provider:
+          shikimori:
+            authorization-uri: ${SHIKIMORI_URL}/oauth/authorize
+            token-uri: ${SHIKIMORI_URL}/oauth/token
+            user-info-uri: ${SHIKIMORI_URL}/api/users/whoami
+            user-name-attribute: id
+          discord:
+            authorization-uri: ${DISCORD_URL}/oauth2/authorize
+            token-uri: ${DISCORD_URL}/api/oauth2/token
+            user-info-uri: ${DISCORD_URL}/api/users/@me
+            user-name-attribute: id
+          anilist:
+            authorization-uri: ${ANILIST_URL}/api/v2/oauth/authorize
+            token-uri: ${ANILIST_URL}/api/v2/oauth/token
+
+feign:
+  svc:
+    shikimori:
+      url: ${SHIKIMORI_URL}
+      path: /
+    anilist:
+      url: ${ANILIST_GRAPHQL_URL}
+      path: /
 
 discord:
   token: ${DISCORD_TOKEN}

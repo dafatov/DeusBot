@@ -27,10 +27,9 @@ import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 @Slf4j
 @Component
 public class MoveCommandUseCase extends PlayerCommand implements MoveCommandInbound {
-    private static final String POSITION = "position";
     protected static final String TARGET = "target";
     protected static final String TARGET_DESCRIPTION = "Номер в очереди целевой композиции";
-
+    private static final String POSITION = "position";
     private final GetIntegerOptionOutbound getIntegerOptionOutbound;
     private final GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound;
     private final IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound;

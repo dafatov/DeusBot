@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.fw.config;
+package ru.demetrious.deus.bot.fw.config.git;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;

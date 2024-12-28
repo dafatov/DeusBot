@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.output;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
@@ -28,18 +29,24 @@ import ru.demetrious.deus.bot.app.api.player.ConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotCanConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
+import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
+import ru.demetrious.deus.bot.domain.ButtonComponent;
+import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
+import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
+import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.LINK;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 
 @Slf4j
 @RequiredArgsConstructor
 public abstract class GenericAdapter<A extends Interaction, E extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback,
     I extends IDeferrableCallback> implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>,
-    GetAuthorIdOutbound<A>, ConnectOutbound<A> {
+    GetAuthorIdOutbound<A>, ConnectOutbound<A>, GetUserIdOutbound<A> {
     @Setter(onParam = @__({@NotNull}))
     protected E event;
     @Autowired
@@ -85,6 +92,22 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
     }
 
     @Override
+    public void notifyUnauthorized(String authorizeUrl) {
+        MessageData messageData = new MessageData()
+            .setEmbeds(List.of(new MessageEmbed()
+                .setColor(WARNING)
+                .setTitle("Безавторизационный ***")
+                .setDescription("Авторизуйся пройдя по ссылке и повтори команду заново после успешной авторизации и все будет ок")))
+            .setComponents(List.of(new MessageComponent().setButtons(List.of(new ButtonComponent()
+                .setStyle(LINK)
+                .setLabel("Авторизоваться")
+                .setId(authorizeUrl)))));
+
+        notify(messageData, true);
+        log.warn("Произошла попытка запуска неавторизованного запуска команды");
+    }
+
+    @Override
     public String getGuildId() {
         return getGuild()
             .map(Guild::getId)
@@ -118,6 +141,11 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
 
         audioManager.setSendingHandler(audioSendHandler);
         audioManager.openAudioConnection(getVoiceChannel());
+    }
+
+    @Override
+    public String getUserId() {
+        return event.getUser().getId();
     }
 
     // ===================================================================================================================

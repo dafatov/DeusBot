@@ -8,4 +8,6 @@ public interface NotifyOutbound<I extends Interaction> extends HasEventOutbound 
     void notify(MessageData messageData, boolean isEphemeral);
 
     void notify(MessageData messageData);
+
+    void notifyUnauthorized(String authorizeUrl);
 }

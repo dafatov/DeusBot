@@ -1,5 +1,7 @@
 package ru.demetrious.deus.bot.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -10,6 +12,7 @@ public class OptionData {
     private String description;
     private Type type;
     private boolean isRequired = false;
+    private List<OptionChoice> choices = new ArrayList<>();
 
     public enum Type {
         STRING, INTEGER, ATTACHMENT

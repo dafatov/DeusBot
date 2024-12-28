@@ -14,7 +14,7 @@ import ru.demetrious.deus.bot.app.api.interaction.ModalInteractionInbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
-import static ru.demetrious.deus.bot.fw.config.SpringConfig.SCOPE_THREAD;
+import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
 @Slf4j
 @RequiredArgsConstructor

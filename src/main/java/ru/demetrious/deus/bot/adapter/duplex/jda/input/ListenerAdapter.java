@@ -1,7 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.input;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +12,8 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.ButtonAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.GenericAdapter;
@@ -22,8 +23,11 @@ import ru.demetrious.deus.bot.app.api.command.CommandInbound;
 import ru.demetrious.deus.bot.domain.CommandData.Name;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
+import ru.demetrious.deus.bot.fw.config.security.LinkAuthorizationComponent;
 
 import static java.text.MessageFormat.format;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -32,10 +36,14 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 @RequiredArgsConstructor
 @Component
 public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
+    private static final String CLIENT_REGISTRATION_ID = "discord";
+
     private final SlashCommandAdapter slashCommandAdapter;
     private final ModalAdapter modalAdapter;
     private final ButtonAdapter buttonAdapter;
     private final List<CommandInbound> commandList;
+    private final LinkAuthorizationComponent linkAuthorizationComponent;
+    private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
 
     @Value("${devs.ids:}")
     private List<String> devUserIdList;
@@ -47,7 +55,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        Name commandName = Optional.ofNullable(event.getMessage().getInteraction())
+        Name commandName = ofNullable(event.getMessage().getInteraction())
             .map(Message.Interaction::getName)
             .map(cN -> cN.split(" "))
             .map(split -> split[0])
@@ -73,6 +81,14 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                                                               String errorText,
                                                               A adapter) {
         adapter.setEvent(event);
+
+        OAuth2AuthorizedClient oAuth2AuthorizedClient = oAuth2AuthorizedClientService.loadAuthorizedClient(CLIENT_REGISTRATION_ID, event.getUser().getId());
+        if (isNull(oAuth2AuthorizedClient)) {
+            adapter.notifyUnauthorized(linkAuthorizationComponent.getUrl(event.getUser().getId(), CLIENT_REGISTRATION_ID));
+            return;
+        }
+
+        linkAuthorizationComponent.authenticate(oAuth2AuthorizedClient);
         try {
             CommandInbound command = commandList.stream()
                 .filter(c -> c.getData().getName() == commandName)

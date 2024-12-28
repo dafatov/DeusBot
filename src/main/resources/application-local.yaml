@@ -1,4 +1,10 @@
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: FULL
   datasource:
     url: jdbc:postgresql://localhost:5432/deus-bot
     username: postgres
@@ -10,8 +16,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  flyway:
-    enabled: false
 
 logging:
   level:

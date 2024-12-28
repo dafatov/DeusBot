@@ -52,32 +52,6 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
     }
 
     @Override
-    public void execute() {
-        final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
-        final List<AudioTrack> queue = player.getQueue();
-        MessageEmbed paginationEmbed = new MessageEmbed();
-        MessageComponent controlMessageComponent = new ControlComponent(player, b(getAuthorIdOutbound).getAuthorId()).get();
-        PaginationComponent paginationComponent = new PaginationComponent(queue.size());
-
-        if (player.isNotPlaying()) {
-            notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter(), b(notifyOutbound)::notify);
-            return;
-        }
-
-        MessageData messageData = updateEmbed(
-            queue,
-            paginationEmbed,
-            paginationComponent,
-            paginationComponent.get(),
-            controlMessageComponent,
-            player.getPlayingTrack()
-        );
-
-        b(notifyOutbound).notify(messageData);
-        log.info("Список композиций успешно выведен");
-    }
-
-    @Override
     public void onButton() {
         final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
         final List<AudioTrack> queue = player.getQueue();
@@ -102,6 +76,32 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
 
         updateMessageOutbound.update(messageData);
         log.debug("Список композиций успешно обновлен");
+    }
+
+    @Override
+    public void execute() {
+        final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
+        final List<AudioTrack> queue = player.getQueue();
+        MessageEmbed paginationEmbed = new MessageEmbed();
+        MessageComponent controlMessageComponent = new ControlComponent(player, b(getAuthorIdOutbound).getAuthorId()).get();
+        PaginationComponent paginationComponent = new PaginationComponent(queue.size());
+
+        if (player.isNotPlaying()) {
+            notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter(), b(notifyOutbound)::notify);
+            return;
+        }
+
+        MessageData messageData = updateEmbed(
+            queue,
+            paginationEmbed,
+            paginationComponent,
+            paginationComponent.get(),
+            controlMessageComponent,
+            player.getPlayingTrack()
+        );
+
+        b(notifyOutbound).notify(messageData);
+        log.info("Список композиций успешно выведен");
     }
 
     // ===================================================================================================================

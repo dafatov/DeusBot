@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.fw.config;
+package ru.demetrious.deus.bot.fw.config.player;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;

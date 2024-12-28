@@ -11,4 +11,5 @@ public class MessageData {
     private String content;
     private List<MessageEmbed> embeds = new ArrayList<>();
     private List<MessageComponent> components = new ArrayList<>();
+    private List<MessageFile> files = new ArrayList<>();
 }

@@ -32,6 +32,7 @@ public class CommandData {
         PLAY("play"),
         QUEUE("queue"),
         REMOVE("remove"),
+        SHIKIMORI("shikimori"),
         SHUFFLE("shuffle"),
         SKIP("skip");
 

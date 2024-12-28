@@ -12,11 +12,12 @@ import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.SECONDARY;
 public class ButtonComponent {
     private StyleEnum style = SECONDARY;
     private String id;
+    private String label;
     private EmojiEnum emoji;
     private boolean isDisabled = false;
 
     public enum StyleEnum {
-        SECONDARY, DANGER
+        DANGER, LINK, SECONDARY
     }
 
     @Getter

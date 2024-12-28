@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.fw.config;
+package ru.demetrious.deus.bot.fw.config.spring;
 
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.cloud.context.scope.thread.ThreadScope;
