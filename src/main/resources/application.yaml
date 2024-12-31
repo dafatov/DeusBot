@@ -1,3 +1,5 @@
+app.url: ${APP_URL}
+
 spring:
   datasource:
     url: ${DATABASE_URL}

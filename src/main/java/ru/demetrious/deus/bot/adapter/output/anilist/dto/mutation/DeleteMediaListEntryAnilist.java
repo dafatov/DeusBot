@@ -1,16 +1,13 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.MutationAnilist;
 
 /**
  * GraphQl mutation dto
  */
 @AllArgsConstructor
 public class DeleteMediaListEntryAnilist implements MutationAnilist {
-    @Getter
-    private final String name = "DeleteMediaListEntry";
-
     private Integer id;
 
     @Override

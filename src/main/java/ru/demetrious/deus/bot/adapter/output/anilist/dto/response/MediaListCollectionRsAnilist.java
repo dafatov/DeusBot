@@ -1,10 +1,12 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.response;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.ResponseRsAnilist;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist;
 
 @Data
 public class MediaListCollectionRsAnilist implements ResponseRsAnilist {

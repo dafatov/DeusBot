@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -27,14 +29,29 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder.builder;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.ANILIST_REGISTRATION_ID;
 import static ru.demetrious.deus.bot.fw.config.security.LinkAuthorizationComponent.createUserFromToken;
 import static ru.demetrious.deus.bot.fw.config.security.LinkAuthorizationComponent.updateRequest;
 
 @RequiredArgsConstructor
 @Configuration
-public class WebSecurityConfig {
+public class SecurityConfig {
     private final LinkAuthorizationComponent linkAuthorizationComponent;
+
+    @Bean
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
+                                                                OAuth2AuthorizedClientService oAuth2AuthorizedClientService) {
+        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientServiceOAuth2AuthorizedClientManager =
+            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
+
+        authorizedClientServiceOAuth2AuthorizedClientManager.setAuthorizedClientProvider(builder()
+            .authorizationCode()
+            .refreshToken()
+            .build());
+        return authorizedClientServiceOAuth2AuthorizedClientManager;
+    }
 
     @Bean
     OAuth2AuthorizedClientService oAuth2AuthorizedClientService(JdbcOperations jdbcOperations, ClientRegistrationRepository clientRegistrationRepository) {
@@ -105,7 +122,7 @@ public class WebSecurityConfig {
     private record CustomOAuth2UserService(DefaultOAuth2UserService defaultOAuth2UserService) implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
         @Override
         public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-            if (userRequest.getClientRegistration().getRegistrationId().equals("anilist")) {
+            if (userRequest.getClientRegistration().getRegistrationId().equals(ANILIST_REGISTRATION_ID)) {
                 return createUserFromToken(userRequest);
             }
 

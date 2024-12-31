@@ -1,7 +1,8 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.response;
 
 import java.util.List;
 import lombok.Data;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.ResponseRsAnilist;
 
 @Data
 public class PageMediaListRsAnilist implements ResponseRsAnilist {

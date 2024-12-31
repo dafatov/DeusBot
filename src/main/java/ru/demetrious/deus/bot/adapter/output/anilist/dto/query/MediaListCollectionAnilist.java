@@ -1,6 +1,8 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.query;
 
 import lombok.AllArgsConstructor;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.QueryAnilist;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaTypeAnilist;
 
 /**
  * GraphQl query dto

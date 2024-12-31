@@ -8,9 +8,10 @@ import ru.demetrious.deus.bot.adapter.output.shikimori.dto.UserDto;
 import ru.demetrious.deus.bot.fw.config.feign.FeignConfig;
 
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.SHIKIMORI_REGISTRATION_ID;
 
 @FeignClient(
-    name = "shikimori",
+    name = SHIKIMORI_REGISTRATION_ID,
     url = "${feign.svc.shikimori.url}",
     path = "${feign.svc.shikimori.path}",
     configuration = FeignConfig.class

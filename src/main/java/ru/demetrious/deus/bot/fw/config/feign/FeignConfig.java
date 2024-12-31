@@ -31,7 +31,8 @@ public class FeignConfig {
                 .setDiscordPrincipalName(t)))
             .map(LinkUser::getLinkedPrincipalName)
             .map(p -> oAuth2AuthorizedClientService.loadAuthorizedClient(requestTemplate.feignTarget().name(), p))
-            .map(c -> ((OAuth2AuthorizedClient) c).getAccessToken())
+            .map(OAuth2AuthorizedClient.class::cast)
+            .map(OAuth2AuthorizedClient::getAccessToken)
             .ifPresent(
                 accessToken -> requestTemplate.header(AUTHORIZATION, "%s %s".formatted(accessToken.getTokenType().getValue(), accessToken.getTokenValue())));
     }

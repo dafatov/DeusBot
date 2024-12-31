@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.enums;
 
 public enum MediaListStatusAnilist {
     COMPLETED,

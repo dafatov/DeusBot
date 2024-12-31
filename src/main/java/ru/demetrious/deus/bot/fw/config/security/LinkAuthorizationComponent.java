@@ -1,19 +1,15 @@
 package ru.demetrious.deus.bot.fw.config.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.http.client.utils.URIBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -22,24 +18,27 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import ru.demetrious.deus.bot.app.api.user.FindLinkUserOutbound;
 import ru.demetrious.deus.bot.app.api.user.SaveLinkUserOutbound;
 import ru.demetrious.deus.bot.domain.LinkUser;
 
 import static java.util.Base64.getDecoder;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest.from;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.MAIN_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.QUERY_DISCORD_USER_ID;
+import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 
 @RequiredArgsConstructor
 @Component
 public class LinkAuthorizationComponent {
     private static final String REQUEST_DISCORD_USER_ID = "discordUserId";
-    private static final String QUERY_DISCORD_USER_ID = "id";
-    private static final String MAIN_REGISTRATION_ID = "discord";
 
     private final SaveLinkUserOutbound saveLinkUserOutbound;
+    private final FindLinkUserOutbound findLinkUserOutbound;
 
     protected static OAuth2AuthorizationRequest updateRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request) {
         return ofNullable(request)
@@ -52,14 +51,14 @@ public class LinkAuthorizationComponent {
                     .additionalParameters(additionalParameters)
                     .build();
             })
-            .orElse(authorizationRequest);
+            .orElseThrow(() -> new IllegalArgumentException("Main registration user id can't be null"));
     }
 
     protected static @NotNull DefaultOAuth2User createUserFromToken(@NotNull OAuth2UserRequest userRequest) {
         try {
             String nameAttributeKey = "id";
             String payload = userRequest.getAccessToken().getTokenValue().split("\\.")[1];
-            Object sub = new ObjectMapper().readValue(getDecoder().decode(payload), Map.class).get("sub");
+            Object sub = getMapper().readValue(getDecoder().decode(payload), Map.class).get("sub");
 
             return new DefaultOAuth2User(emptyCollection(), Map.of(nameAttributeKey, sub), nameAttributeKey);
         } catch (IOException e) {
@@ -81,6 +80,7 @@ public class LinkAuthorizationComponent {
     }
 
     protected void handleSuccess(OAuth2AuthenticationToken authentication) {
+        requireNonNull(authentication.getCredentials(), "Main registration user id can't be null");
         LinkUser.LinkUserKey linkUserKey = new LinkUser.LinkUserKey()
             .setDiscordPrincipalName(String.valueOf(authentication.getCredentials()))
             .setLinkedRegistrationId(authentication.getAuthorizedClientRegistrationId());
@@ -92,25 +92,11 @@ public class LinkAuthorizationComponent {
         }
     }
 
-    public @NotNull String getUrl(String userId, String registrationId) {
-        try {
-            //TODO как-то сделать для стендов урлы (скорее всего через env)
-            return new URIBuilder("http://localhost:8080")
-                .setPath("/oauth2/authorization/%s".formatted(registrationId))
-                .addParameter(QUERY_DISCORD_USER_ID, userId)
-                .build()
-                .toString();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void authenticate(OAuth2AuthorizedClient authorizedClient) {
-        getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-            authorizedClient.getPrincipalName(),
-            authorizedClient,
-            emptyCollection()
-        ));
+    protected Optional<String> getLinkedPrincipalName(String shikimoriRegistrationId, String userId) {
+        return findLinkUserOutbound.findById(new LinkUser.LinkUserKey()
+                .setLinkedRegistrationId(shikimoriRegistrationId)
+                .setDiscordPrincipalName(userId))
+            .map(LinkUser::getLinkedPrincipalName);
     }
 
     // ===================================================================================================================

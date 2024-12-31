@@ -1,7 +1,9 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.adapter.output.anilist.dto.query;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.QueryAnilist;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaTypeAnilist;
 
 import static java.util.stream.Collectors.joining;
 

@@ -6,5 +6,5 @@ import ru.demetrious.deus.bot.domain.ImportAnimeContext;
 
 @FunctionalInterface
 public interface ImportAnimeOutbound {
-    ImportAnimeContext execute(List<Map<String, String>> animeList);
+    ImportAnimeContext execute(List<Map<String, String>> animeList, Integer userId);
 }
