@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.interaction.ModalInteractionInbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
+import ru.demetrious.deus.bot.domain.CommandData;
 
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
@@ -32,6 +33,11 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
 
     @Override
     protected @NotNull ModalInteraction getInteraction() {
-        return event.getInteraction();
+        return getEvent().getInteraction();
+    }
+
+    @Override
+    public CommandData.Name getCommandName() {
+        return getName(getEvent().getModalId().split(" "));
     }
 }

@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.output.repository;
+package ru.demetrious.deus.bot.adapter.output.repository.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

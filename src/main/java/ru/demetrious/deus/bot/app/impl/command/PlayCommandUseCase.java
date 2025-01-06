@@ -125,7 +125,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
 
         if (identifierOptional.isEmpty() && attachmentOptional.isEmpty()) {
             ModalData modalData = new ModalData()
-                .setCustomId("play")
+                .setCustomId(PLAY.stringify())
                 .setTitle("Добавление в очередь плеера")
                 .setComponents(rangeClosed(1, MAX_COMPONENTS)
                     .mapToObj(index -> new ModalComponent()

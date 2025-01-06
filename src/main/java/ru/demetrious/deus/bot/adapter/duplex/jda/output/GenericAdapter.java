@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -22,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.MessageDataMapper;
+import ru.demetrious.deus.bot.app.api.command.GetCommandNameOutbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.Interaction;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
@@ -31,6 +31,7 @@ import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.domain.ButtonComponent;
+import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
@@ -46,17 +47,41 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 @RequiredArgsConstructor
 public abstract class GenericAdapter<A extends Interaction, E extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback,
     I extends IDeferrableCallback> implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>,
-    GetAuthorIdOutbound<A>, ConnectOutbound<A>, GetUserIdOutbound<A> {
-    @Setter(onParam = @__({@NotNull}))
-    protected E event;
+    GetAuthorIdOutbound<A>, ConnectOutbound<A>, GetUserIdOutbound<A>, GetCommandNameOutbound<A> {
+    private final ThreadLocal<E> event = new ThreadLocal<>();
+
     @Autowired
     protected MessageDataMapper messageDataMapper;
 
+    protected static CommandData.Name getName(String[] strings) {
+        if (strings.length == 1) {
+            return CommandData.Name.from(strings[0], null, null);
+        }
+
+        if (strings.length == 2) {
+            return CommandData.Name.from(strings[0], null, strings[1]);
+        }
+
+        return CommandData.Name.from(strings[0], strings[1], strings[2]);
+    }
+
     protected abstract @NotNull I getInteraction();
+
+    public void removeEvent() {
+        this.event.remove();
+    }
+
+    protected E getEvent() {
+        return event.get();
+    }
+
+    public void setEvent(@NotNull E event) {
+        this.event.set(event);
+    }
 
     @Override
     public boolean hasEvent() {
-        return nonNull(event);
+        return nonNull(getEvent());
     }
 
     @Override
@@ -64,23 +89,23 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
         MessageCreateData content = messageDataMapper.mapToMessageCreate(messageData);
 
         try {
-            if (event.isAcknowledged() && isDeferred()) {
-                event.getHook()
+            if (getEvent().isAcknowledged() && isDeferred()) {
+                getEvent().getHook()
                     .editOriginal(messageDataMapper.mapToMessageEdit(messageData))
                     .queue();
-            } else if (event.isAcknowledged() && !isDeferred()) {
-                event.getHook()
+            } else if (getEvent().isAcknowledged() && !isDeferred()) {
+                getEvent().getHook()
                     .sendMessage(content)
                     .setEphemeral(isEphemeral)
                     .queue();
             } else {
-                event.reply(content)
+                getEvent().reply(content)
                     .setEphemeral(isEphemeral)
                     .queue();
             }
         } catch (Exception e) {
             log.warn("Cannot reply onModal interaction", e);
-            ((MessageChannelUnion) requireNonNull(event.getChannel()))
+            ((MessageChannelUnion) requireNonNull(getEvent().getChannel()))
                 .sendMessage(content)
                 .queue();
         }
@@ -128,7 +153,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
 
     @Override
     public String getAuthorId() {
-        return event.getUser().getId();
+        return getEvent().getUser().getId();
     }
 
     @Override
@@ -145,7 +170,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
 
     @Override
     public String getUserId() {
-        return event.getUser().getId();
+        return getEvent().getUser().getId();
     }
 
     // ===================================================================================================================
@@ -175,7 +200,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
     }
 
     private Optional<VoiceChannel> getVoiceChannelOptional() {
-        return ofNullable(event.getMember())
+        return ofNullable(getEvent().getMember())
             .map(Member::getVoiceState)
             .map(GuildVoiceState::getChannel)
             .map(AudioChannelUnion::asVoiceChannel);
@@ -189,6 +214,6 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
     }
 
     private Optional<Guild> getGuild() {
-        return ofNullable(event.getGuild());
+        return ofNullable(getEvent().getGuild());
     }
 }

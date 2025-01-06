@@ -11,6 +11,15 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  quartz:
+    job-store-type: jdbc
+    overwrite-existing-jobs: true
+    jdbc:
+      initialize-schema: never
+    properties:
+      org.quartz.jobStore:
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+        useProperties: true
   security:
     oauth2:
       client:

@@ -17,6 +17,7 @@ import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound
 import ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound;
 import ru.demetrious.deus.bot.app.api.network.GetLatencyOutbound;
 import ru.demetrious.deus.bot.domain.AttachmentOption;
+import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.ModalData;
 
 import static java.util.Optional.ofNullable;
@@ -51,7 +52,7 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
 
     @Override
     public void showModal(ModalData modal) {
-        event.replyModal(modalDataMapper.mapModal(modal)).queue();
+        getEvent().replyModal(modalDataMapper.mapModal(modal)).queue();
     }
 
     @Override
@@ -60,16 +61,21 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
             .map(OptionMapping::getAsInt);
     }
 
+    @Override
+    public CommandData.Name getCommandName() {
+        return CommandData.Name.from(getEvent().getName(), getEvent().getSubcommandGroup(), getEvent().getSubcommandName());
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
     private Optional<OptionMapping> getOption(String name) {
-        return ofNullable(event.getOption(name));
+        return ofNullable(getEvent().getOption(name));
     }
 
     @Override
     protected @NotNull SlashCommandInteraction getInteraction() {
-        return event.getInteraction();
+        return getEvent().getInteraction();
     }
 }

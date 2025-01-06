@@ -3,12 +3,14 @@ package ru.demetrious.deus.bot.adapter.duplex.jda.input;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,13 +20,16 @@ import ru.demetrious.deus.bot.adapter.duplex.jda.output.GenericAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.ModalAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.api.command.CommandInbound;
+import ru.demetrious.deus.bot.app.api.message.MessageReceivedInbound;
+import ru.demetrious.deus.bot.app.api.voice.GuildVoiceSessionUpdateInbound;
 import ru.demetrious.deus.bot.domain.CommandData.Name;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.text.MessageFormat.format;
-import static java.util.Optional.ofNullable;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -34,35 +39,43 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.M
 @RequiredArgsConstructor
 @Component
 public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
+    private final AuthorizationComponent authorizationComponent;
+    private final List<CommandInbound> commandInboundList;
     private final SlashCommandAdapter slashCommandAdapter;
     private final ModalAdapter modalAdapter;
     private final ButtonAdapter buttonAdapter;
-    private final List<CommandInbound> commandList;
-    private final AuthorizationComponent authorizationComponent;
+    private final GuildVoiceSessionUpdateInbound guildVoiceSessionUpdateInbound;
+    private final MessageReceivedInbound messageReceivedInbound;
 
     @Value("${devs.ids:}")
     private List<String> devUserIdList;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        onInteraction(event, Name.fromValue(event.getName()), CommandInbound::execute, "запуском", slashCommandAdapter);
+        onInteraction(event, CommandInbound::execute, "запуском", slashCommandAdapter);
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        Name commandName = ofNullable(event.getMessage().getInteraction())
-            .map(Message.Interaction::getName)
-            .map(cN -> cN.split(" "))
-            .map(split -> split[0])
-            .map(Name::fromValue)
-            .orElse(null);
-
-        onInteraction(event, commandName, CommandInbound::onButton, "обработкой события кнопки", buttonAdapter);
+        onInteraction(event, CommandInbound::onButton, "обработкой события кнопки", buttonAdapter);
     }
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        onInteraction(event, Name.fromValue(event.getModalId().split(" ")[0]), CommandInbound::onModal, "обработкой события модального окна", modalAdapter);
+        onInteraction(event, CommandInbound::onModal, "обработкой события модального окна", modalAdapter);
+    }
+
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        messageReceivedInbound.execute(event.getGuild().getId(), event.getAuthor().getId());
+    }
+
+    @SneakyThrows
+    @Override
+    public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
+        if (isNull(event.getOldValue()) || isNull(event.getNewValue())) {
+            guildVoiceSessionUpdateInbound.execute(event.getGuild().getId(), event.getMember().getUser().getId(), nonNull(event.getNewValue()));
+        }
     }
 
     // ===================================================================================================================
@@ -71,7 +84,6 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
     private <E extends GenericInteractionCreateEvent & IReplyCallback,
         A extends GenericAdapter<?, E, ?>> void onInteraction(@NotNull E event,
-                                                              Name commandName,
                                                               Consumer<CommandInbound> executeConsumer,
                                                               String errorText,
                                                               A adapter) {
@@ -82,8 +94,9 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
             return;
         }
 
+        Name commandName = adapter.getCommandName();
         try {
-            CommandInbound command = commandList.stream()
+            CommandInbound command = commandInboundList.stream()
                 .filter(c -> c.getData().getName() == commandName)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
@@ -101,6 +114,8 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
             executeConsumer.accept(command);
         } catch (Exception e) {
             notifyError(commandName, errorText, adapter, e);
+        } finally {
+            adapter.removeEvent();
         }
     }
 

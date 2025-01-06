@@ -40,6 +40,7 @@ public class JDAConfig {
             .setActivity(playing(format("/help | v{0}", version)))
             .setStatus(DO_NOT_DISTURB)
             .addEventListeners(listenerAdapter)
+            .setEventPassthrough(true)
             .build()
             .awaitReady();
     }

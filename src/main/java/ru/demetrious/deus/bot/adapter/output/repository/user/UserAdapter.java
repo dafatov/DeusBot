@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.output.repository;
+package ru.demetrious.deus.bot.adapter.output.repository.user;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

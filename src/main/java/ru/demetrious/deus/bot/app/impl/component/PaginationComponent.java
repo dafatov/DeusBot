@@ -1,6 +1,5 @@
 package ru.demetrious.deus.bot.app.impl.component;
 
-import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.text.MessageFormat.format;
+import static java.util.Arrays.stream;
 
 @RequiredArgsConstructor
 public class PaginationComponent implements Component {
@@ -58,7 +58,7 @@ public class PaginationComponent implements Component {
 
     @Override
     public MessageComponent update(String customId) {
-        if (Arrays.stream(ButtonIdEnum.values()).map(Enum::name).toList().contains(customId)) {
+        if (stream(ButtonIdEnum.values()).map(Enum::name).toList().contains(customId)) {
             switch (ButtonIdEnum.from(customId)) {
                 case FIRST -> start = 0;
                 case PREVIOUS -> start -= count;

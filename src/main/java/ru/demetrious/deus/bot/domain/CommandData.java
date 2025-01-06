@@ -1,18 +1,17 @@
 package ru.demetrious.deus.bot.domain;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.stream;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.collections4.MapUtils.getObject;
+import static java.util.stream.Collectors.joining;
 
 @Data
 @Accessors(chain = true)
@@ -21,6 +20,7 @@ public class CommandData {
     private String description;
     private List<OptionData> options = new ArrayList<>();
 
+    @AllArgsConstructor
     @RequiredArgsConstructor
     public enum Name {
         CLEAR("clear"),
@@ -34,15 +34,36 @@ public class CommandData {
         REMOVE("remove"),
         SHIKIMORI("shikimori"),
         SHUFFLE("shuffle"),
-        SKIP("skip");
-
-        private final static Map<String, Name> VALUES_MAP = new HashMap<>(stream(values()).collect(toMap(Name::getValue, identity())));
+        SKIP("skip"),
+        STATISTIC_COMMAND("statistic", "command"),
+        STATISTIC_MESSAGE("statistic", "message"),
+        STATISTIC_SESSION("statistic", "session"),
+        STATISTIC_VOICE("statistic", "voice");
 
         @Getter
-        private final String value;
+        private final String commandName;
+        @Getter
+        private String groupName;
+        @Getter
+        private String subcommandName;
 
-        public static Name fromValue(String value) {
-            return getObject(VALUES_MAP, value, null);
+        Name(String commandName, String subcommandName) {
+            this.commandName = commandName;
+            this.subcommandName = subcommandName;
+        }
+
+        public static Name from(String commandName, String groupName, String subcommandName) {
+            return stream(values())
+                .filter(value -> StringUtils.equals(value.commandName, commandName) && StringUtils.equals(value.groupName, groupName) &&
+                    StringUtils.equals(value.subcommandName, subcommandName))
+                .findFirst()
+                .orElseThrow();
+        }
+
+        public String stringify() {
+            return Stream.of(commandName, groupName, subcommandName)
+                .filter(StringUtils::isNotBlank)
+                .collect(joining(" "));
         }
     }
 }

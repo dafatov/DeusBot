@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.adapter.duplex.jda.output;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import org.jetbrains.annotations.NotNull;
@@ -11,9 +12,11 @@ import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.ButtonInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.UpdateMessageOutbound;
+import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
@@ -25,21 +28,30 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
     GetEmbedOutbound, UpdateMessageOutbound, GetCustomIdOutbound {
     @Override
     public MessageEmbed getEmbed(int index) {
-        return messageDataMapper.mapEmbed(event.getMessage().getEmbeds().get(index));
+        return messageDataMapper.mapEmbed(getEvent().getMessage().getEmbeds().get(index));
     }
 
     @Override
     public void update(MessageData messageData) {
-        event.editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();
+        getEvent().editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();
     }
 
     @Override
     public String getCustomId() {
-        return event.getComponentId();
+        return getEvent().getComponentId();
     }
 
     @Override
     protected @NotNull ButtonInteraction getInteraction() {
-        return event.getInteraction();
+        return getEvent().getInteraction();
+    }
+
+    @Override
+    public CommandData.Name getCommandName() {
+        return ofNullable(getEvent().getMessage().getInteraction())
+            .map(Message.Interaction::getName)
+            .map(cN -> cN.split(" "))
+            .map(GenericAdapter::getName)
+            .orElseThrow();
     }
 }
