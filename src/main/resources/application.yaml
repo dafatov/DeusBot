@@ -70,6 +70,9 @@ feign:
     anilist:
       url: ${ANILIST_GRAPHQL_URL}
       path: /
+    free-steam:
+      url: ${FREE_STEAM_URL}
+      path: /feed
 
 discord:
   token: ${DISCORD_TOKEN}

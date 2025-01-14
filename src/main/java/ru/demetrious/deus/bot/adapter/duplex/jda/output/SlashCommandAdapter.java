@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.adapter.duplex.jda.output;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
@@ -10,12 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper;
+import ru.demetrious.deus.bot.app.api.channel.GetChannelOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetAttachmentOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound;
 import ru.demetrious.deus.bot.app.api.network.GetLatencyOutbound;
+import ru.demetrious.deus.bot.app.api.user.GetUserOptionOutbound;
 import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.ModalData;
@@ -29,8 +32,14 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionInbound, SlashCommandInteractionEvent, SlashCommandInteraction>
-    implements GetLatencyOutbound, GetStringOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound, GetIntegerOptionOutbound {
+    implements GetLatencyOutbound, GetStringOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound, GetIntegerOptionOutbound, GetChannelOptionOutbound,
+    GetUserOptionOutbound {
     private final ModalDataMapper modalDataMapper;
+
+    @Override
+    protected @NotNull SlashCommandInteraction getInteraction() {
+        return getEvent().getInteraction();
+    }
 
     @Override
     public String getLatency() {
@@ -66,16 +75,25 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
         return CommandData.Name.from(getEvent().getName(), getEvent().getSubcommandGroup(), getEvent().getSubcommandName());
     }
 
+    @Override
+    public Optional<String> getChannelOption(String name) {
+        return getOption(name)
+            .map(OptionMapping::getAsChannel)
+            .map(ISnowflake::getId);
+    }
+
+    @Override
+    public Optional<String> getUserIdOption(String name) {
+        return getOption(name)
+            .map(OptionMapping::getAsUser)
+            .map(ISnowflake::getId);
+    }
+
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
     private Optional<OptionMapping> getOption(String name) {
         return ofNullable(getEvent().getOption(name));
-    }
-
-    @Override
-    protected @NotNull SlashCommandInteraction getInteraction() {
-        return getEvent().getInteraction();
     }
 }

@@ -12,9 +12,10 @@ public class OptionData {
     private String description;
     private Type type;
     private boolean isRequired = false;
+    private boolean isAutoComplete = false;
     private List<OptionChoice> choices = new ArrayList<>();
 
     public enum Type {
-        STRING, INTEGER, ATTACHMENT
+        ATTACHMENT, CHANNEL, INTEGER, STRING, USER
     }
 }

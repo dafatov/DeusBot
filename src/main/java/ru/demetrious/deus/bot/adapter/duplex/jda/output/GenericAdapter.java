@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.MessageDataMapper;
-import ru.demetrious.deus.bot.app.api.command.GetCommandNameOutbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.Interaction;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
@@ -29,14 +27,12 @@ import ru.demetrious.deus.bot.app.api.player.ConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotCanConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
-import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.domain.ButtonComponent;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
@@ -45,11 +41,9 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class GenericAdapter<A extends Interaction, E extends GenericInteractionCreateEvent & IDeferrableCallback & IReplyCallback,
-    I extends IDeferrableCallback> implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>,
-    GetAuthorIdOutbound<A>, ConnectOutbound<A>, GetUserIdOutbound<A>, GetCommandNameOutbound<A> {
-    private final ThreadLocal<E> event = new ThreadLocal<>();
-
+public abstract class GenericAdapter<A extends Interaction, E extends IReplyCallback, I extends IDeferrableCallback> extends BaseAdapter<E, A>
+    implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>, GetAuthorIdOutbound<A>,
+    ConnectOutbound<A> {
     @Autowired
     protected MessageDataMapper messageDataMapper;
 
@@ -66,23 +60,6 @@ public abstract class GenericAdapter<A extends Interaction, E extends GenericInt
     }
 
     protected abstract @NotNull I getInteraction();
-
-    public void removeEvent() {
-        this.event.remove();
-    }
-
-    protected E getEvent() {
-        return event.get();
-    }
-
-    public void setEvent(@NotNull E event) {
-        this.event.set(event);
-    }
-
-    @Override
-    public boolean hasEvent() {
-        return nonNull(getEvent());
-    }
 
     @Override
     public void notify(MessageData messageData, boolean isEphemeral) {

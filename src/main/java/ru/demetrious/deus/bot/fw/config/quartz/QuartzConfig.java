@@ -3,10 +3,10 @@ package ru.demetrious.deus.bot.fw.config.quartz;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -20,7 +20,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @RequiredArgsConstructor
 @Configuration
 public class QuartzConfig {
-    private final List<QuartzJobBean> quartzJobBeanList;
+    private final List<? extends QuartzJobBean> quartzJobBeanList;
     private final Scheduler scheduler;
 
     @PostConstruct
@@ -28,14 +28,16 @@ public class QuartzConfig {
         quartzJobBeanList.stream()
             .filter(quartzJobBean -> nonNull(getAnnotation(quartzJobBean)))
             .map(quartzJobBean -> {
+                InitScheduled initScheduled = getAnnotation(quartzJobBean);
                 JobDetail jobDetail = newJob(quartzJobBean.getClass())
-                    .storeDurably()
+                    .withIdentity(initScheduled.name(), initScheduled.groupName())
                     .requestRecovery()
                     .build();
 
                 return Pair.of(jobDetail, newTrigger()
+                    .withIdentity(initScheduled.name(), initScheduled.groupName())
                     .forJob(jobDetail)
-                    .withSchedule(cronSchedule(getAnnotation(quartzJobBean).cron()))
+                    .withSchedule(cronSchedule(initScheduled.cron()))
                     .build());
             }).forEach(this::scheduleJob);
     }
@@ -48,11 +50,12 @@ public class QuartzConfig {
         return quartzJobBean.getClass().getAnnotation(InitScheduled.class);
     }
 
+    @SneakyThrows
     private void scheduleJob(Pair<JobDetail, ? extends Trigger> schedulePair) {
-        try {
-            scheduler.scheduleJob(schedulePair.getLeft(), schedulePair.getRight());
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
+        if (scheduler.checkExists(schedulePair.getRight().getKey())) {
+            return;
         }
+
+        scheduler.scheduleJob(schedulePair.getLeft(), schedulePair.getRight());
     }
 }

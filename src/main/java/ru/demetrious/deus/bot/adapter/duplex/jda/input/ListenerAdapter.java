@@ -1,13 +1,14 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.input;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
-import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -15,6 +16,8 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.demetrious.deus.bot.adapter.duplex.jda.output.AutocompleteAdapter;
+import ru.demetrious.deus.bot.adapter.duplex.jda.output.BaseAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.ButtonAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.GenericAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.ModalAdapter;
@@ -44,6 +47,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     private final SlashCommandAdapter slashCommandAdapter;
     private final ModalAdapter modalAdapter;
     private final ButtonAdapter buttonAdapter;
+    private final AutocompleteAdapter autocompleteAdapter;
     private final GuildVoiceSessionUpdateInbound guildVoiceSessionUpdateInbound;
     private final MessageReceivedInbound messageReceivedInbound;
 
@@ -58,6 +62,11 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         onInteraction(event, CommandInbound::onButton, "обработкой события кнопки", buttonAdapter);
+    }
+
+    @Override
+    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
+        onInteraction(event, CommandInbound::onAutocomplete, (n, e) -> replyEmptyChoices(event), s -> replyEmptyChoices(event), autocompleteAdapter);
     }
 
     @Override
@@ -82,15 +91,15 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     // = Implementation
     // ===================================================================================================================
 
-    private <E extends GenericInteractionCreateEvent & IReplyCallback,
-        A extends GenericAdapter<?, E, ?>> void onInteraction(@NotNull E event,
-                                                              Consumer<CommandInbound> executeConsumer,
-                                                              String errorText,
-                                                              A adapter) {
+    private <E, A extends BaseAdapter<E, ?>> void onInteraction(@NotNull E event,
+                                                                @NotNull Consumer<CommandInbound> executeConsumer,
+                                                                @NotNull BiConsumer<Name, Exception> errorConsumer,
+                                                                @NotNull Consumer<String> unauthorizedConsumer,
+                                                                @NotNull A adapter) {
         adapter.setEvent(event);
 
         if (authorizationComponent.authorize(MAIN_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
-            adapter.notifyUnauthorized(authorizationComponent.getUrl(adapter.getUserId(), MAIN_REGISTRATION_ID));
+            unauthorizedConsumer.accept(authorizationComponent.getUrl(adapter.getUserId(), MAIN_REGISTRATION_ID));
             return;
         }
 
@@ -101,22 +110,31 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
 
-            if (!devUserIdList.isEmpty() && !devUserIdList.contains(adapter.getUserId())) {
-                notifyInDev(commandName, adapter);
-                return;
-            }
-
-            if (adapter instanceof SlashCommandAdapter && command.isDeferReply()) {
-                log.debug("Deferring command \"{}\"", commandName);
-                event.deferReply().queue();
-            }
-
             executeConsumer.accept(command);
         } catch (Exception e) {
-            notifyError(commandName, errorText, adapter, e);
+            errorConsumer.accept(commandName, e);
         } finally {
             adapter.removeEvent();
         }
+    }
+
+    private <E extends IReplyCallback, A extends GenericAdapter<?, E, ?>> void onInteraction(@NotNull E event,
+                                                                                             @NotNull Consumer<CommandInbound> executeConsumer,
+                                                                                             String errorText,
+                                                                                             @NotNull A adapter) {
+        onInteraction(event, commandInbound -> {
+            if (!devUserIdList.isEmpty() && !devUserIdList.contains(adapter.getUserId())) {
+                notifyInDev(commandInbound.getData().getName(), adapter);
+                return;
+            }
+
+            if (commandInbound.isDeferReply()) {
+                log.debug("Deferring command \"{}\"", commandInbound.getData().getName());
+                event.deferReply().queue();
+            }
+
+            executeConsumer.accept(commandInbound);
+        }, (commandName, e) -> notifyError(commandName, errorText, adapter, e), adapter::notifyUnauthorized, adapter);
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyError(Name commandName, String errorText, A adapter, Exception e) {
@@ -142,5 +160,9 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
         adapter.notify(messageData, true);
         log.warn(format("Произошла попытка запуска команды \"{0}\" во время тестирования", commandName));
+    }
+
+    private void replyEmptyChoices(@NotNull CommandAutoCompleteInteractionEvent event) {
+        event.replyChoices(List.of()).queue();
     }
 }

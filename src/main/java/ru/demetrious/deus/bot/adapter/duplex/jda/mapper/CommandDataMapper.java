@@ -2,11 +2,13 @@ package ru.demetrious.deus.bot.adapter.duplex.jda.mapper;
 
 import java.util.List;
 import java.util.stream.Stream;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.Mapper;
+import ru.demetrious.deus.bot.domain.AutocompleteOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
@@ -43,7 +45,7 @@ public interface CommandDataMapper {
 
     default net.dv8tion.jda.api.interactions.commands.build.OptionData mapOption(OptionData optionData) {
         return new net.dv8tion.jda.api.interactions.commands.build.OptionData(mapOptionType(optionData.getType()), optionData.getName(),
-            optionData.getDescription(), optionData.isRequired())
+            optionData.getDescription(), optionData.isRequired(), optionData.isAutoComplete())
             .addChoices(mapChoice(optionData.getChoices()));
     }
 
@@ -54,6 +56,8 @@ public interface CommandDataMapper {
     }
 
     net.dv8tion.jda.api.interactions.commands.OptionType mapOptionType(OptionData.Type type);
+
+    AutocompleteOption mapAutocompleteOption(AutoCompleteQuery autoCompleteQuery);
 
     // ===================================================================================================================
     // = Implementation
