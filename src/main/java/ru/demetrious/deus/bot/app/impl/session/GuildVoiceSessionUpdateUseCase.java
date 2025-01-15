@@ -1,11 +1,11 @@
-package ru.demetrious.deus.bot.app.impl.voice;
+package ru.demetrious.deus.bot.app.impl.session;
 
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.session.GetSessionOutbound;
+import ru.demetrious.deus.bot.app.api.session.GuildVoiceSessionUpdateInbound;
 import ru.demetrious.deus.bot.app.api.session.SaveSessionOutbound;
-import ru.demetrious.deus.bot.app.api.voice.GuildVoiceSessionUpdateInbound;
 import ru.demetrious.deus.bot.domain.Session;
 
 import static java.time.Instant.now;

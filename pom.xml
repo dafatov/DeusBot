@@ -77,6 +77,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<version>${spring-boot-starter.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -106,6 +112,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
+			<version>${spring-boot-starter.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
 			<version>${spring-boot-starter.version}</version>
 		</dependency>
 
@@ -146,11 +157,17 @@
 			<artifactId>JDA</artifactId>
 			<version>${JDA.version}</version>
 		</dependency>
-    <dependency>
-      <groupId>dev.arbjerg</groupId>
-      <artifactId>lavaplayer</artifactId>
-      <version>${lavaplayer.version}</version>
-    </dependency>
+		<dependency>
+			<groupId>dev.arbjerg</groupId>
+			<artifactId>lavaplayer</artifactId>
+			<version>${lavaplayer.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
     <dependency>
       <groupId>dev.lavalink.youtube</groupId>
       <artifactId>common</artifactId>

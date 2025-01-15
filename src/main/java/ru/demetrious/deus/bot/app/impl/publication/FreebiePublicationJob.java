@@ -18,7 +18,7 @@ import ru.demetrious.deus.bot.fw.annotation.quartz.InitScheduled;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 
-@InitScheduled(name = "freebie", groupName = "publication", cron = "0 0 0/1 ? * * *")
+@InitScheduled(name = "freebie", groupName = "publication", cron = "0 0 0/1 ? * *")
 @Slf4j
 @RequiredArgsConstructor
 @Component

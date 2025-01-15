@@ -14,7 +14,7 @@ import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 @RequiredArgsConstructor
 @RestController
-public class ErrorAdapter implements ErrorController {
+public class ErrorUiAdapter implements ErrorController {
     private final ErrorAttributes errorAttributes;
 
     @GetMapping(value = "/error", produces = TEXT_HTML_VALUE)

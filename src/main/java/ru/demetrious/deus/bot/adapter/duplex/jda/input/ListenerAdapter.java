@@ -24,7 +24,7 @@ import ru.demetrious.deus.bot.adapter.duplex.jda.output.ModalAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.api.command.CommandInbound;
 import ru.demetrious.deus.bot.app.api.message.MessageReceivedInbound;
-import ru.demetrious.deus.bot.app.api.voice.GuildVoiceSessionUpdateInbound;
+import ru.demetrious.deus.bot.app.api.session.GuildVoiceSessionUpdateInbound;
 import ru.demetrious.deus.bot.domain.CommandData.Name;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;

@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.app.api.voice;
+package ru.demetrious.deus.bot.app.api.session;
 
 @FunctionalInterface
 public interface GuildVoiceSessionUpdateInbound {
