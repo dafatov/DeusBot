@@ -30,6 +30,7 @@ public class MoveCommandUseCase extends PlayerCommand implements MoveCommandInbo
     protected static final String TARGET = "target";
     protected static final String TARGET_DESCRIPTION = "Номер в очереди целевой композиции";
     private static final String POSITION = "position";
+
     private final GetIntegerOptionOutbound getIntegerOptionOutbound;
     private final GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound;
     private final IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound;

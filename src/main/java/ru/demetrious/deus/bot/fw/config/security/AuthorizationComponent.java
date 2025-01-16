@@ -17,6 +17,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 import static org.springframework.security.oauth2.client.OAuth2AuthorizeRequest.withClientRegistrationId;
+import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
 @RequiredArgsConstructor
 @Component
@@ -59,7 +60,7 @@ public class AuthorizationComponent {
     public @NotNull String getUrl(String userId, String registrationId) {
         try {
             return new URIBuilder(appUrl)
-                .setPath("/oauth2/authorization/%s".formatted(registrationId))
+                .setPath("%s/%s".formatted(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI, registrationId))
                 .addParameter(QUERY_DISCORD_USER_ID, userId)
                 .build()
                 .toString();

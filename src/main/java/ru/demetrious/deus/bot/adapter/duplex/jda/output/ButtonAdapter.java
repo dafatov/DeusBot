@@ -33,6 +33,7 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
 
     @Override
     public void update(MessageData messageData) {
+        //TODO если сообщение отложено не работает
         getEvent().editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();
     }
 

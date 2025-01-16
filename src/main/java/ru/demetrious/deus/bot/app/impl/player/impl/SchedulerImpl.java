@@ -6,11 +6,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.impl.player.api.Scheduler;
 
 @RequiredArgsConstructor
-@Component
 public class SchedulerImpl implements Scheduler {
     private final List<AudioTrack> queue = new LinkedList<>();
     private final AudioPlayer audioPlayer;

@@ -1,4 +1,4 @@
-CREATE TABLE public.session
+CREATE TABLE session
 (
     guild_id varchar(255)                NOT NULL,
     user_id  varchar(255)                NOT NULL,

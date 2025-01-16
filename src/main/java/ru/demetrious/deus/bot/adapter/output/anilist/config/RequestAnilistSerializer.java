@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.MutationAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.QueryAnilist;
 import ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestSerialize;
 
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
@@ -27,38 +26,31 @@ public class RequestAnilistSerializer extends StdSerializer<RequestAnilist.Query
         throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (isNotEmpty(queryAnilist.getQuery())) {
-            stringBuilder.append("\"query{");
-            for (Iterator<? extends Map.Entry<String, ? extends QueryAnilist>> iterator = queryAnilist.getQuery().entrySet().iterator();
-                iterator.hasNext(); ) {
-                Map.Entry<String, ? extends QueryAnilist> stringEntry = iterator.next();
-                stringBuilder.append(stringEntry.getKey())
-                    .append(":")
-                    .append(stringEntry.getValue().serialize());
-
-                if (iterator.hasNext()) {
-                    stringBuilder.append(',');
-                }
-            }
-            stringBuilder.append("}\"");
-        }
-
-        if (isNotEmpty(queryAnilist.getMutation())) {
-            stringBuilder.append("\"mutation{");
-            for (Iterator<? extends Map.Entry<String, ? extends MutationAnilist>> iterator = queryAnilist.getMutation().entrySet().iterator();
-                iterator.hasNext(); ) {
-                Map.Entry<String, ? extends MutationAnilist> stringEntry = iterator.next();
-                stringBuilder.append(stringEntry.getKey())
-                    .append(":")
-                    .append(stringEntry.getValue().serialize());
-
-                if (iterator.hasNext()) {
-                    stringBuilder.append(',');
-                }
-            }
-            stringBuilder.append("}\"");
-        }
+        serialize(stringBuilder, queryAnilist.getQuery(), "query");
+        serialize(stringBuilder, queryAnilist.getMutation(), "mutation");
 
         jsonGenerator.writeRawValue(stringBuilder.toString());
+    }
+
+    // ===================================================================================================================
+    // = Implementation
+    // ===================================================================================================================
+
+    private void serialize(StringBuilder stringBuilder, Map<String, ? extends RequestSerialize> stringMap, String type) {
+        if (isNotEmpty(stringMap)) {
+            stringBuilder.append("\"").append(type).append("{");
+            for (Iterator<? extends Map.Entry<String, ? extends RequestSerialize>> iterator = stringMap.entrySet().iterator(); iterator.hasNext(); ) {
+                Map.Entry<String, ? extends RequestSerialize> stringEntry = iterator.next();
+
+                stringBuilder.append(stringEntry.getKey())
+                    .append(":")
+                    .append(stringEntry.getValue().serialize());
+
+                if (iterator.hasNext()) {
+                    stringBuilder.append(',');
+                }
+            }
+            stringBuilder.append("}\"");
+        }
     }
 }

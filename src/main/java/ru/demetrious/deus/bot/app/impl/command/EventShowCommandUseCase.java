@@ -1,8 +1,11 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.quartz.CronTrigger;
+import org.quartz.Trigger;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.EventShowCommandInbound;
@@ -16,7 +19,12 @@ import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
+import static java.lang.Math.floorDiv;
+import static java.text.MessageFormat.format;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static ru.demetrious.deus.bot.app.impl.event.EventComponent.DESCRIPTION;
+import static ru.demetrious.deus.bot.app.impl.event.EventComponent.USER_ID;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_SHOW;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
@@ -40,12 +48,12 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
     @Override
     public void onButton() {
         MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
-        List<String> jobDetailList = eventComponent.getEventKeyList();
-        PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), jobDetailList.size());
+        List<Trigger> triggerList = eventComponent.getTriggerList();
+        PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), triggerList.size());
 
         MessageData messageData = updateMessage(
             messageEmbed,
-            jobDetailList,
+            triggerList,
             paginationComponent,
             paginationComponent.update(getCustomIdOutbound.getCustomId())
         );
@@ -56,13 +64,13 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
     @SneakyThrows
     @Override
     public void execute() {
-        List<String> jobDetailList = eventComponent.getEventKeyList();
+        List<Trigger> triggerList = eventComponent.getTriggerList();
         MessageEmbed messageEmbed = new MessageEmbed()
             .setTitle("Запущенные события");
-        PaginationComponent paginationComponent = new PaginationComponent(jobDetailList.size());
+        PaginationComponent paginationComponent = new PaginationComponent(triggerList.size());
         MessageData messageData = updateMessage(
             messageEmbed,
-            jobDetailList,
+            triggerList,
             paginationComponent,
             paginationComponent.get()
         );
@@ -74,11 +82,12 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
     // = Implementation
     // ===================================================================================================================
 
-    private MessageData updateMessage(MessageEmbed messageEmbed, List<String> jobKeySet, PaginationComponent paginationComponent,
+    private MessageData updateMessage(MessageEmbed messageEmbed, List<Trigger> triggerList, PaginationComponent paginationComponent,
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
-            .setDescription(jobKeySet.stream()
+            .setDescription(triggerList.stream()
                 .skip(paginationComponent.getStart())
+                .map(this::mapEvent)
                 .limit(paginationComponent.getCount())
                 .collect(joining("\n\n")))
             .setFooter(paginationComponent.getFooter());
@@ -86,5 +95,29 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
         return new MessageData()
             .setEmbeds(List.of(messageEmbed))
             .setComponents(List.of(paginationMessageComponent));
+    }
+
+    private String mapEvent(Trigger trigger) {
+        return format("""
+                {0}
+                -# Описание: {1}
+                -# Пользователь: {2}
+                -# Начат: <t:{3}>
+                -# Следующее: <t:{4}>
+                -# Периодичность: {5}
+                """,
+            trigger.getKey().getName(),
+            trigger.getJobDataMap().get(DESCRIPTION),
+            ofNullable(trigger.getJobDataMap().get(USER_ID))
+                .map("<@%s>"::formatted)
+                .orElse("-"),
+            Long.toString(floorDiv(trigger.getStartTime().getTime(), 1000)),
+            Long.toString(floorDiv(trigger.getNextFireTime().getTime(), 1000)),
+            Optional.of(trigger)
+                .filter(t -> t instanceof CronTrigger)
+                .map(CronTrigger.class::cast)
+                .map(CronTrigger::getCronExpression)
+                .orElse("`Неизвестно`")
+        );
     }
 }

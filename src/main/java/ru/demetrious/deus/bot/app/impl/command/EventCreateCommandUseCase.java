@@ -19,6 +19,7 @@ import ru.demetrious.deus.bot.domain.OptionData;
 import static java.text.MessageFormat.format;
 import static java.time.Instant.now;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_CREATE;
+import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_HELP;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.USER;
 
@@ -55,7 +56,7 @@ public class EventCreateCommandUseCase implements EventCreateCommandInbound {
                 new OptionData()
                     .setType(STRING)
                     .setName(CRON_OPTION)
-                    .setDescription("Дата, время и периодичность события в формате cron (подробнее в команде /event help)")
+                    .setDescription("Дата, время и периодичность события в формате cron (подробнее в команде /%s)".formatted(EVENT_HELP.stringify()))
                     .setRequired(true),
                 new OptionData()
                     .setType(USER)
@@ -83,8 +84,8 @@ public class EventCreateCommandUseCase implements EventCreateCommandInbound {
                     """,
                 title,
                 description,
-                userIdOptional.map(u -> "<@" + u + ">").orElse("-"),
-                nextFireDateOptional.map(nextFireDate -> "<t:" + nextFireDate + ">").orElse("`Неизвестно`")))
+                userIdOptional.map("<@%s>"::formatted).orElse("-"),
+                nextFireDateOptional.map("<t:%d>"::formatted).orElse("`Неизвестно`")))
             .setTimestamp(now())));
         notifyOutbound.notify(messageData);
     }

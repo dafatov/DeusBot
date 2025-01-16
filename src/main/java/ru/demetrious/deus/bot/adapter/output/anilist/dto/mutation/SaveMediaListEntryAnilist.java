@@ -7,7 +7,7 @@ import ru.demetrious.deus.bot.adapter.output.anilist.dto.MutationAnilist;
 import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist;
 
 import static java.lang.String.join;
-import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * GraphQl mutation dto
@@ -24,17 +24,11 @@ public class SaveMediaListEntryAnilist implements MutationAnilist {
     public String serialize() {
         Set<String> fields = new HashSet<>();
 
-        if (nonNull(status)) {
-            fields.add("status:" + status);
-        }
+        ofNullable(status).map("status:%s"::formatted).ifPresent(fields::add);
         fields.add("mediaId:" + mediaId);
         fields.add("progress:" + progress);
-        if (nonNull(status)) {
-            fields.add("score:" + score);
-        }
-        if (nonNull(status)) {
-            fields.add("repeat:" + repeat);
-        }
+        ofNullable(score).map("score:%s"::formatted).ifPresent(fields::add);
+        ofNullable(repeat).map("repeat:%s"::formatted).ifPresent(fields::add);
 
         return "SaveMediaListEntry(%s){id}".formatted(join(",", fields));
     }

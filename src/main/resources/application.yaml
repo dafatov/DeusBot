@@ -26,15 +26,15 @@ spring:
         registration:
           shikimori:
             client-name: Shikimori
-            client-id: ${SHIKIMORI_OAUTH2_CLIENT-ID}
-            client-secret: ${SHIKIMORI_OAUTH2_CLIENT-SECRET}
+            client-id: ${SHIKIMORI_OAUTH2_ID}
+            client-secret: ${SHIKIMORI_OAUTH2_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
             provider: shikimori
           discord:
             client-name: Discord
-            client-id: ${DISCORD_OAUTH2_CLIENT-ID}
-            client-secret: ${DISCORD_OAUTH2_CLIENT-SECRET}
+            client-id: ${DISCORD_OAUTH2_ID}
+            client-secret: ${DISCORD_OAUTH2_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
             provider: discord
@@ -42,8 +42,8 @@ spring:
               - identify
           anilist:
             client-name: Anilist
-            client-id: ${ANILIST_OAUTH2_CLIENT-ID}
-            client-secret: ${ANILIST_OAUTH2_CLIENT-SECRET}
+            client-id: ${ANILIST_OAUTH2_ID}
+            client-secret: ${ANILIST_OAUTH2_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
             provider: anilist

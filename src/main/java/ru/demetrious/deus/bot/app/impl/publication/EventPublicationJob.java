@@ -26,7 +26,7 @@ public class EventPublicationJob extends PublicationJob {
         MessageData messageData = new MessageData();
 
         ofNullable(jobDataMap.getString(USER_ID))
-            .map(userId -> "<@" + userId + ">")
+            .map("<@%s>"::formatted)
             .ifPresent(messageData::setContent);
         return Map.of(ofNullable(jobDataMap.getString(GUILD_ID)), messageData.setEmbeds(List.of(new MessageEmbed()
             .setTitle(jobDataMap.getString(TITLE))

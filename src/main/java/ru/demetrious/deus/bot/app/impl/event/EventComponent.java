@@ -14,6 +14,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.quartz.utils.Key;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.impl.publication.EventPublicationJob;
@@ -50,6 +51,13 @@ public class EventComponent {
     public List<String> getEventKeyList() {
         return scheduler.getJobKeys(groupEquals(EVENT)).stream()
             .map(Key::getName)
+            .toList();
+    }
+
+    @SneakyThrows
+    public List<Trigger> getTriggerList() {
+        return scheduler.getTriggerKeys(groupEquals(EVENT)).stream()
+            .map(this::getTrigger)
             .toList();
     }
 
@@ -92,5 +100,10 @@ public class EventComponent {
         userIdOptional.ifPresent(userId -> objectObjectHashMap.put(USER_ID, userId));
         objectObjectHashMap.put(GUILD_ID, guildId);
         return objectObjectHashMap;
+    }
+
+    @SneakyThrows
+    private Trigger getTrigger(TriggerKey triggerKey) {
+        return scheduler.getTrigger(triggerKey);
     }
 }

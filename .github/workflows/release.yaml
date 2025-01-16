@@ -123,17 +123,33 @@ jobs:
       - release
 
     env:
+      # Build secrets
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Build vars
+      CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
+
+      # App secrets
+      ANILIST_OAUTH2_ID: ${{ secrets.ANILIST_OAUTH2_ID }}
+      ANILIST_OAUTH2_SECRET: ${{ secrets.ANILIST_OAUTH2_SECRET }}
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DISCORD_OAUTH2_ID: ${{ secrets.DISCORD_OAUTH2_ID }}
+      DISCORD_OAUTH2_SECRET: ${{ secrets.DISCORD_OAUTH2_SECRET }}
       DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      SHIKIMORI_OAUTH2_ID: ${{ secrets.SHIKIMORI_OAUTH2_ID }}
+      SHIKIMORI_OAUTH2_SECRET: ${{ secrets.SHIKIMORI_OAUTH2_SECRET }}
       YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-
+      # App vars
+      ANILIST_GRAPHQL_URL: ${{ vars.ANILIST_GRAPHQL_URL }}
+      ANILIST_URL: ${{ vars.ANILIST_URL }}
+      APP_URL: ${{ vars.APP_URL }}
       DATABASE_MAX_POOL: ${{ vars.DATABASE_MAX_POOL }}
-      CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
+      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DISCORD_URL: ${{ vars.DISCORD_URL }}
+      FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
+      SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
 
     steps:
       - name: Run multiple remote commands via SSH
@@ -144,4 +160,24 @@ jobs:
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
             docker container rm -f ${{ env.IMAGE_NAME }} || true
-            docker run -d -m ${{ env.CONTAINER_MEMORY_LIMIT }} --restart=always --name ${{ env.IMAGE_NAME }} -e DATABASE_URL=${{ env.DATABASE_URL }} -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} -e DATABASE_MAX_POOL=${{ env.DATABASE_MAX_POOL }} -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} ${{ needs.install.outputs.url }}
+            docker run -d -m ${{ env.CONTAINER_MEMORY_LIMIT }} --restart=always --name ${{ env.IMAGE_NAME }} \
+              -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
+              -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
+              -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} \
+              -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} \
+              -e DISCORD_OAUTH2_ID=${{ env.DISCORD_OAUTH2_ID }} \
+              -e DISCORD_OAUTH2_SECRET=${{ env.DISCORD_OAUTH2_SECRET }} \
+              -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} \
+              -e SHIKIMORI_OAUTH2_ID=${{ env.SHIKIMORI_OAUTH2_ID }} \
+              -e SHIKIMORI_OAUTH2_SECRET=${{ env.SHIKIMORI_OAUTH2_SECRET }} \
+              -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} \
+              \
+              -e ANILIST_GRAPHQL_URL=${{ vars.ANILIST_GRAPHQL_URL }} \
+              -e ANILIST_URL=${{ vars.ANILIST_URL }} \
+              -e APP_URL=${{ vars.APP_URL }} \
+              -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} \
+              -e DATABASE_URL=${{ vars.DATABASE_URL }} \
+              -e DISCORD_URL=${{ vars.DISCORD_URL }} \
+              -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
+              -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
+            ${{ needs.install.outputs.url }}

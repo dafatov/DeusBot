@@ -5,11 +5,9 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.impl.player.api.Scheduler;
 
 @RequiredArgsConstructor
-@Component
 public class AudioEventAdapterImpl extends AudioEventAdapter {
     private final Scheduler scheduler;
 
