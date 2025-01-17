@@ -18,6 +18,7 @@ import ru.demetrious.deus.bot.app.impl.player.api.Scheduler;
 import static dev.lavalink.youtube.YoutubeAudioSourceManager.SEARCH_PREFIX;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 
 @RequiredArgsConstructor
@@ -25,11 +26,11 @@ public class PlayerImpl implements Player {
     private final AudioPlayerManager audioPlayerManager;
     private final AudioPlayer audioPlayer;
     private final Scheduler scheduler;
-    private final ConnectOutbound<?> connectOutbound;
+    private final List<ConnectOutbound<?>> connectOutbound;
 
     @Override
     public void connect() {
-        connectOutbound.connectPlayer(new AudioSendHandler(audioPlayer));
+        b(connectOutbound).connectPlayer(new AudioSendHandler(audioPlayer));
     }
 
     @Override

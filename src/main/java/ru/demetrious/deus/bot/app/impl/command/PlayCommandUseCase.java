@@ -32,11 +32,11 @@ import ru.demetrious.deus.bot.domain.OptionData;
 import ru.demetrious.deus.bot.domain.TextInputComponent;
 import ru.demetrious.deus.bot.utils.PlayerUtils;
 
+import static java.lang.Math.floorDiv;
 import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.IntStream.rangeClosed;
-import static org.apache.commons.lang3.time.DurationFormatUtils.formatDurationWords;
 import static ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper.MAX_COMPONENTS;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PLAY;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -46,6 +46,7 @@ import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.SHORT;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.hasLive;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
+import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -83,7 +84,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
     }
 
     @Override
-    public boolean isDeferReply() {
+    public boolean isDefer() {
         return getStringOptionOutbound.getStringOption(STRING_OPTION).isPresent()
             || getAttachmentOptionOutbound.getAttachmentOption(ATTACHMENT_OPTION).isPresent();
     }
@@ -180,7 +181,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
     }
 
     private String getDescription(AddedInfo added, int length, String remained) {
-        String duration = added.isLive() ? "<Стрим>" : formatDurationWords(added.getDuration(), true, true);
+        String duration = added.isLive() ? "<Стрим>" : prettifySeconds(floorDiv(added.getDuration(), 1000));
 
         return format(
             """
@@ -205,7 +206,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
             return "<Сейчас>";
         }
 
-        return formatDurationWords(remained, true, true);
+        return prettifySeconds(floorDiv(remained, 1000));
     }
 
     private AddedInfo getAddedInfo(AudioItem audioItem) {

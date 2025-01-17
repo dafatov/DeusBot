@@ -9,7 +9,6 @@ import ru.demetrious.deus.bot.app.api.command.StatisticSessionCommandInbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.message.UpdateMessageOutbound;
 import ru.demetrious.deus.bot.app.api.session.GetGuildSessionListOutbound;
 import ru.demetrious.deus.bot.app.impl.component.PaginationComponent;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -33,7 +32,6 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     private final List<GetGuildIdOutbound<?>> getGuildIdOutbound;
     private final List<NotifyOutbound<?>> notifyOutbound;
     private final GetEmbedOutbound getEmbedOutbound;
-    private final UpdateMessageOutbound updateMessageOutbound;
     private final GetCustomIdOutbound getCustomIdOutbound;
 
     @Override
@@ -57,7 +55,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
             paginationComponent.update(getCustomIdOutbound.getCustomId())
         );
 
-        updateMessageOutbound.update(messageData);
+        b(notifyOutbound).notify(messageData);
     }
 
     @Override

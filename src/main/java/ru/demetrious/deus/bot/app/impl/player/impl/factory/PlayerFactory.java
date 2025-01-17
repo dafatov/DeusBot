@@ -12,8 +12,6 @@ import ru.demetrious.deus.bot.app.impl.player.impl.PlayerImpl;
 import ru.demetrious.deus.bot.app.impl.player.impl.SchedulerImpl;
 import ru.demetrious.deus.bot.app.impl.player.impl.handler.AudioEventAdapterImpl;
 
-import static ru.demetrious.deus.bot.utils.BeanUtils.b;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -21,7 +19,7 @@ public class PlayerFactory {
     private final AudioPlayerManager audioPlayerManager;
     private final List<ConnectOutbound<?>> connectOutbound;
 
-    public Player create(String guildId) {
+    public Player create() {
         AudioPlayer audioPlayer = audioPlayerManager.createPlayer();
         SchedulerImpl scheduler = new SchedulerImpl(audioPlayer);
 
@@ -31,7 +29,7 @@ public class PlayerFactory {
             audioPlayerManager,
             audioPlayer,
             scheduler,
-            b(connectOutbound)
+            connectOutbound
         );
     }
 }

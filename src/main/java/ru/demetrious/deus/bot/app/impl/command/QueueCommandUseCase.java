@@ -11,7 +11,6 @@ import ru.demetrious.deus.bot.app.api.command.QueueCommandInbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.message.UpdateMessageOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
 import ru.demetrious.deus.bot.app.impl.component.ControlComponent;
 import ru.demetrious.deus.bot.app.impl.component.PaginationComponent;
@@ -42,7 +41,6 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
     private final List<NotifyOutbound<?>> notifyOutbound;
     private final GetEmbedOutbound getEmbedOutbound;
     private final GetCustomIdOutbound getCustomIdOutbound;
-    private final UpdateMessageOutbound updateMessageOutbound;
 
     @Override
     public CommandData getData() {
@@ -60,8 +58,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
         PaginationComponent paginationComponent = PaginationComponent.from(paginationEmbed.getFooter(), queue.size());
 
         if (player.isNotPlaying()) {
-            notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter(),
-                updateMessageOutbound::update);
+            notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter());
             return;
         }
 
@@ -74,7 +71,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
             player.getPlayingTrack()
         );
 
-        updateMessageOutbound.update(messageData);
+        b(notifyOutbound).notify(messageData);
         log.debug("Список композиций успешно обновлен");
     }
 
@@ -87,7 +84,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
         PaginationComponent paginationComponent = new PaginationComponent(queue.size());
 
         if (player.isNotPlaying()) {
-            notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter(), b(notifyOutbound)::notify);
+            notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter());
             return;
         }
 

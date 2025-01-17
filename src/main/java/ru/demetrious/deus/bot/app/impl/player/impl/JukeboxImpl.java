@@ -16,6 +16,6 @@ public class JukeboxImpl implements Jukebox {
 
     @Override
     public Player getPlayer(String guildId) {
-        return players.computeIfAbsent(guildId, playerFactory::create);
+        return players.computeIfAbsent(guildId, g -> playerFactory.create());
     }
 }

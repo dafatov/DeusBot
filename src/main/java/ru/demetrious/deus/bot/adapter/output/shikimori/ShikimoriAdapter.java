@@ -11,7 +11,7 @@ public class ShikimoriAdapter implements GetAnimeOutbound {
     private final ShikimoriClient shikimoriClient;
 
     @Override
-    public Map<String, Object> getAnimeList() {
-        return shikimoriClient.getAnimeList(shikimoriClient.getMe().getNickname());
+    public Map<String, ?> getAnimeListXml() {
+        return shikimoriClient.getAnimeListXml(shikimoriClient.getMe().getNickname());
     }
 }

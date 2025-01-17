@@ -4,5 +4,5 @@ import java.util.Map;
 
 @FunctionalInterface
 public interface GetAnimeOutbound {
-    Map<String, Object> getAnimeList();
+    Map<String, ?> getAnimeListXml();
 }

@@ -94,6 +94,7 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
     // ===================================================================================================================
 
     private Optional<OptionMapping> getOption(String name) {
-        return ofNullable(getEvent().getOption(name));
+        return ofNullable(getEvent())
+            .map(event -> event.getOption(name));
     }
 }

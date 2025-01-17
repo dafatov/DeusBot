@@ -61,6 +61,11 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
 
     protected abstract @NotNull I getInteraction();
 
+    public void defer() {
+        getEvent().deferReply().queue();
+        log.debug("Deferred command's reply");
+    }
+
     @Override
     public void notify(MessageData messageData, boolean isEphemeral) {
         MessageCreateData content = messageDataMapper.mapToMessageCreate(messageData);

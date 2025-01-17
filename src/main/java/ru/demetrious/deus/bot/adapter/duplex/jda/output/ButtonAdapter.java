@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.ButtonInteractionInbound;
-import ru.demetrious.deus.bot.app.api.message.UpdateMessageOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
@@ -25,16 +24,10 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, ButtonInteractionEvent, ButtonInteraction> implements
-    GetEmbedOutbound, UpdateMessageOutbound, GetCustomIdOutbound {
+    GetEmbedOutbound, GetCustomIdOutbound {
     @Override
     public MessageEmbed getEmbed(int index) {
         return messageDataMapper.mapEmbed(getEvent().getMessage().getEmbeds().get(index));
-    }
-
-    @Override
-    public void update(MessageData messageData) {
-        //TODO если сообщение отложено не работает
-        getEvent().editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();
     }
 
     @Override
@@ -45,6 +38,21 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
     @Override
     protected @NotNull ButtonInteraction getInteraction() {
         return getEvent().getInteraction();
+    }
+
+    @Override
+    public void defer() {
+        getEvent().deferEdit().queue();
+        log.debug("Deferred command's edit");
+    }
+
+    @Override
+    public void notify(MessageData messageData, boolean isEphemeral) {
+        if (getEvent().isAcknowledged()) {
+            getEvent().getHook().editOriginal(messageDataMapper.mapToMessageEdit(messageData)).queue();
+        } else {
+            getEvent().editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();
+        }
     }
 
     @Override

@@ -21,5 +21,5 @@ public interface ShikimoriClient {
     UserDto getMe();
 
     @GetMapping(value = "/{nickname}/list_export/animes.xml", produces = APPLICATION_XML_VALUE)
-    Map<String, Object> getAnimeList(@PathVariable("nickname") String nickname);
+    Map<String, ?> getAnimeListXml(@PathVariable("nickname") String nickname);
 }

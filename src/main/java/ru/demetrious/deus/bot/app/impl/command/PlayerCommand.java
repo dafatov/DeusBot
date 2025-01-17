@@ -1,7 +1,6 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +55,10 @@ public abstract class PlayerCommand implements CommandInbound {
     }
 
     protected void notifyIsNotPlaying() {
-        notifyIsNotPlaying(List.of(), null, b(notifyOutbound)::notify);
+        notifyIsNotPlaying(List.of(), null);
     }
 
-    protected void notifyIsNotPlaying(List<MessageComponent> components, String footer, Consumer<MessageData> queueConsumer) {
+    protected void notifyIsNotPlaying(List<MessageComponent> components, String footer) {
         MessageData messageData = new MessageData()
             .setEmbeds(List.of(new MessageEmbed()
                 .setColor(WARNING)
@@ -68,7 +67,7 @@ public abstract class PlayerCommand implements CommandInbound {
                 .setFooter(footer)))
             .setComponents(components);
 
-        queueConsumer.accept(messageData);
+        b(notifyOutbound).notify(messageData);
         log.warn("Плеер не играет");
     }
 

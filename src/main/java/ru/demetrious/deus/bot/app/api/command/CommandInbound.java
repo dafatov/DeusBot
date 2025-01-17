@@ -9,7 +9,7 @@ import ru.demetrious.deus.bot.domain.CommandData;
 public interface CommandInbound extends SlashCommandInteractionInbound, ButtonInteractionInbound, ModalInteractionInbound, AutocompleteInteractionInbound {
     CommandData getData();
 
-    default boolean isDeferReply() {
+    default boolean isDefer() {
         return true;
     }
 

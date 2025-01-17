@@ -28,6 +28,7 @@ import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Integer.parseInt;
 import static java.time.Instant.now;
+import static java.util.Optional.empty;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.SHIKIMORI;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.ANILIST_REGISTRATION_ID;
@@ -72,7 +73,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
     }
 
     @Override
-    public boolean isDeferReply() {
+    public boolean isDefer() {
         String userId = getUserIdOutbound.getUserId();
 
         return getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD)
@@ -91,62 +92,66 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
             return;
         }
 
-        Map<String, Object> animeList = getAnimeOutbound.getAnimeList();
+        String method = getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD).orElseThrow();
+        Optional<OAuth2AuthorizedClient> anilistUser = empty();
 
-        switch (getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD).orElseThrow()) {
-            case METHOD_CHOICE_FILE -> {
-                MessageData messageData = new MessageData()
-                    .setFiles(List.of(new MessageFile()
-                        .setData(getBytes(animeList))
-                        .setName("%s_animes.xml".formatted(shikimoriUser.get().getPrincipalName()))));
-                notifyOutbound.notify(messageData);
+        if (METHOD_CHOICE_ANILIST.equals(method)) {
+            anilistUser = authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId);
+
+            if (anilistUser.isEmpty()) {
+                notifyOutbound.notifyUnauthorized(authorizationComponent.getUrl(userId, ANILIST_REGISTRATION_ID));
+                return;
             }
-            case METHOD_CHOICE_ANILIST -> //noinspection unchecked
-                importAnilist(userId, (List<Map<String, String>>) animeList.get("anime"));
-            default -> throw new IllegalStateException("Unexpected value: " + getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD).orElseThrow());
         }
+
+        Map<String, ?> animeListXml = getAnimeOutbound.getAnimeListXml();
+        MessageData messageData = switch (method) {
+            case METHOD_CHOICE_FILE -> new MessageData()
+                .setFiles(List.of(new MessageFile()
+                    .setData(getBytes(animeListXml))
+                    .setName("%s_animes.xml".formatted(shikimoriUser.get().getPrincipalName()))));
+            case METHOD_CHOICE_ANILIST -> {
+                String anilistPrincipalName = anilistUser.get().getPrincipalName();
+                ImportAnimeContext importAnimeContext = importAnimeOutbound.execute(getAnimeList(animeListXml), parseInt(anilistPrincipalName));
+
+                yield new MessageData().setEmbeds(List.of(new MessageEmbed()
+                    .setColor(MessageEmbed.ColorEnum.INFO)
+                    .setTitle("Список shikimori успешно импортирован на anilist.co")
+                    .setUrl("%s/user/%s/animelist".formatted(anilistUrl, anilistPrincipalName))
+                    .setDescription("""
+                        Обновлено или добавлено: %d
+                        Удалено: %d
+                        """.formatted(importAnimeContext.getChangesCount(), importAnimeContext.getRemovedCount()))
+                    .setTimestamp(now())));
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + method);
+        };
+
+        notifyOutbound.notify(messageData);
     }
 
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
 
-    private void importAnilist(String userId, List<Map<String, String>> animeList) {
-        Optional<OAuth2AuthorizedClient> anilistUser = authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId);
-
-        if (anilistUser.isEmpty()) {
-            notifyOutbound.notifyUnauthorized(authorizationComponent.getUrl(userId, ANILIST_REGISTRATION_ID));
-            return;
-        }
-
-        ImportAnimeContext importAnimeContext = importAnimeOutbound.execute(animeList, parseInt(anilistUser.get().getPrincipalName()));
-        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setColor(MessageEmbed.ColorEnum.INFO)
-            .setTitle("Список shikimori успешно импортирован на anilist.co")
-            .setUrl("%s/user/%s/animelist".formatted(anilistUrl, anilistUser.get().getPrincipalName()))
-            .setDescription("""
-                Обновлено или добавлено: %d
-                Удалено: %d
-                """.formatted(importAnimeContext.getChangesCount(), importAnimeContext.getRemovedCount()))
-            .setTimestamp(now())));
-        notifyOutbound.notify(messageData);
-    }
-
-    private byte[] getBytes(Map<String, ?> animeList) {
+    private byte[] getBytes(Map<String, ?> animeListXml) {
         try {
-            //noinspection unchecked
-            ((List<Map<String, Object>>) animeList.get("anime"))
-                .forEach(stringStringLinkedHashMap -> stringStringLinkedHashMap.putAll(Map.of(
-                    "my_start_date", List.of("0000-00-00"),
-                    "my_finish_date", List.of("0000-00-00")
-                )));
+            (getAnimeList(animeListXml)).forEach(stringStringLinkedHashMap -> stringStringLinkedHashMap.putAll(Map.of(
+                "my_start_date", List.of("0000-00-00"),
+                "my_finish_date", List.of("0000-00-00")
+            )));
 
             return new XmlMapper()
                 .writerWithDefaultPrettyPrinter()
                 .withRootName("myanimelist")
-                .writeValueAsBytes(animeList);
+                .writeValueAsBytes(animeListXml);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<Map<String, T>> getAnimeList(Map<String, ?> animeListXml) {
+        return (List<Map<String, T>>) animeListXml.get("anime");
     }
 }

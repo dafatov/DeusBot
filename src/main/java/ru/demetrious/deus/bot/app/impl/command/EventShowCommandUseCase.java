@@ -11,7 +11,6 @@ import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.EventShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.message.UpdateMessageOutbound;
 import ru.demetrious.deus.bot.app.impl.component.PaginationComponent;
 import ru.demetrious.deus.bot.app.impl.event.EventComponent;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -33,7 +32,6 @@ import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 public class EventShowCommandUseCase implements EventShowCommandInbound {
     private final List<NotifyOutbound<?>> notifyOutbound;
     private final GetEmbedOutbound getEmbedOutbound;
-    private final UpdateMessageOutbound updateMessageOutbound;
     private final GetCustomIdOutbound getCustomIdOutbound;
     private final EventComponent eventComponent;
 
@@ -58,7 +56,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
             paginationComponent.update(getCustomIdOutbound.getCustomId())
         );
 
-        updateMessageOutbound.update(messageData);
+        b(notifyOutbound).notify(messageData);
     }
 
     @SneakyThrows
