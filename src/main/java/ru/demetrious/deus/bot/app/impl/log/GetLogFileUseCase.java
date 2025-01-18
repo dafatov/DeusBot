@@ -7,6 +7,7 @@ import ru.demetrious.deus.bot.app.api.log.GetLogListOutbound;
 import ru.demetrious.deus.bot.domain.Log;
 
 import static java.lang.String.join;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -25,10 +26,11 @@ public class GetLogFileUseCase implements GetLogFileInbound {
                 String.valueOf(log.getId()),
                 String.valueOf(log.getTimestamp()),
                 leftPad(log.getLevel(), 5),
-                rightPad(log.getLogger() + ":", 80),
+                rightPad(log.getLogger(), 80),
+                ":",
                 log.getMessage(),
                 log.getException()))
             .collect(joining("\n"))
-            .getBytes();
+            .getBytes(UTF_8);
     }
 }
