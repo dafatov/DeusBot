@@ -84,6 +84,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(guildSessionList.stream()
+                .sorted((a, b) -> b.getFinish().compareTo(a.getFinish()))
                 .skip(paginationComponent.getStart())
                 .map(this::mapSession)
                 .limit(paginationComponent.getCount())

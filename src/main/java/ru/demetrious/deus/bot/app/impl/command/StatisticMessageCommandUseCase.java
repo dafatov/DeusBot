@@ -88,6 +88,7 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(guildMessageAuditList.stream()
+                .sorted((a, b) -> b.getCount().compareTo(a.getCount()))
                 .skip(paginationComponent.getStart())
                 .map(this::mapMessageAudit)
                 .limit(paginationComponent.getCount())

@@ -93,6 +93,7 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(commandCountMap.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
                 .skip(paginationComponent.getStart())
                 .map(this::mapCommandAudit)
                 .limit(paginationComponent.getCount())
