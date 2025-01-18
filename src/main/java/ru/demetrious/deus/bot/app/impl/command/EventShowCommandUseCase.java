@@ -66,6 +66,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
         MessageEmbed messageEmbed = new MessageEmbed()
             .setTitle("Запущенные события");
         PaginationComponent paginationComponent = new PaginationComponent(triggerList.size());
+
         MessageData messageData = updateMessage(
             messageEmbed,
             triggerList,
