@@ -13,6 +13,7 @@ import ru.demetrious.deus.bot.fw.annotation.quartz.InitScheduled;
 
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @InitScheduled(name = "remove-before", groupName = "log", cron = "0 0 0/1 ? * *")
 @Slf4j
@@ -24,6 +25,9 @@ public class RemoveLogJob extends QuartzJobBean {
     @Override
     protected void executeInternal(@NotNull JobExecutionContext context) {
         List<Log> removed = removeLogsOutbound.removeLogs(now().minus(7, DAYS));
-        log.info("{} logs were removed", removed.size());
+
+        if (isNotEmpty(removed)) {
+            log.info("{} logs were removed", removed.size());
+        }
     }
 }
