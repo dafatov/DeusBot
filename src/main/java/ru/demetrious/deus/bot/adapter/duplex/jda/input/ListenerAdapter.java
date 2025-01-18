@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -34,7 +36,7 @@ import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -173,7 +175,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     private void leaveIfAlone(@NotNull GuildVoiceUpdateEvent event) {
         AudioManager audioManager = event.getGuild().getAudioManager();
 
-        if (audioManager.isConnected() && requireNonNull(event.getOldValue()).getMembers().stream().allMatch(m -> m.getUser().isBot())) {
+        if (ofNullable(audioManager.getConnectedChannel()).map(c -> c.getMembers().stream().map(Member::getUser).allMatch(User::isBot)).orElse(false)) {
             audioManager.closeAudioConnection();
         }
     }
