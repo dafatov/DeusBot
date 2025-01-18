@@ -20,6 +20,7 @@ import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.lang.Math.floorDiv;
 import static java.text.MessageFormat.format;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.app.impl.event.EventComponent.DESCRIPTION;
@@ -85,6 +86,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(triggerList.stream()
+                .sorted(comparing(Trigger::getKey, (a, b) -> b.getName().compareToIgnoreCase(a.getName())))
                 .skip(paginationComponent.getStart())
                 .map(this::mapEvent)
                 .limit(paginationComponent.getCount())

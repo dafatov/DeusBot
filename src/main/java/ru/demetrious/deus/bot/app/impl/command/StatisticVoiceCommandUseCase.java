@@ -94,6 +94,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
 
         messageEmbed
             .setDescription(guildVoiceAuditList.stream()
+                .sorted((a, b) -> b.getCount().compareTo(a.getCount()))
                 .skip(paginationComponent.getStart())
                 .map(audit -> mapVoiceAudit(audit, averageSeconds))
                 .limit(paginationComponent.getCount())
@@ -109,7 +110,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
         return "<@%s>\n%s\n%s".formatted(
             audit.getAuditId().getUserId(),
             prettifySeconds(audit.getCount()),
-            mapDeviation(floorDiv(100 * audit.getCount(), averageSeconds) - 100)
+            averageSeconds == 0 ? "" : mapDeviation(floorDiv(100 * audit.getCount(), averageSeconds) - 100)
         );
     }
 
