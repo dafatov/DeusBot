@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import ru.demetrious.deus.bot.domain.Session;
 
 import static java.lang.Math.floorDiv;
 import static java.time.Duration.between;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.STATISTIC_SESSION;
@@ -28,6 +30,22 @@ import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 @RequiredArgsConstructor
 @Component
 public class StatisticSessionCommandUseCase implements StatisticSessionCommandInbound {
+    private static final Comparator<Session> SESSION_COMPARATOR = (a, b) -> {
+        if (nonNull(a.getFinish()) && nonNull(b.getFinish())) {
+            return b.getFinish().compareTo(a.getFinish());
+        }
+
+        if (nonNull(a.getFinish())) {
+            return 1;
+        }
+
+        if (nonNull(b.getFinish())) {
+            return -1;
+        }
+
+        return b.getStart().compareTo(a.getStart());
+    };
+
     private final GetGuildSessionListOutbound getGuildSessionListOutbound;
     private final List<GetGuildIdOutbound<?>> getGuildIdOutbound;
     private final List<NotifyOutbound<?>> notifyOutbound;
@@ -84,7 +102,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(guildSessionList.stream()
-                .sorted((a, b) -> b.getFinish().compareTo(a.getFinish()))
+                .sorted(SESSION_COMPARATOR)
                 .skip(paginationComponent.getStart())
                 .map(this::mapSession)
                 .limit(paginationComponent.getCount())
