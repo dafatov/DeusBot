@@ -38,6 +38,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.MAIN_REGISTRATION_ID;
@@ -129,6 +130,11 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                                                                                              String errorText,
                                                                                              @NotNull A adapter) {
         onInteraction(event, commandInbound -> {
+            if (PRIVATE.equals(event.getChannelType())) {
+                notifyPrivateChannel(commandInbound.getData().getName(), adapter);
+                return;
+            }
+
             if (!devUserIdList.isEmpty() && !devUserIdList.contains(adapter.getUserId())) {
                 notifyInDev(commandInbound.getData().getName(), adapter);
                 return;
@@ -153,6 +159,16 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
         adapter.notify(messageData, true);
         log.error(format("Произошла ошибка с {0} команды \"{1}\"", errorText, commandName), e);
+    }
+
+    private <A extends GenericAdapter<?, ?, ?>> void notifyPrivateChannel(Name commandName, A adapter) {
+        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            .setColor(ERROR)
+            .setTitle("У нас так не принято")
+            .setDescription("Из приватного канала бот не хочет выполнять команды. Увы!")));
+
+        adapter.notify(messageData, true);
+        log.warn(format("Произошла попытка запуска команды \"{0}\" из приватного канала", commandName));
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyInDev(Name commandName, A adapter) {
