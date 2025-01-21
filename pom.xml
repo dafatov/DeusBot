@@ -27,7 +27,7 @@
 
 	<properties>
 		<!-- Service -->
-		<revision>2.0.3</revision>
+		<revision>2.0.4</revision>
 
 		<!-- Engines -->
 		<java.version>17</java.version>
