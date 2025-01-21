@@ -9,6 +9,8 @@ import ru.demetrious.deus.bot.domain.ButtonComponent.EmojiEnum;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 
 import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.DANGER;
+import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.SECONDARY;
+import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.SUCCESS;
 
 @RequiredArgsConstructor
 public class ControlComponent implements Component {
@@ -25,16 +27,17 @@ public class ControlComponent implements Component {
                 .setId(ButtonIdEnum.CLEAR.name())
                 .setEmoji(EASTER_EGG_USER_ID.equals(authorId) ? EmojiEnum.CLEAN : EmojiEnum.CLEAR),
             new ButtonComponent()
+                .setStyle(player.isLooped() ? SUCCESS : SECONDARY)
                 .setId(ButtonIdEnum.REPEAT.name())
-                .setEmoji(player.isLooped() ? EmojiEnum.REPEAT : EmojiEnum.QUEUE)
+                .setEmoji(EmojiEnum.REPEAT)
+                .setDisabled(player.isPlayingLive()),
+            new ButtonComponent()
+                .setId(ButtonIdEnum.PAUSE.name())
+                .setEmoji(player.isPaused() ? EmojiEnum.PLAY : EmojiEnum.PAUSE)
                 .setDisabled(player.isPlayingLive()),
             new ButtonComponent()
                 .setId(ButtonIdEnum.SKIP.name())
                 .setEmoji(EmojiEnum.SKIP),
-            new ButtonComponent()
-                .setId(ButtonIdEnum.PAUSE.name())
-                .setEmoji(player.isPaused() ? EmojiEnum.PAUSE : EmojiEnum.PLAY)
-                .setDisabled(player.isPlayingLive()),
             new ButtonComponent()
                 .setId(ButtonIdEnum.SHUFFLE.name())
                 .setEmoji(EmojiEnum.SHUFFLE)

@@ -17,7 +17,7 @@ public class ButtonComponent {
     private boolean isDisabled = false;
 
     public enum StyleEnum {
-        DANGER, LINK, SECONDARY
+        DANGER, LINK, SECONDARY, SUCCESS
     }
 
     @Getter
@@ -31,7 +31,6 @@ public class ButtonComponent {
         PAUSE("<:pause:1266035822986268734>"),
         PLAY("<:play:1266035825238605845>"),
         PREVIOUS("<:previous:1266035826555359242>"),
-        QUEUE("<:queue:1266035828174622730>"),
         REFRESH("<:refresh:1266035829634236518>"),
         REPEAT("<:repeat:1266035894180249601>"),
         SHUFFLE("<:shuffle:1266035834105364533>"),
