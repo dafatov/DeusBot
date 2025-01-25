@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.domain;
 
+import java.nio.file.Path;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,19 +24,20 @@ public class ButtonComponent {
     @Getter
     @RequiredArgsConstructor
     public enum EmojiEnum {
-        CLEAN("<:clean:1266035815528792134>"),
-        CLEAR("<:clear:1266035817042940065>"),
-        FIRST("<:first:1266035818628255859>"),
-        LAST("<:last:1266035820054450196>"),
-        NEXT("<:next:1266035820985454724>"),
-        PAUSE("<:pause:1266035822986268734>"),
-        PLAY("<:play:1266035825238605845>"),
-        PREVIOUS("<:previous:1266035826555359242>"),
-        REFRESH("<:refresh:1266035829634236518>"),
-        REPEAT("<:repeat:1266035894180249601>"),
-        SHUFFLE("<:shuffle:1266035834105364533>"),
-        SKIP("<:skip:1266035837787967633>");
+        CLEAN("clean", Path.of("discord/emoji/clean.png")),
+        CLEAR("clear", Path.of("discord/emoji/clear.png")),
+        FIRST("first", Path.of("discord/emoji/first.png")),
+        LAST("last", Path.of("discord/emoji/last.png")),
+        NEXT("next", Path.of("discord/emoji/next.png")),
+        PAUSE("pause", Path.of("discord/emoji/pause.png")),
+        PLAY("play", Path.of("discord/emoji/play.png")),
+        PREVIOUS("previous", Path.of("discord/emoji/previous.png")),
+        REFRESH("refresh", Path.of("discord/emoji/refresh.png")),
+        REPEAT("repeat", Path.of("discord/emoji/repeat.png")),
+        SHUFFLE("shuffle", Path.of("discord/emoji/shuffle.png")),
+        SKIP("skip", Path.of("discord/emoji/skip.png"));
 
-        private final String value;
+        private final String name;
+        private final Path icon;
     }
 }

@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.mapstruct.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.demetrious.deus.bot.adapter.duplex.jda.output.EmojiProvider;
 import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.ButtonComponent;
 import ru.demetrious.deus.bot.domain.MessageComponent;
@@ -28,8 +30,11 @@ import static java.util.Optional.ofNullable;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.values;
 
 @Mapper
-public interface MessageDataMapper {
-    default MessageCreateData mapToMessageCreate(MessageData messageData) {
+public abstract class MessageDataMapper {
+    @Autowired
+    private EmojiProvider emojiProvider;
+
+    public MessageCreateData mapToMessageCreate(MessageData messageData) {
         return new MessageCreateBuilder()
             .setContent(messageData.getContent())
             .setEmbeds(mapEmbed(messageData.getEmbeds()))
@@ -38,37 +43,36 @@ public interface MessageDataMapper {
             .build();
     }
 
-    List<FileUpload> mapFile(List<MessageFile> messageFiles);
+    public abstract List<FileUpload> mapFile(List<MessageFile> messageFiles);
 
-    default FileUpload mapFile(MessageFile messageFile) {
+    public FileUpload mapFile(MessageFile messageFile) {
         return FileUpload.fromData(messageFile.getData(), messageFile.getName());
     }
 
-    List<LayoutComponent> mapComponent(List<MessageComponent> components);
+    public abstract List<LayoutComponent> mapComponent(List<MessageComponent> components);
 
-    default LayoutComponent mapComponent(MessageComponent messageComponent) {
+    public LayoutComponent mapComponent(MessageComponent messageComponent) {
         return ActionRow.of(mapButton(messageComponent.getButtons()));
     }
 
-    List<net.dv8tion.jda.api.interactions.components.ItemComponent> mapButton(List<ButtonComponent> items);
+    public abstract List<net.dv8tion.jda.api.interactions.components.ItemComponent> mapButton(List<ButtonComponent> items);
 
-    default net.dv8tion.jda.api.interactions.components.ItemComponent mapButton(ButtonComponent buttonComponent) {
+    public net.dv8tion.jda.api.interactions.components.ItemComponent mapButton(ButtonComponent buttonComponent) {
         return Button.of(mapButtonStyle(buttonComponent.getStyle()), buttonComponent.getId(), buttonComponent.getLabel(), mapEmoji(buttonComponent.getEmoji()))
             .withDisabled(buttonComponent.isDisabled());
     }
 
-    ButtonStyle mapButtonStyle(ButtonComponent.StyleEnum style);
+    public abstract ButtonStyle mapButtonStyle(ButtonComponent.StyleEnum style);
 
-    default Emoji mapEmoji(ButtonComponent.EmojiEnum emoji) {
+    public Emoji mapEmoji(ButtonComponent.EmojiEnum emoji) {
         return ofNullable(emoji)
-            .map(ButtonComponent.EmojiEnum::getValue)
-            .map(Emoji::fromFormatted)
-            .orElse(null);
+            .map(e -> emojiProvider.getApplicationEmoji(e))
+            .orElseThrow(() -> new IllegalArgumentException("There is no emoji \"%s\"".formatted(emoji)));
     }
 
-    List<MessageEmbed> mapEmbed(List<ru.demetrious.deus.bot.domain.MessageEmbed> embeds);
+    public abstract List<MessageEmbed> mapEmbed(List<ru.demetrious.deus.bot.domain.MessageEmbed> embeds);
 
-    default MessageEmbed mapEmbed(ru.demetrious.deus.bot.domain.MessageEmbed messageEmbed) {
+    public MessageEmbed mapEmbed(ru.demetrious.deus.bot.domain.MessageEmbed messageEmbed) {
         return new EmbedBuilder()
             .setTitle(messageEmbed.getTitle())
             .setDescription(messageEmbed.getDescription())
@@ -80,7 +84,7 @@ public interface MessageDataMapper {
             .build();
     }
 
-    default ru.demetrious.deus.bot.domain.MessageEmbed mapEmbed(MessageEmbed messageEmbed) {
+    public ru.demetrious.deus.bot.domain.MessageEmbed mapEmbed(MessageEmbed messageEmbed) {
         return new ru.demetrious.deus.bot.domain.MessageEmbed()
             .setTitle(messageEmbed.getTitle())
             .setDescription(messageEmbed.getDescription())
@@ -98,7 +102,7 @@ public interface MessageDataMapper {
                 .orElse(null));
     }
 
-    default MessageEditData mapToMessageEdit(MessageData messageData) {
+    public MessageEditData mapToMessageEdit(MessageData messageData) {
         return new MessageEditBuilder()
             .setContent(messageData.getContent())
             .setEmbeds(mapEmbed(messageData.getEmbeds()))
@@ -107,7 +111,7 @@ public interface MessageDataMapper {
             .build();
     }
 
-    default AttachmentOption mapAttachmentOption(Message.Attachment attachment) {
+    public AttachmentOption mapAttachmentOption(Message.Attachment attachment) {
         return new AttachmentOption()
             .setUrl(attachment.getUrl())
             .setFileName(attachment.getFileName());
