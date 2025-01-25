@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.demetrious.deus.bot.app.api.session.GetGuildSessionListOutbound;
 import ru.demetrious.deus.bot.app.api.session.GetSessionOutbound;
 import ru.demetrious.deus.bot.app.api.session.SaveSessionOutbound;
 import ru.demetrious.deus.bot.domain.Session;
 
+@Transactional
 @RequiredArgsConstructor
 @Component
 public class SessionAdapter implements GetGuildSessionListOutbound, GetSessionOutbound, SaveSessionOutbound {

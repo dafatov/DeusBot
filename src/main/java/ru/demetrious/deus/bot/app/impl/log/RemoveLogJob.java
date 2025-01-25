@@ -24,6 +24,7 @@ public class RemoveLogJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(@NotNull JobExecutionContext context) {
+        log.debug("Trying remove logs...");
         List<Log> removed = removeLogsOutbound.removeLogs(now().minus(7, DAYS));
 
         if (isNotEmpty(removed)) {
