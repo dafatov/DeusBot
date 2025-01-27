@@ -24,12 +24,9 @@ public class LocalCommandsConfig {
     public void updateCommand() {
         List<CommandData> commandDataList = commandDataMapper.mapCommand(commandList.stream().map(CommandInbound::getData).toList());
 
-        jda.updateCommands().queue();
         jda.getGuilds().forEach(guild -> guild.updateCommands()
-            .submit()
-            .thenRun(() -> guild.updateCommands()
-                .addCommands(commandDataList)
-                .onSuccess(commandList -> log.info("Init guild({}) commands: {}", guild.getName(), commandList))
-                .queue()));
+            .addCommands(commandDataList)
+            .onSuccess(commandList -> log.info("Init guild({}) commands: {}", guild.getName(), commandList))
+            .queue());
     }
 }

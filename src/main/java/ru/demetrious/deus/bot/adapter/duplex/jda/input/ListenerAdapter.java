@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
@@ -15,7 +16,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
-import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,6 +27,8 @@ import ru.demetrious.deus.bot.adapter.duplex.jda.output.ModalAdapter;
 import ru.demetrious.deus.bot.adapter.duplex.jda.output.SlashCommandAdapter;
 import ru.demetrious.deus.bot.app.api.command.CommandInbound;
 import ru.demetrious.deus.bot.app.api.message.MessageReceivedInbound;
+import ru.demetrious.deus.bot.app.api.player.ClearGuildPlayerInbound;
+import ru.demetrious.deus.bot.app.api.player.LeaveIfAloneInbound;
 import ru.demetrious.deus.bot.app.api.session.GuildVoiceSessionUpdateInbound;
 import ru.demetrious.deus.bot.domain.CommandData.Name;
 import ru.demetrious.deus.bot.domain.MessageData;
@@ -55,6 +57,8 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     private final AutocompleteAdapter autocompleteAdapter;
     private final GuildVoiceSessionUpdateInbound guildVoiceSessionUpdateInbound;
     private final MessageReceivedInbound messageReceivedInbound;
+    private final ClearGuildPlayerInbound clearGuildPlayerInbound;
+    private final LeaveIfAloneInbound leaveIfAloneInbound;
 
     @Value("${devs.ids:}")
     private List<String> devUserIdList;
@@ -87,11 +91,21 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     @SneakyThrows
     @Override
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
+        Guild guild = event.getGuild();
+        String guildId = guild.getId();
+        String userId = event.getMember().getUser().getId();
+
         if (isNull(event.getOldValue()) || isNull(event.getNewValue())) {
-            guildVoiceSessionUpdateInbound.execute(event.getGuild().getId(), event.getMember().getUser().getId(), nonNull(event.getNewValue()));
+            guildVoiceSessionUpdateInbound.execute(guildId, userId, nonNull(event.getNewValue()));
         }
 
-        leaveIfAlone(event);
+        if (event.getJDA().getSelfUser().getId().equals(userId) && isNull(event.getNewValue())) {
+            clearGuildPlayerInbound.execute(guildId);
+        }
+
+        leaveIfAloneInbound.execute(guildId, ofNullable(guild.getAudioManager().getConnectedChannel())
+            .map(c -> c.getMembers().stream().map(Member::getUser).allMatch(User::isBot))
+            .orElse(false));
     }
 
     // ===================================================================================================================
@@ -186,13 +200,5 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
     private void replyEmptyChoices(@NotNull CommandAutoCompleteInteractionEvent event) {
         event.replyChoices(List.of()).queue();
-    }
-
-    private void leaveIfAlone(@NotNull GuildVoiceUpdateEvent event) {
-        AudioManager audioManager = event.getGuild().getAudioManager();
-
-        if (ofNullable(audioManager.getConnectedChannel()).map(c -> c.getMembers().stream().map(Member::getUser).allMatch(User::isBot)).orElse(false)) {
-            audioManager.closeAudioConnection();
-        }
     }
 }

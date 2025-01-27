@@ -7,11 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.SkipCommandInbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
-import ru.demetrious.deus.bot.app.impl.player.api.Player;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
@@ -22,8 +20,6 @@ import static ru.demetrious.deus.bot.domain.CommandData.Name.SKIP;
 @Slf4j
 @Component
 public class SkipCommandUseCase extends PlayerCommand implements SkipCommandInbound {
-    private final GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound;
-    private final IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound;
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
 
     @Override
@@ -35,25 +31,21 @@ public class SkipCommandUseCase extends PlayerCommand implements SkipCommandInbo
 
     @Override
     public void execute() {
-        final Player player = getPlayer(getGuildIdOutbound.getGuildId());
+        Result<AudioTrack> result = getPlayer().skip();
 
-        if (player.isNotPlaying()) {
-            notifyIsNotPlaying();
-            return;
+        switch (result.getStatus()) {
+            case IS_NOT_PLAYING -> notifyIsNotPlaying();
+            case NOT_SAME_CHANNEL -> notifyIsNotCanConnect();
+            case OK -> {
+                MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+                    .setTitle("Текущая композиция уничтожена")
+                    .setDescription(MessageFormat.format("Название того, что играло уже не помню. Прошлое должно остаться в прошлом.\n" +
+                        "...Вроде это **{0}**, но уже какая разница?", result.getData().getInfo().title))));
+
+                notifyOutbound.notify(messageData);
+                log.info("Композиция была успешно пропущена");
+            }
+            default -> throw new IllegalArgumentException("Unexpected status player operation: %s".formatted(result.getStatus()));
         }
-
-        if (isNotConnectedSameChannelOutbound.isNotConnectedSameChannel()) {
-            notifyIsNotCanConnect();
-            return;
-        }
-
-        AudioTrack audioTrack = player.skip();
-        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Текущая композиция уничтожена")
-            .setDescription(MessageFormat.format("Название того, что играло уже не помню. Прошлое должно остаться в прошлом.\n" +
-                "...Вроде это **{0}**, но уже какая разница?", audioTrack.getInfo().title))));
-
-        notifyOutbound.notify(messageData);
-        log.info("Композиция была успешно пропущена");
     }
 }

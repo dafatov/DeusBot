@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.StatisticVoiceCommandInbound;
@@ -28,6 +29,7 @@ import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInbound {
     private final GetGuildVoiceAuditListOutbound getGuildVoiceAuditListOutbound;
@@ -58,6 +60,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
         );
 
         b(notifyOutbound).notify(messageData);
+        log.debug("Список статистики время в голосовых каналах успешно обновлен");
     }
 
     @Override
@@ -82,6 +85,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
         );
 
         b(notifyOutbound).notify(messageData);
+        log.info("Список статистики время в голосовых каналах успешно установлен");
     }
 
     // ===================================================================================================================

@@ -14,6 +14,7 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.text.MessageFormat.format;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
@@ -27,8 +28,8 @@ public abstract class PlayerCommand implements CommandInbound {
     @Autowired
     private List<GetGuildIdOutbound<?>> getGuildIdOutbound;
 
-    protected Player getPlayer(String guildId) {
-        return jukebox.getPlayer(guildId);
+    protected Player getPlayer() {
+        return jukebox.getPlayer(b(getGuildIdOutbound).getGuildId());
     }
 
     protected void notifyIsNotCanConnect() {
@@ -48,7 +49,7 @@ public abstract class PlayerCommand implements CommandInbound {
             .setDescription(format(
                 "Типа знаешь вселенная расширяется, а твой мозг походу нет. Ну вышел ты за пределы размеров очереди или решил написать одинаковые индексы.\n" +
                     "Диапазон значений _от 1 по {0}_",
-                getPlayer(b(getGuildIdOutbound).getGuildId()).getQueue().size()))));
+                emptyIfNull(getPlayer().getQueue().getData()).size()))));
 
         b(notifyOutbound).notify(messageData);
         log.warn("Выход за пределы очереди");

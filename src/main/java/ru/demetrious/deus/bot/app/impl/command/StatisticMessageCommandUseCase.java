@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.StatisticMessageCommandInbound;
@@ -24,6 +25,7 @@ import static ru.demetrious.deus.bot.domain.CommandData.Name.STATISTIC_MESSAGE;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class StatisticMessageCommandUseCase implements StatisticMessageCommandInbound {
     private final GetGuildMessageAuditListOutbound getGuildMessageAuditListOutbound;
@@ -54,6 +56,7 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
         );
 
         b(notifyOutbound).notify(messageData);
+        log.debug("Список статистики сообщений успешно обновлен");
     }
 
     @Override
@@ -78,6 +81,7 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
         );
 
         b(notifyOutbound).notify(messageData);
+        log.info("Список статистики сообщений успешно установлен");
     }
 
     // ===================================================================================================================

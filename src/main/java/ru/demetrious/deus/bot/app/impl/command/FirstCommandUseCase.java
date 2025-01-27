@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.FirstCommandInbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.OptionData;
 
@@ -19,10 +17,8 @@ import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 @Slf4j
 @Component
 public class FirstCommandUseCase extends MoveCommandUseCase implements FirstCommandInbound {
-    public FirstCommandUseCase(GetIntegerOptionOutbound getIntegerOptionOutbound, GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound,
-                               IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound,
-                               NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound) {
-        super(getIntegerOptionOutbound, getGuildIdOutbound, isNotConnectedSameChannelOutbound, notifyOutbound);
+    public FirstCommandUseCase(GetIntegerOptionOutbound getIntegerOptionOutbound, NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound) {
+        super(getIntegerOptionOutbound, notifyOutbound);
     }
 
     @Override

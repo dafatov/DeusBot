@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.EventCreateCommandInbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
@@ -24,6 +25,7 @@ import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.USER;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class EventCreateCommandUseCase implements EventCreateCommandInbound {
     private static final String CRON_OPTION = "cron";
@@ -88,5 +90,6 @@ public class EventCreateCommandUseCase implements EventCreateCommandInbound {
                 nextFireDateOptional.map("<t:%d>"::formatted).orElse("`Неизвестно`")))
             .setTimestamp(now())));
         notifyOutbound.notify(messageData);
+        log.info("Событие успешно создано");
     }
 }

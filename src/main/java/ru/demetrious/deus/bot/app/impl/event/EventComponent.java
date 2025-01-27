@@ -72,14 +72,14 @@ public class EventComponent {
 
     private JobDetail createJob(String name) {
         return newJob(EventPublicationJob.class)
-            .withIdentity(name, EventComponent.EVENT)
+            .withIdentity(name, EVENT)
             .requestRecovery()
             .build();
     }
 
     private Trigger saveTrigger(String cronExpression, String name, JobDetail jobDetail, Map<String, ?> jobDataMap) throws SchedulerException {
         Trigger trigger = newTrigger()
-            .withIdentity(name, EventComponent.EVENT)
+            .withIdentity(name, EVENT)
             .withSchedule(cronSchedule(cronExpression))
             .usingJobData(new JobDataMap(jobDataMap))
             .build();

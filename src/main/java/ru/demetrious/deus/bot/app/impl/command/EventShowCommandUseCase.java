@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronTrigger;
 import org.quartz.Trigger;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_SHOW;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class EventShowCommandUseCase implements EventShowCommandInbound {
     private final List<NotifyOutbound<?>> notifyOutbound;
@@ -76,6 +78,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
         );
 
         b(notifyOutbound).notify(messageData);
+        log.info("События успешно выведены");
     }
 
     // ===================================================================================================================

@@ -5,11 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.ShuffleCommandInbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
-import ru.demetrious.deus.bot.app.impl.player.api.Player;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
@@ -20,7 +19,6 @@ import static ru.demetrious.deus.bot.domain.CommandData.Name.SHUFFLE;
 @Slf4j
 @Component
 public class ShuffleCommandUseCase extends PlayerCommand implements ShuffleCommandInbound {
-    private final GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound;
     private final IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound;
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
 
@@ -33,28 +31,24 @@ public class ShuffleCommandUseCase extends PlayerCommand implements ShuffleComma
 
     @Override
     public void execute() {
-        final Player player = getPlayer(getGuildIdOutbound.getGuildId());
+        Result.Status status = getPlayer().shuffle().getStatus();
 
-        if (isNotConnectedSameChannelOutbound.isNotConnectedSameChannel()) {
-            notifyIsNotCanConnect();
-            return;
+        switch (status) {
+            case NOT_SAME_CHANNEL -> notifyIsNotCanConnect();
+            case UNBOUND -> notifyUnbound();
+            case OK -> {
+                MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+                    .setTitle("Плейлист ~~взболтан~~ перемешан")
+                    .setDescription("""
+                        Это было суровое время.. Мы мешали песни как могли, чтобы хоть как-то разнообразить свою серую жизнь..
+                        И  пришел он!! Генератор Псевдо Случайных Чисел или _ГПСЧ_! Он спас нас, но остался в безызвестности.. Так давайте восславим его.
+                        Присоединяйтесь к _культу ГПСЧ_!!! Да пребудет с Вами **Бог Псевдо Рандома**
+                        """)));
+
+                notifyOutbound.notify(messageData);
+                log.info("Плейлист успешно перемешан");
+            }
+            default -> throw new IllegalArgumentException("Unexpected status player operation: %s".formatted(status));
         }
-
-        if (player.isNotValidIndex(0)) {
-            notifyUnbound();
-            return;
-        }
-
-        player.shuffle();
-        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Плейлист ~~взболтан~~ перемешан")
-            .setDescription("""
-                Это было суровое время.. Мы мешали песни как могли, чтобы хоть как-то разнообразить свою серую жизнь..
-                И  пришел он!! Генератор Псевдо Случайных Чисел или _ГПСЧ_! Он спас нас, но остался в безызвестности.. Так давайте восславим его.
-                Присоединяйтесь к _культу ГПСЧ_!!! Да пребудет с Вами **Бог Псевдо Рандома**
-                """)));
-
-        notifyOutbound.notify(messageData);
-        log.info("Плейлист успешно перемешан");
     }
 }

@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.EventHelpCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
@@ -13,6 +14,7 @@ import ru.demetrious.deus.bot.domain.MessageEmbed;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_HELP;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class EventHelpCommandUseCase implements EventHelpCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
@@ -32,5 +34,6 @@ public class EventHelpCommandUseCase implements EventHelpCommandInbound {
                 "[ресурс](https://www.freeformatter.com/cron-expression-generator-quartz.html)")));
 
         notifyOutbound.notify(messageData);
+        log.info("Помощь по событиям успешно выведена");
     }
 }

@@ -9,16 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDuration;
 
 @UtilityClass
 public class PlayerUtils {
     public static Long reduceDuration(List<AudioTrack> audioTrackList) {
-        return audioTrackList.stream().reduce(0L, (duration, audioTrack) -> duration + audioTrack.getDuration(), Long::sum);
+        return emptyIfNull(audioTrackList).stream().reduce(0L, (duration, audioTrack) -> duration + audioTrack.getDuration(), Long::sum);
     }
 
     public static boolean hasLive(List<AudioTrack> audioTrackList) {
-        return audioTrackList.stream().anyMatch(audioTrack -> audioTrack.getInfo().isStream);
+        return emptyIfNull(audioTrackList).stream().anyMatch(audioTrack -> audioTrack.getInfo().isStream);
     }
 
     public static Optional<String> getPreview(AudioTrack audioTrack) {

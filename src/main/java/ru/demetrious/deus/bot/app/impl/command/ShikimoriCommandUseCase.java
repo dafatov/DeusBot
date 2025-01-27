@@ -128,6 +128,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
         };
 
         notifyOutbound.notify(messageData);
+        log.info("Обработка списка успешно выполнена по методу {}", method);
     }
 
     // ===================================================================================================================

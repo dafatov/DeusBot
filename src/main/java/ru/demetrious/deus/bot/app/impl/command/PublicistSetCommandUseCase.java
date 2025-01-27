@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.channel.GetChannelOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.PublicistSetCommandInbound;
@@ -18,6 +19,7 @@ import static ru.demetrious.deus.bot.domain.CommandData.Name.PUBLICIST_SET;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.CHANNEL;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PublicistSetCommandUseCase implements PublicistSetCommandInbound {
     private static final String CHANNEL_OPTION = "channel";
@@ -50,5 +52,6 @@ public class PublicistSetCommandUseCase implements PublicistSetCommandInbound {
         MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
             .setTitle("Канал установлен")));
         notifyOutbound.notify(messageData);
+        log.info("Канал публициста успешно установлен");
     }
 }

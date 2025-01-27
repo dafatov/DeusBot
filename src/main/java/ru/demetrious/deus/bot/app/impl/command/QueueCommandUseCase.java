@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.QueueCommandInbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
 import ru.demetrious.deus.bot.app.impl.component.ControlComponent;
 import ru.demetrious.deus.bot.app.impl.component.PaginationComponent;
 import ru.demetrious.deus.bot.app.impl.player.api.Player;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
@@ -26,6 +26,7 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.QUEUE;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
@@ -36,7 +37,6 @@ import static ru.demetrious.deus.bot.utils.PlayerUtils.getPreview;
 @Slf4j
 @Component
 public class QueueCommandUseCase extends PlayerCommand implements QueueCommandInbound {
-    private final List<GetGuildIdOutbound<?>> getGuildIdOutbound;
     private final List<GetAuthorIdOutbound<?>> getAuthorIdOutbound;
     private final List<NotifyOutbound<?>> notifyOutbound;
     private final GetEmbedOutbound getEmbedOutbound;
@@ -51,54 +51,56 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
 
     @Override
     public void onButton() {
-        final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
-        final List<AudioTrack> queue = player.getQueue();
+        final Player player = getPlayer();
+        Result<List<AudioTrack>> result = player.getQueue();
         MessageEmbed paginationEmbed = getEmbedOutbound.getEmbed(0);
         MessageComponent controlMessageComponent = new ControlComponent(player, b(getAuthorIdOutbound).getAuthorId()).update(getCustomIdOutbound.getCustomId());
-        PaginationComponent paginationComponent = PaginationComponent.from(paginationEmbed.getFooter(), queue.size());
+        PaginationComponent paginationComponent = PaginationComponent.from(paginationEmbed.getFooter(), emptyIfNull(result.getData()).size());
 
-        if (player.isNotPlaying()) {
-            notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter());
-            return;
+        switch (result.getStatus()) {
+            case IS_NOT_PLAYING -> notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter());
+            case OK -> {
+                MessageData messageData = updateEmbed(
+                    result.getData(),
+                    paginationEmbed,
+                    paginationComponent,
+                    paginationComponent.update(getCustomIdOutbound.getCustomId()),
+                    controlMessageComponent,
+                    player.getPlayingTrack()
+                );
+
+                b(notifyOutbound).notify(messageData);
+                log.debug("Список композиций успешно обновлен");
+            }
+            default -> throw new IllegalArgumentException("Unexpected status player operation: %s".formatted(result.getStatus()));
         }
-
-        MessageData messageData = updateEmbed(
-            queue,
-            paginationEmbed,
-            paginationComponent,
-            paginationComponent.update(getCustomIdOutbound.getCustomId()),
-            controlMessageComponent,
-            player.getPlayingTrack()
-        );
-
-        b(notifyOutbound).notify(messageData);
-        log.debug("Список композиций успешно обновлен");
     }
 
     @Override
     public void execute() {
-        final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
-        final List<AudioTrack> queue = player.getQueue();
+        final Player player = getPlayer();
+        Result<List<AudioTrack>> result = player.getQueue();
         MessageEmbed paginationEmbed = new MessageEmbed();
         MessageComponent controlMessageComponent = new ControlComponent(player, b(getAuthorIdOutbound).getAuthorId()).get();
-        PaginationComponent paginationComponent = new PaginationComponent(queue.size());
+        PaginationComponent paginationComponent = new PaginationComponent(emptyIfNull(result.getData()).size());
 
-        if (player.isNotPlaying()) {
-            notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter());
-            return;
+        switch (result.getStatus()) {
+            case IS_NOT_PLAYING -> notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter());
+            case OK -> {
+                MessageData messageData = updateEmbed(
+                    result.getData(),
+                    paginationEmbed,
+                    paginationComponent,
+                    paginationComponent.get(),
+                    controlMessageComponent,
+                    player.getPlayingTrack()
+                );
+
+                b(notifyOutbound).notify(messageData);
+                log.info("Список композиций успешно выведен");
+            }
+            default -> throw new IllegalArgumentException("Unexpected status player operation: %s".formatted(result.getStatus()));
         }
-
-        MessageData messageData = updateEmbed(
-            queue,
-            paginationEmbed,
-            paginationComponent,
-            paginationComponent.get(),
-            controlMessageComponent,
-            player.getPlayingTrack()
-        );
-
-        b(notifyOutbound).notify(messageData);
-        log.info("Список композиций успешно выведен");
     }
 
     // ===================================================================================================================
