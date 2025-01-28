@@ -9,6 +9,11 @@ import ru.demetrious.deus.bot.domain.CommandData;
 public interface CommandInbound extends SlashCommandInteractionInbound, ButtonInteractionInbound, ModalInteractionInbound, AutocompleteInteractionInbound {
     CommandData getData();
 
+    default String getHint() {
+        return "По данной команде нет подсказок. Если Вы это видите, то у Вас есть вопрос " +
+            "- адресуйте его администрации сервера/бота, и в дальнейшем эта информация появится здесь";
+    }
+
     default boolean isDefer() {
         return true;
     }
