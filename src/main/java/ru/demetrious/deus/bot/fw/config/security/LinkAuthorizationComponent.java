@@ -28,7 +28,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.CollectionUtils.emptyCollection;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest.from;
-import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.MAIN_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.DISCORD_REGISTRATION_ID;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.QUERY_DISCORD_USER_ID;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 
@@ -85,7 +85,7 @@ public class LinkAuthorizationComponent {
             .setDiscordPrincipalName(String.valueOf(authentication.getCredentials()))
             .setLinkedRegistrationId(authentication.getAuthorizedClientRegistrationId());
 
-        if (!equalsIgnoreCase(MAIN_REGISTRATION_ID, linkUserKey.getLinkedRegistrationId())) {
+        if (!equalsIgnoreCase(DISCORD_REGISTRATION_ID, linkUserKey.getLinkedRegistrationId())) {
             saveLinkUserOutbound.save(new LinkUser()
                 .setLinkUserKey(linkUserKey)
                 .setLinkedPrincipalName(authentication.getPrincipal().getName()));

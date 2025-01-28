@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.input;
 
+import java.net.URI;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,7 +45,7 @@ import static java.util.stream.Collectors.joining;
 import static net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
-import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.MAIN_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.DISCORD_REGISTRATION_ID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -75,7 +77,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        onInteraction(event, CommandInbound::onAutocomplete, (n, e) -> replyEmptyChoices(event), s -> replyEmptyChoices(event), autocompleteAdapter);
+        onInteraction(event, CommandInbound::onAutocomplete, (n, e) -> replyEmptyChoices(event), p -> replyEmptyChoices(event), autocompleteAdapter);
     }
 
     @Override
@@ -115,12 +117,12 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
     private <E, A extends BaseAdapter<E, ?>> void onInteraction(@NotNull E event,
                                                                 @NotNull Consumer<CommandInbound> executeConsumer,
                                                                 @NotNull BiConsumer<Name, Exception> errorConsumer,
-                                                                @NotNull Consumer<String> unauthorizedConsumer,
+                                                                @NotNull Consumer<Pair<String, URI>> unauthorizedConsumer,
                                                                 @NotNull A adapter) {
         adapter.setEvent(event);
 
-        if (authorizationComponent.authorize(MAIN_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
-            unauthorizedConsumer.accept(authorizationComponent.getUrl(adapter.getUserId(), MAIN_REGISTRATION_ID));
+        if (authorizationComponent.authorize(DISCORD_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
+            unauthorizedConsumer.accept(authorizationComponent.getData(adapter.getUserId(), DISCORD_REGISTRATION_ID));
             return;
         }
 
