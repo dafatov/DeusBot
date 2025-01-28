@@ -18,7 +18,7 @@ public class PlayerUtils {
         return emptyIfNull(audioTrackList).stream().reduce(0L, (duration, audioTrack) -> duration + audioTrack.getDuration(), Long::sum);
     }
 
-    public static boolean hasLive(List<AudioTrack> audioTrackList) {
+    public static boolean anyLive(List<AudioTrack> audioTrackList) {
         return emptyIfNull(audioTrackList).stream().anyMatch(audioTrack -> audioTrack.getInfo().isStream);
     }
 

@@ -2,7 +2,6 @@ package ru.demetrious.deus.bot.app.impl.command;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,6 +28,7 @@ import static java.util.stream.Stream.of;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.QUEUE;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.INFO;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.getFormatDuration;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.getPreview;
@@ -85,7 +85,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
         PaginationComponent paginationComponent = new PaginationComponent(emptyIfNull(result.getData()).size());
 
         switch (result.getStatus()) {
-            case IS_NOT_PLAYING -> notifyIsNotPlaying(List.of(paginationComponent.update(getCustomIdOutbound.getCustomId())), paginationComponent.getFooter());
+            case IS_NOT_PLAYING -> notifyIsNotPlaying(List.of(paginationComponent.get()), paginationComponent.getFooter());
             case OK -> {
                 MessageData messageData = updateEmbed(
                     result.getData(),
@@ -110,6 +110,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
     private MessageData updateEmbed(List<AudioTrack> queue, MessageEmbed paginationEmbed, PaginationComponent paginationComponent,
                                     MessageComponent paginationMessageComponent, MessageComponent controlMessageComponent, AudioTrack playingTrack) {
         paginationEmbed
+            .setColor(INFO)
             .setTitle(playingTrack.getInfo().title)
             .setUrl(playingTrack.getInfo().uri)
             .setDescription(getDescription(playingTrack, queue, paginationComponent.getStart(), paginationComponent.getCount()))
@@ -122,25 +123,28 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
     }
 
     private String getDescription(AudioTrack playingTrack, List<AudioTrack> queue, int start, int count) {
-        if (playingTrack.getInfo().isStream) {
-            return "<Стрим>\n\u200B\\n";
-        }
-
-        Stream<String> playing = of(getPlaying(playingTrack));
-        Stream<String> songs = queue.stream()
+        return concat(of(getPlaying(playingTrack)), queue.stream()
             .skip(start)
-            .map(audioTrack -> format("{0}. [{1}]({2})\n`{3}`—_<@{4}>_",
-                leftPad(String.valueOf(queue.indexOf(audioTrack) + 1), String.valueOf(queue.size()).length(), "0"),
-                audioTrack.getInfo().title,
-                audioTrack.getInfo().uri,
-                getFormatDuration(audioTrack.getDuration()),
-                audioTrack.getUserData()
-            )).limit(count);
+            .map(audioTrack -> mapAudioTrack(audioTrack, queue.indexOf(audioTrack), queue.size()))
+            .limit(count))
+            .collect(joining("\n\n"));
+    }
 
-        return concat(playing, songs).collect(joining("\n\n"));
+    private String mapAudioTrack(AudioTrack audioTrack, int index, int size) {
+        return format("{0}. [{1}]({2})\n`{3}`—_<@{4}>_",
+            leftPad(String.valueOf(index + 1), String.valueOf(size).length(), "0"),
+            audioTrack.getInfo().title,
+            audioTrack.getInfo().uri,
+            audioTrack.getInfo().isStream ? "<Стрим>" : getFormatDuration(audioTrack.getDuration()),
+            audioTrack.getUserData()
+        );
     }
 
     private String getPlaying(AudioTrack playingTrack) {
+        if (playingTrack.getInfo().isStream) {
+            return format("`<Стрим>`—_<@{0}>_", playingTrack.getUserData());
+        }
+
         long position = playingTrack.getPosition();
         long duration = playingTrack.getDuration();
         int percent = toIntExact(round(100D * position / duration));
