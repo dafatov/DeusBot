@@ -67,7 +67,7 @@ public abstract class MessageDataMapper {
     public Emoji mapEmoji(ButtonComponent.EmojiEnum emoji) {
         return ofNullable(emoji)
             .map(e -> emojiProvider.getApplicationEmoji(e))
-            .orElseThrow(() -> new IllegalArgumentException("There is no emoji \"%s\"".formatted(emoji)));
+            .orElse(null);
     }
 
     public abstract List<MessageEmbed> mapEmbed(List<ru.demetrious.deus.bot.domain.MessageEmbed> embeds);

@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.output;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
@@ -99,16 +101,16 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
     }
 
     @Override
-    public void notifyUnauthorized(String authorizeUrl) {
+    public void notifyUnauthorized(Pair<String, URI> authorizeData) {
         MessageData messageData = new MessageData()
             .setEmbeds(List.of(new MessageEmbed()
                 .setColor(WARNING)
-                .setTitle("Безавторизационный ***")
+                .setTitle("Безавторизационный %s".formatted(authorizeData.getKey()))
                 .setDescription("Авторизуйся пройдя по ссылке и повтори команду заново после успешной авторизации и все будет ок")))
             .setComponents(List.of(new MessageComponent().setButtons(List.of(new ButtonComponent()
                 .setStyle(LINK)
                 .setLabel("Авторизоваться")
-                .setId(authorizeUrl)))));
+                .setId(authorizeData.getValue().toString())))));
 
         notify(messageData, true);
         log.warn("Произошла попытка запуска неавторизованного запуска команды");

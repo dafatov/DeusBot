@@ -88,7 +88,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
         Optional<OAuth2AuthorizedClient> shikimoriUser = authorizationComponent.authorize(SHIKIMORI_REGISTRATION_ID, userId);
 
         if (shikimoriUser.isEmpty()) {
-            notifyOutbound.notifyUnauthorized(authorizationComponent.getUrl(userId, SHIKIMORI_REGISTRATION_ID));
+            notifyOutbound.notifyUnauthorized(authorizationComponent.getData(userId, SHIKIMORI_REGISTRATION_ID));
             return;
         }
 
@@ -99,7 +99,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
             anilistUser = authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId);
 
             if (anilistUser.isEmpty()) {
-                notifyOutbound.notifyUnauthorized(authorizationComponent.getUrl(userId, ANILIST_REGISTRATION_ID));
+                notifyOutbound.notifyUnauthorized(authorizationComponent.getData(userId, ANILIST_REGISTRATION_ID));
                 return;
             }
         }

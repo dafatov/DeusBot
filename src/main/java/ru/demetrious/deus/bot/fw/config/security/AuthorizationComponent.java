@@ -1,8 +1,10 @@
 package ru.demetrious.deus.bot.fw.config.security;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.utils.URIBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +24,7 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
 @RequiredArgsConstructor
 @Component
 public class AuthorizationComponent {
-    public static final String MAIN_REGISTRATION_ID = "discord";
+    public static final String DISCORD_REGISTRATION_ID = "discord";
     public static final String ANILIST_REGISTRATION_ID = "anilist";
     public static final String SHIKIMORI_REGISTRATION_ID = "shikimori";
     protected static final String QUERY_DISCORD_USER_ID = "id";
@@ -30,15 +32,21 @@ public class AuthorizationComponent {
     private final OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
     private final LinkAuthorizationComponent linkAuthorizationComponent;
 
-    @Value("${app.url}")
+    @Value("${ANILIST_URL}")
+    private String anilistUrl;
+    @Value("${APP_URL}")
     private String appUrl;
+    @Value("${DISCORD_URL}")
+    private String discordUrl;
+    @Value("${SHIKIMORI_URL}")
+    private String shikimoriUrl;
 
     public Optional<OAuth2AuthorizedClient> authorize(String registrationId, String userId) {
         Optional<OAuth2AuthorizedClient> oAuth2AuthorizedClientOptional;
 
         try {
             oAuth2AuthorizedClientOptional = ofNullable(userId)
-                .filter(u -> MAIN_REGISTRATION_ID.equals(registrationId))
+                .filter(u -> DISCORD_REGISTRATION_ID.equals(registrationId))
                 .or(() -> linkAuthorizationComponent.getLinkedPrincipalName(registrationId, userId))
                 .map(principalName -> oAuth2AuthorizedClientManager.authorize(withClientRegistrationId(registrationId)
                     .principal(principalName)
@@ -47,7 +55,7 @@ public class AuthorizationComponent {
             oAuth2AuthorizedClientOptional = empty();
         }
 
-        oAuth2AuthorizedClientOptional.filter(o -> MAIN_REGISTRATION_ID.equals(o.getClientRegistration().getRegistrationId()))
+        oAuth2AuthorizedClientOptional.filter(o -> DISCORD_REGISTRATION_ID.equals(o.getClientRegistration().getRegistrationId()))
             .ifPresent(oAuth2AuthorizedClient -> getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 oAuth2AuthorizedClient.getPrincipalName(),
                 oAuth2AuthorizedClient,
@@ -57,15 +65,31 @@ public class AuthorizationComponent {
         return oAuth2AuthorizedClientOptional;
     }
 
-    public @NotNull String getUrl(String userId, String registrationId) {
+    public @NotNull Pair<String, URI> getData(String userId, String registrationId) {
+        return Pair.of(getServiceUrl(registrationId), createUri(userId, registrationId));
+    }
+
+    // ===================================================================================================================
+    // = Implementation
+    // ===================================================================================================================
+
+    private @NotNull URI createUri(String userId, String registrationId) {
         try {
             return new URIBuilder(appUrl)
                 .setPath("%s/%s".formatted(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI, registrationId))
                 .addParameter(QUERY_DISCORD_USER_ID, userId)
-                .build()
-                .toString();
+                .build();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private @NotNull String getServiceUrl(String registrationId) {
+        return switch (registrationId) {
+            case DISCORD_REGISTRATION_ID -> discordUrl;
+            case ANILIST_REGISTRATION_ID -> anilistUrl;
+            case SHIKIMORI_REGISTRATION_ID -> shikimoriUrl;
+            default -> throw new IllegalArgumentException("Unexpected registrationId=%s".formatted(registrationId));
+        };
     }
 }
