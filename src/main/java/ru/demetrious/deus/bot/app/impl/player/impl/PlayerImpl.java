@@ -26,6 +26,7 @@ import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.NOT_SA
 import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.OK;
 import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.UNBOUND;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.anyLive;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 
 @RequiredArgsConstructor
@@ -78,11 +79,16 @@ public class PlayerImpl implements Player {
     }
 
     @Override
+    public boolean hasLive() {
+        return isPlayingLive() || anyLive(getQueue().getData());
+    }
+
+    @Override
     public Long getRemaining() {
         AudioTrack playingTrack = getPlayingTrack();
         Long queueDuration = reduceDuration(getQueue().getData());
 
-        if (playingTrack == null) {
+        if (isNotPlaying()) {
             return queueDuration;
         }
 
@@ -112,11 +118,7 @@ public class PlayerImpl implements Player {
 
     @Override
     public boolean isPlayingLive() {
-        if (isNotPlaying()) {
-            return false;
-        }
-
-        return getPlayingTrack().getInfo().isStream;
+        return !isNotPlaying() && getPlayingTrack().getInfo().isStream;
     }
 
     @Override

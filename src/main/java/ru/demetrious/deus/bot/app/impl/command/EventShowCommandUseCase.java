@@ -107,7 +107,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
                 -# Описание: {1}
                 -# Пользователь: {2}
                 -# Начат: <t:{3}>
-                -# Следующее: <t:{4}>
+                -# Следующее: <t:{4}:R>
                 -# Периодичность: {5}
                 """,
             trigger.getKey().getName(),
