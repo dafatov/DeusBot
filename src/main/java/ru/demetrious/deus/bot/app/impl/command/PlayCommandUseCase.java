@@ -44,7 +44,7 @@ import static ru.demetrious.deus.bot.domain.OptionData.Type.ATTACHMENT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.SHORT;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
-import static ru.demetrious.deus.bot.utils.PlayerUtils.hasLive;
+import static ru.demetrious.deus.bot.utils.PlayerUtils.anyLive;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
@@ -145,7 +145,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
         // Блок получения данных очереди воспроизведения до добавления новых композиций
         final Player player = getPlayer();
         int queueSize = emptyIfNull(player.getQueue().getData()).size();
-        boolean hasLive = hasLive(player.getQueue().getData());
+        boolean hasLive = player.hasLive();
         Long remained = player.getRemaining();
 
         Optional<AudioItem> addedOptional = player.add(identifierOptional
@@ -224,7 +224,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
                 .setCount(audioPlaylist.getTracks().size())
                 .setTitle(audioPlaylist.getName())
                 .setDuration(reduceDuration(audioPlaylist.getTracks()))
-                .setLive(hasLive(audioPlaylist.getTracks()));
+                .setLive(anyLive(audioPlaylist.getTracks()));
 
             if (audioPlaylist instanceof YoutubeAudioPlaylist youtubeAudioPlaylist) {
                 addedInfo.setUrl("https://www.youtube.com/playlist?list=" + youtubeAudioPlaylist.getPlaylistId());
