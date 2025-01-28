@@ -14,6 +14,8 @@ public interface Player {
 
     Result<List<AudioTrack>> getQueue();
 
+    boolean hasLive();
+
     Long getRemaining();
 
     Result<Void> clear();

@@ -87,7 +87,7 @@ public class EventCreateCommandUseCase implements EventCreateCommandInbound {
                 title,
                 description,
                 userIdOptional.map("<@%s>"::formatted).orElse("-"),
-                nextFireDateOptional.map("<t:%d>"::formatted).orElse("`Неизвестно`")))
+                nextFireDateOptional.map("<t:%d:R>"::formatted).orElse("`Неизвестно`")))
             .setTimestamp(now())));
         notifyOutbound.notify(messageData);
         log.info("Событие успешно создано");

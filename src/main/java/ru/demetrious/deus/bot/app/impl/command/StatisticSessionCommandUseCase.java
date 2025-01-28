@@ -119,7 +119,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     }
 
     private String mapSession(Session session) {
-        return "<@%s>\n<t:%d>\n%s".formatted(
+        return "<@%s>\n<t:%d:R>\n%s".formatted(
             session.getId().getUserId(),
             floorDiv(session.getStart().toEpochMilli(), 1000),
             ofNullable(session.getFinish())
@@ -129,7 +129,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     }
 
     private String mapSessionFinish(Session session, Instant finish) {
-        return "<t:%d>\n%s".formatted(
+        return "<t:%d:R>\n%s".formatted(
             floorDiv(finish.toEpochMilli(), 1000),
             prettifySeconds(between(session.getStart(), finish).getSeconds())
         );
