@@ -15,8 +15,8 @@ import ru.demetrious.deus.bot.domain.MessageEmbed;
 import static java.text.MessageFormat.format;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PING;
 
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PingCommandUseCase implements PingCommandInbound {
     private final GetLatencyOutbound getLatencyOutbound;
@@ -36,5 +36,6 @@ public class PingCommandUseCase implements PingCommandInbound {
             .setDescription(format("Решал на досуге задачи тысячелетия и решил за {0}мс. Их все.", getLatencyOutbound.getLatency()))));
 
         notifyOutbound.notify(messageData);
+        log.info("Пинг успешно выведен");
     }
 }

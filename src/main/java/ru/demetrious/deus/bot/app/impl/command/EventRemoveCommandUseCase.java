@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
 import ru.demetrious.deus.bot.app.api.command.EventRemoveCommandInbound;
@@ -24,6 +25,7 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class EventRemoveCommandUseCase implements EventRemoveCommandInbound {
     private static final String TITLE_OPTION = "title";
@@ -72,5 +74,6 @@ public class EventRemoveCommandUseCase implements EventRemoveCommandInbound {
             .setColor(isRemoved ? INFO : WARNING)
             .setTimestamp(now())));
         notifyOutbound.notify(messageData);
+        log.info("Событие успешно удалено");
     }
 }

@@ -5,41 +5,42 @@ import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import java.util.List;
 import java.util.Optional;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 
 public interface Player {
     void connect();
 
     Optional<AudioItem> add(AudioReference reference, String userId);
 
-    List<AudioTrack> getQueue();
+    Result<List<AudioTrack>> getQueue();
 
     Long getRemaining();
 
-    void clear();
+    Result<Void> clear();
 
-    boolean isNotPlaying();
+    Result<Void> clear(boolean force);
 
     boolean isPlayingLive();
 
-    boolean loop();
+    Result<Boolean> loop();
 
     boolean isLooped();
 
     boolean isPaused();
 
-    boolean isNotValidIndex(Integer index);
+    Result<AudioTrack> move(Integer target, Integer position);
 
-    boolean isValidIndex(Integer index);
+    Result<Boolean> pause();
 
-    AudioTrack move(Integer target, Integer position);
-
-    boolean pause();
+    Result<Boolean> pause(boolean force);
 
     AudioTrack getPlayingTrack();
 
-    AudioTrack skip();
+    Result<AudioTrack> skip(boolean force);
 
-    void shuffle();
+    Result<AudioTrack> skip();
 
-    AudioTrack remove(Integer target);
+    Result<Void> shuffle();
+
+    Result<AudioTrack> remove(Integer target);
 }

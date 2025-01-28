@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.PublicistRemoveCommandInbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
@@ -15,6 +16,7 @@ import ru.demetrious.deus.bot.domain.MessageEmbed;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PUBLICIST_REMOVE;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PublicistRemoveCommandUseCase implements PublicistRemoveCommandInbound {
     private final RemoveGuildPublicistOutbound removeGuildPublicistOutbound;
@@ -35,5 +37,6 @@ public class PublicistRemoveCommandUseCase implements PublicistRemoveCommandInbo
         MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
             .setTitle("Канал удален")));
         notifyOutbound.notify(messageData);
+        log.info("Канал публициста успешно удален");
     }
 }

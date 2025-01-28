@@ -12,12 +12,19 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.app.api.player.ConnectOutbound;
+import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
 import ru.demetrious.deus.bot.app.impl.player.api.Player;
 import ru.demetrious.deus.bot.app.impl.player.api.Scheduler;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 
 import static dev.lavalink.youtube.YoutubeAudioSourceManager.SEARCH_PREFIX;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.IS_NOT_PLAYING;
+import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.IS_PLAYING_LIVE;
+import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.NOT_SAME_CHANNEL;
+import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.OK;
+import static ru.demetrious.deus.bot.app.impl.player.domain.Result.Status.UNBOUND;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.PlayerUtils.reduceDuration;
 
@@ -27,6 +34,7 @@ public class PlayerImpl implements Player {
     private final AudioPlayer audioPlayer;
     private final Scheduler scheduler;
     private final List<ConnectOutbound<?>> connectOutbound;
+    private final List<IsNotConnectedSameChannelOutbound<?>> isNotConnectedSameChannelOutbound;
 
     @Override
     public void connect() {
@@ -61,14 +69,18 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public List<AudioTrack> getQueue() {
-        return scheduler.getQueue();
+    public Result<List<AudioTrack>> getQueue() {
+        if (isNotPlaying()) {
+            return Result.of(IS_NOT_PLAYING);
+        }
+
+        return Result.of(scheduler.getQueue());
     }
 
     @Override
     public Long getRemaining() {
         AudioTrack playingTrack = getPlayingTrack();
-        Long queueDuration = reduceDuration(getQueue());
+        Long queueDuration = reduceDuration(getQueue().getData());
 
         if (playingTrack == null) {
             return queueDuration;
@@ -78,13 +90,24 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public void clear() {
-        scheduler.clear();
+    public Result<Void> clear() {
+        return clear(false);
     }
 
     @Override
-    public boolean isNotPlaying() {
-        return isNull(getPlayingTrack());
+    public Result<Void> clear(boolean force) {
+        if (!force) {
+            if (isNotPlaying()) {
+                return Result.of(IS_NOT_PLAYING);
+            }
+
+            if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+                return Result.of(NOT_SAME_CHANNEL);
+            }
+        }
+
+        scheduler.clear();
+        return Result.of(OK);
     }
 
     @Override
@@ -97,8 +120,20 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public boolean loop() {
-        return scheduler.setLooped(!isLooped());
+    public Result<Boolean> loop() {
+        if (isNotPlaying()) {
+            return Result.of(IS_NOT_PLAYING);
+        }
+
+        if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+            return Result.of(NOT_SAME_CHANNEL);
+        }
+
+        if (isPlayingLive()) {
+            return Result.of(IS_PLAYING_LIVE);
+        }
+
+        return Result.of(scheduler.setLooped(!isLooped()));
     }
 
     @Override
@@ -112,26 +147,43 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public boolean isNotValidIndex(Integer index) {
-        return !isValidIndex(index);
+    public Result<AudioTrack> move(Integer target, Integer position) {
+        if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+            return Result.of(NOT_SAME_CHANNEL);
+        }
+
+        if (isNotValidIndex(target) || isNotValidIndex(position)) {
+            return Result.of(UNBOUND);
+        }
+
+        return Result.of(scheduler.move(target, position));
     }
 
     @Override
-    public boolean isValidIndex(Integer index) {
-        return index >= 0 && index < scheduler.getQueue().size();
+    public Result<Boolean> pause() {
+        return pause(false);
     }
 
     @Override
-    public AudioTrack move(Integer target, Integer position) {
-        return scheduler.move(target, position);
-    }
+    public Result<Boolean> pause(boolean force) {
+        if (!force) {
+            if (isNotPlaying()) {
+                return Result.of(IS_NOT_PLAYING);
+            }
 
-    @Override
-    public boolean pause() {
+            if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+                return Result.of(NOT_SAME_CHANNEL);
+            }
+
+            if (isPlayingLive()) {
+                return Result.of(IS_PLAYING_LIVE);
+            }
+        }
+
         boolean isPause = !audioPlayer.isPaused();
 
         audioPlayer.setPaused(isPause);
-        return isPause;
+        return Result.of(isPause);
     }
 
     @Override
@@ -140,18 +192,50 @@ public class PlayerImpl implements Player {
     }
 
     @Override
-    public AudioTrack skip() {
-        return scheduler.next();
+    public Result<AudioTrack> skip(boolean force) {
+        if (!force) {
+            if (isNotPlaying()) {
+                return Result.of(IS_NOT_PLAYING);
+            }
+
+            if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+                return Result.of(NOT_SAME_CHANNEL);
+            }
+        }
+
+        return Result.of(scheduler.next());
     }
 
     @Override
-    public void shuffle() {
+    public Result<AudioTrack> skip() {
+        return skip(false);
+    }
+
+    @Override
+    public Result<Void> shuffle() {
+        if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+            return Result.of(NOT_SAME_CHANNEL);
+        }
+
+        if (isNotValidIndex(0)) {
+            return Result.of(UNBOUND);
+        }
+
         scheduler.shuffle();
+        return Result.of(OK);
     }
 
     @Override
-    public AudioTrack remove(Integer target) {
-        return scheduler.remove(target);
+    public Result<AudioTrack> remove(Integer target) {
+        if (b(isNotConnectedSameChannelOutbound).isNotConnectedSameChannel()) {
+            return Result.of(NOT_SAME_CHANNEL);
+        }
+
+        if (isNotValidIndex(target)) {
+            return Result.of(UNBOUND);
+        }
+
+        return Result.of(scheduler.remove(target));
     }
 
     // ===================================================================================================================
@@ -163,5 +247,13 @@ public class PlayerImpl implements Player {
             audioTrack.setUserData(userId);
             return audioTrack;
         };
+    }
+
+    private boolean isNotValidIndex(Integer index) {
+        return index < 0 || index >= scheduler.getQueue().size();
+    }
+
+    private boolean isNotPlaying() {
+        return isNull(getPlayingTrack());
     }
 }

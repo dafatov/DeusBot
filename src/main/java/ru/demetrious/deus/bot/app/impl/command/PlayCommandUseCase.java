@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.GetAttachmentOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.PlayCommandInbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 import ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound;
@@ -37,6 +36,7 @@ import static java.text.MessageFormat.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.IntStream.rangeClosed;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper.MAX_COMPONENTS;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PLAY;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -59,7 +59,6 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
 
     private final List<NotifyOutbound<?>> notifyOutbound;
     private final List<IsNotCanConnectOutbound<?>> isNotCanConnectOutbound;
-    private final List<GetGuildIdOutbound<?>> getGuildIdOutbound;
     private final List<GetAuthorIdOutbound<?>> getAuthorIdOutbound;
     private final GetAttachmentOptionOutbound getAttachmentOptionOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
@@ -143,9 +142,10 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
             return;
         }
 
-        final Player player = getPlayer(b(getGuildIdOutbound).getGuildId());
-        int queueSize = player.getQueue().size();
-        boolean hasLive = hasLive(player.getQueue());
+        // Блок получения данных очереди воспроизведения до добавления новых композиций
+        final Player player = getPlayer();
+        int queueSize = emptyIfNull(player.getQueue().getData()).size();
+        boolean hasLive = hasLive(player.getQueue().getData());
         Long remained = player.getRemaining();
 
         Optional<AudioItem> addedOptional = player.add(identifierOptional

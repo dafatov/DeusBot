@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.PublicistShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
@@ -17,6 +18,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PUBLICIST_SHOW;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PublicistShowCommandUseCase implements PublicistShowCommandInbound {
     private final GetGuildPublicistOutbound getGuildPublicistOutbound;
@@ -40,5 +42,6 @@ public class PublicistShowCommandUseCase implements PublicistShowCommandInbound 
                 .map("<#%s>"::formatted)
                 .orElse(EMPTY))));
         notifyOutbound.notify(messageData);
+        log.info("Каналы публициста успешно выведены");
     }
 }

@@ -8,18 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.MoveCommandInbound;
-import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
-import ru.demetrious.deus.bot.app.impl.player.api.Player;
+import ru.demetrious.deus.bot.app.impl.player.domain.Result;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.OptionData;
 
 import static java.text.MessageFormat.format;
-import static java.util.stream.Stream.of;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.MOVE;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 
@@ -32,8 +29,6 @@ public class MoveCommandUseCase extends PlayerCommand implements MoveCommandInbo
     private static final String POSITION = "position";
 
     private final GetIntegerOptionOutbound getIntegerOptionOutbound;
-    private final GetGuildIdOutbound<SlashCommandInteractionInbound> getGuildIdOutbound;
-    private final IsNotConnectedSameChannelOutbound<SlashCommandInteractionInbound> isNotConnectedSameChannelOutbound;
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
 
     @Override
@@ -61,27 +56,23 @@ public class MoveCommandUseCase extends PlayerCommand implements MoveCommandInbo
     }
 
     protected void move(Optional<Integer> position) {
-        final Player player = getPlayer(getGuildIdOutbound.getGuildId());
         Optional<Integer> target = getIntegerOptionOutbound.getIntegerOption(TARGET).map(index -> index - 1);
+        Result<AudioTrack> result = getPlayer().move(target.orElseThrow(), position.orElseThrow());
 
-        if (isNotConnectedSameChannelOutbound.isNotConnectedSameChannel()) {
-            notifyIsNotCanConnect();
-            return;
+        switch (result.getStatus()) {
+            case NOT_SAME_CHANNEL -> notifyIsNotCanConnect();
+            case UNBOUND -> notifyUnbound();
+            case OK -> {
+                MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+                    .setTitle("Целевая композиция передвинута")
+                    .setDescription(format("Композиция **{0}** протолкала всех локтями на позицию **{1}**.\nКто бы сомневался. Донатеры \\*\\*\\*\\*ые",
+                        result.getData().getInfo().title,
+                        position.map(index -> index + 1).orElseThrow()))));
+
+                notifyOutbound.notify(messageData);
+                log.info("Композиция была успешна перемещена");
+            }
+            default -> throw new IllegalArgumentException("Unexpected status player operation: %s".formatted(result.getStatus()));
         }
-
-        if (of(target, position).flatMap(Optional::stream).distinct().filter(player::isValidIndex).count() < 2) {
-            notifyUnbound();
-            return;
-        }
-
-        AudioTrack audioTrack = player.move(target.orElseThrow(), position.orElseThrow());
-        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Целевая композиция передвинута")
-            .setDescription(format("Композиция **{0}** протолкала всех локтями на позицию **{1}**.\nКто бы сомневался. Донатеры \\*\\*\\*\\*ые",
-                audioTrack.getInfo().title,
-                position.map(index -> index + 1).orElseThrow()))));
-
-        notifyOutbound.notify(messageData);
-        log.info("Композиция была успешна перемещена");
     }
 }

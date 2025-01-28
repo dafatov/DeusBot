@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.StatisticSessionCommandInbound;
@@ -28,6 +29,7 @@ import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class StatisticSessionCommandUseCase implements StatisticSessionCommandInbound {
     private static final Comparator<Session> SESSION_COMPARATOR = (a, b) -> {
@@ -74,6 +76,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
         );
 
         b(notifyOutbound).notify(messageData);
+        log.debug("Список статистики сессии успешно обновлен");
     }
 
     @Override
@@ -92,6 +95,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
         );
 
         b(notifyOutbound).notify(messageData);
+        log.info("Список статистики сессии успешно установлен");
     }
 
     // ===================================================================================================================
