@@ -1,3 +1,10 @@
+server:
+  ssl:
+    key-store: classpath:ssl/keystore.jks
+    key-store-password: ${KEY_STORE_PASSWORD}
+    keyStoreType: PKCS12
+    keyAlias: deus-bot
+
 spring:
   datasource:
     url: ${DATABASE_URL}

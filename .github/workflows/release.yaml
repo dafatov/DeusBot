@@ -131,6 +131,7 @@ jobs:
       CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
 
       # App secrets
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ANILIST_OAUTH2_ID: ${{ secrets.ANILIST_OAUTH2_ID }}
       ANILIST_OAUTH2_SECRET: ${{ secrets.ANILIST_OAUTH2_SECRET }}
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
@@ -160,7 +161,8 @@ jobs:
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
             docker container rm -f ${{ env.IMAGE_NAME }} || true
-            docker run -d -p 80:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
+            docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
+              -e KEY_STORE_PASSWORD=${{ env.KEY_STORE_PASSWORD }} \
               -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
               -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
               -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} \

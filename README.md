@@ -7,6 +7,7 @@
 #### secrets
 
 ```dotenv
+KEY_STORE_PASSWORD=
 ANILIST_OAUTH2_ID=
 ANILIST_OAUTH2_SECRET=
 DATABASE_PASSWORD=[application-local.yaml]
