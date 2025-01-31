@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.output;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -14,6 +15,7 @@ import ru.demetrious.deus.bot.app.api.interaction.ModalInteractionInbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
@@ -29,6 +31,13 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
             .map(ModalMapping::getAsString)
             .filter(StringUtils::isNotBlank)
             .toList();
+    }
+
+    @Override
+    public Optional<String> getValue(String id) {
+        return ofNullable(getInteraction().getValue(id))
+            .map(ModalMapping::getAsString)
+            .filter(StringUtils::isNotBlank);
     }
 
     @Override

@@ -1,8 +1,10 @@
 package ru.demetrious.deus.bot.app.api.modal;
 
 import java.util.List;
+import java.util.Optional;
 
-@FunctionalInterface
 public interface GetModalValuesOutbound {
     List<String> getValues();
+
+    Optional<String> getValue(String id);
 }

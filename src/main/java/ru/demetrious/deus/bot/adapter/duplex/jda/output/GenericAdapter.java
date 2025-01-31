@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.MessageDataMapper;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
+import ru.demetrious.deus.bot.app.api.interaction.DeferOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.Interaction;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.player.ConnectOutbound;
@@ -45,7 +46,7 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 @RequiredArgsConstructor
 public abstract class GenericAdapter<A extends Interaction, E extends IReplyCallback, I extends IDeferrableCallback> extends BaseAdapter<E, A>
     implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>, GetAuthorIdOutbound<A>,
-    ConnectOutbound<A> {
+    ConnectOutbound<A>, DeferOutbound<A> {
     @Autowired
     protected MessageDataMapper messageDataMapper;
 
@@ -63,6 +64,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
 
     protected abstract @NotNull I getInteraction();
 
+    @Override
     public void defer() {
         getEvent().deferReply().queue();
         log.debug("Deferred command's reply");

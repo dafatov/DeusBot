@@ -75,11 +75,11 @@ jobs:
           echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo $(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'adopt'
+          java-version: '21'
+          distribution: 'graalvm'
 
       - name: Build a container image from Spring Boot app using maven
         run: mvn spring-boot:build-image
@@ -131,7 +131,6 @@ jobs:
       CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
 
       # App secrets
-      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ANILIST_OAUTH2_ID: ${{ secrets.ANILIST_OAUTH2_ID }}
       ANILIST_OAUTH2_SECRET: ${{ secrets.ANILIST_OAUTH2_SECRET }}
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
@@ -139,6 +138,7 @@ jobs:
       DISCORD_OAUTH2_ID: ${{ secrets.DISCORD_OAUTH2_ID }}
       DISCORD_OAUTH2_SECRET: ${{ secrets.DISCORD_OAUTH2_SECRET }}
       DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       SHIKIMORI_OAUTH2_ID: ${{ secrets.SHIKIMORI_OAUTH2_ID }}
       SHIKIMORI_OAUTH2_SECRET: ${{ secrets.SHIKIMORI_OAUTH2_SECRET }}
       YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
@@ -146,6 +146,7 @@ jobs:
       ANILIST_GRAPHQL_URL: ${{ vars.ANILIST_GRAPHQL_URL }}
       ANILIST_URL: ${{ vars.ANILIST_URL }}
       APP_URL: ${{ vars.APP_URL }}
+      ARTING_URL: ${{ vars.ARTING_URL }}
       DATABASE_MAX_POOL: ${{ vars.DATABASE_MAX_POOL }}
       DATABASE_URL: ${{ vars.DATABASE_URL }}
       DISCORD_URL: ${{ vars.DISCORD_URL }}
@@ -162,7 +163,6 @@ jobs:
           script: |
             docker container rm -f ${{ env.IMAGE_NAME }} || true
             docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
-              -e KEY_STORE_PASSWORD=${{ env.KEY_STORE_PASSWORD }} \
               -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
               -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
               -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} \
@@ -170,6 +170,7 @@ jobs:
               -e DISCORD_OAUTH2_ID=${{ env.DISCORD_OAUTH2_ID }} \
               -e DISCORD_OAUTH2_SECRET=${{ env.DISCORD_OAUTH2_SECRET }} \
               -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} \
+              -e KEY_STORE_PASSWORD=${{ env.KEY_STORE_PASSWORD }} \
               -e SHIKIMORI_OAUTH2_ID=${{ env.SHIKIMORI_OAUTH2_ID }} \
               -e SHIKIMORI_OAUTH2_SECRET=${{ env.SHIKIMORI_OAUTH2_SECRET }} \
               -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} \
@@ -177,6 +178,7 @@ jobs:
               -e ANILIST_GRAPHQL_URL=${{ vars.ANILIST_GRAPHQL_URL }} \
               -e ANILIST_URL=${{ vars.ANILIST_URL }} \
               -e APP_URL=${{ vars.APP_URL }} \
+              -e ARTING_URL=${{ vars.ARTING_URL }} \
               -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} \
               -e DATABASE_URL=${{ vars.DATABASE_URL }} \
               -e DISCORD_URL=${{ vars.DISCORD_URL }} \
