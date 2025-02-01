@@ -15,6 +15,6 @@ public class TextInputComponent {
     private boolean isRequired;
 
     public enum StyleEnum {
-        SHORT
+        PARAGRAPH, SHORT
     }
 }

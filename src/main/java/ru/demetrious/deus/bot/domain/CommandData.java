@@ -23,6 +23,7 @@ public class CommandData {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum Name {
+        AI_IMAGE("ai", "image"),
         CLEAR("clear"),
         EVENT_CREATE("event", "create"),
         EVENT_HELP("event", "help"),

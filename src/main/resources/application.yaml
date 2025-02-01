@@ -78,6 +78,9 @@ feign:
     free-steam:
       url: ${FREE_STEAM_URL}
       path: /feed
+    arting:
+      url: ${ARTING_URL}
+      path: /api
 
 discord:
   token: ${DISCORD_TOKEN}
