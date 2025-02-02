@@ -5,16 +5,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.CommandDataMapper;
 import ru.demetrious.deus.bot.app.api.command.CommandInbound;
 
 @Slf4j
 @RequiredArgsConstructor
-@Profile("!local")
 @Configuration
 public class CommandsConfig {
     private final JDA jda;
@@ -23,12 +21,15 @@ public class CommandsConfig {
 
     @PostConstruct
     public void updateCommand() {
-        jda.updateCommands()
-            .submit()
-            .thenRun(() -> jda.updateCommands()
-                .addCommands(commandDataMapper.mapCommand(commandList.stream().map(CommandInbound::getData).toList()))
-                .onSuccess(commandList -> log.info("Init commands: {}", commandList))
-                .queue());
-        jda.getGuilds().stream().map(Guild::updateCommands).forEach(RestAction::queue);
+        List<CommandData> commandDataList = commandDataMapper.mapCommand(commandList.stream().map(CommandInbound::getData).toList());
+
+        jda.retrieveCommands()
+            .flatMap(CollectionUtils::isNotEmpty, c -> jda.updateCommands())
+            .onSuccess(c -> log.info("Global commands are removed"))
+            .queue();
+        jda.getGuilds().forEach(guild -> guild.updateCommands()
+            .addCommands(commandDataList)
+            .onSuccess(commandList -> log.info("Init guild({}) commands: {}", guild.getName(), commandList))
+            .queue());
     }
 }
