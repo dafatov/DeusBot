@@ -13,6 +13,8 @@ public class OptionData {
     private Type type;
     private boolean isRequired = false;
     private boolean isAutoComplete = false;
+    private Integer minValue;
+    private Integer maxValue;
     private List<OptionChoice> choices = new ArrayList<>();
 
     public enum Type {
