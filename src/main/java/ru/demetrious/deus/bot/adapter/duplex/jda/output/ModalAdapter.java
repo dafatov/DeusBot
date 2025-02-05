@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.interaction.ModalInteractionInbound;
+import ru.demetrious.deus.bot.app.api.modal.GetModalIdOutbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 
@@ -24,7 +25,7 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalInteractionEvent, ModalInteraction> implements
-    GetModalValuesOutbound {
+    GetModalValuesOutbound, GetModalIdOutbound {
     @Override
     public List<String> getValues() {
         return getInteraction().getValues().stream()
@@ -47,6 +48,11 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
 
     @Override
     public CommandData.Name getCommandName() {
-        return getName(getEvent().getModalId().split(" "));
+        return getName(getEvent().getModalId().split(DATA_DIVIDER)[0].split(" "));
+    }
+
+    @Override
+    public String getModalId() {
+        return getEvent().getModalId();
     }
 }

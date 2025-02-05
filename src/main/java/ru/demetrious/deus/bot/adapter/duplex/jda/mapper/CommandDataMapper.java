@@ -13,6 +13,7 @@ import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
@@ -44,9 +45,13 @@ public interface CommandDataMapper {
     List<net.dv8tion.jda.api.interactions.commands.build.OptionData> mapOption(List<OptionData> optionData);
 
     default net.dv8tion.jda.api.interactions.commands.build.OptionData mapOption(OptionData optionData) {
-        return new net.dv8tion.jda.api.interactions.commands.build.OptionData(mapOptionType(optionData.getType()), optionData.getName(),
+        var optionDataResult = new net.dv8tion.jda.api.interactions.commands.build.OptionData(mapOptionType(optionData.getType()), optionData.getName(),
             optionData.getDescription(), optionData.isRequired(), optionData.isAutoComplete())
             .addChoices(mapChoice(optionData.getChoices()));
+
+        ofNullable(optionData.getMinValue()).ifPresent(optionDataResult::setMinValue);
+        ofNullable(optionData.getMaxValue()).ifPresent(optionDataResult::setMaxValue);
+        return optionDataResult;
     }
 
     List<Command.Choice> mapChoice(List<OptionChoice> choices);
