@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.LF;
 import static ru.demetrious.deus.bot.app.api.modal.GetModalIdOutbound.DATA_DIVIDER;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.AI_IMAGE;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.PARAGRAPH;
@@ -94,6 +96,14 @@ public class AiImageCommandUseCase implements AiImageCommandInbound {
                 .filter(Optional::isPresent)
                 .flatMap(Optional::stream)
                 .toList();
+        } catch (CompletionException e) {
+            MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+                .setColor(ERROR)
+                .setTitle("Ошибка взаимодействия")));
+
+            b(notifyOutbound).notify(messageData);
+            log.error("Ошибка взаимодействия при генерации изображений", e.getCause());
+            return;
         }
 
         MessageData messageData = new MessageData();
