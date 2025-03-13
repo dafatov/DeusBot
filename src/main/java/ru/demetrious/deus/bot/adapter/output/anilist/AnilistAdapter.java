@@ -10,22 +10,22 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation.DeleteMediaListEntryAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation.SaveMediaListEntryAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.MediaAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.MediaListCollectionAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.PageAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionRsAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionRsAnilist.Lists;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionRsAnilist.Lists.Entries;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionRsAnilist.Lists.Entries.Media;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.PageMediaListRsAnilist;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation.DeleteMediaListEntryMutation;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation.SaveMediaListEntryMutation;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.MediaListCollectionQuery;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.MediaQuery;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.query.PageQuery;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionResponse;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionResponse.Lists;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionResponse.Lists.Entries;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.MediaListCollectionResponse.Lists.Entries.Media;
+import ru.demetrious.deus.bot.adapter.output.anilist.dto.response.PageMediaListResponse;
+import ru.demetrious.deus.bot.adapter.output.anilist.mapper.AnimeAnilistMapper;
 import ru.demetrious.deus.bot.app.api.anime.ImportAnimeOutbound;
+import ru.demetrious.deus.bot.domain.Anime;
 import ru.demetrious.deus.bot.domain.ImportAnimeContext;
+import ru.demetrious.deus.bot.domain.graphql.Request;
 
-import static java.lang.Double.parseDouble;
-import static java.lang.Integer.parseInt;
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -33,15 +33,10 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist.createQueries;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist.createQuery;
 import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.COMPLETED;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.CURRENT;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.DROPPED;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.PAUSED;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.PLANNING;
-import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.REPEATING;
 import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaTypeAnilist.ANIME;
+import static ru.demetrious.deus.bot.domain.graphql.Request.createQueries;
+import static ru.demetrious.deus.bot.domain.graphql.Request.createQuery;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 
 @Slf4j
@@ -53,13 +48,14 @@ public class AnilistAdapter implements ImportAnimeOutbound {
     private static final int PER_REQUEST = 150;
 
     private final AnilistClient anilistClient;
+    private final AnimeAnilistMapper animeAnilistMapper;
 
     @Override
-    public ImportAnimeContext execute(List<Map<String, String>> targetAnimeList, Integer userId) {
+    public ImportAnimeContext execute(List<Anime> targetAnimeList, Integer userId) {
         Map<Integer, Entries> oldAnimeMap = getOldAnimeList(userId);
         List<Entries> changedAndNewAnimes = new ArrayList<>();
 
-        targetAnimeList.stream().map(this::mapTargetAnime).forEach(anime -> {
+        targetAnimeList.stream().map(animeAnilistMapper::map).forEach(anime -> {
             if (!anime.equals(oldAnimeMap.remove(anime.getMedia().getIdMal()))) {
                 changedAndNewAnimes.add(anime);
             }
@@ -77,7 +73,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
         if (isNotEmpty(changedAndNewAnimes)) {
             partition(changedAndNewAnimes, PER_REQUEST).stream()
                 .map(this::mapSaveMediaMutations)
-                .map(RequestAnilist::createMutations)
+                .map(Request::createMutations)
                 .forEach(anilistClient::execute);
             log.info("Обновлены аниме для пользователя {}: {}", userId, changedAndNewAnimes);
         }
@@ -87,7 +83,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
             partition(oldAnimeList, PER_REQUEST).stream()
                 .map(this::mapDeleteMediaMutations)
-                .map(RequestAnilist::createMutations)
+                .map(Request::createMutations)
                 .forEach(anilistClient::execute);
             log.info("Удалены аниме для пользователя {}: {}", userId, oldAnimeList);
         }
@@ -101,20 +97,20 @@ public class AnilistAdapter implements ImportAnimeOutbound {
     // = Implementation
     // ===================================================================================================================
 
-    private Map<String, DeleteMediaListEntryAnilist> mapDeleteMediaMutations(List<Entries> entriesList) {
+    private Map<String, DeleteMediaListEntryMutation> mapDeleteMediaMutations(List<Entries> entriesList) {
         return entriesList.stream()
-            .map(entries -> new DeleteMediaListEntryAnilist(entries.getId()))
+            .map(entries -> new DeleteMediaListEntryMutation(entries.getId()))
             .collect(toMap(j -> RANDOM_KEY_SUPPLIER.get(), identity()));
     }
 
-    private Map<String, SaveMediaListEntryAnilist> mapSaveMediaMutations(List<Entries> entriesList) {
+    private Map<String, SaveMediaListEntryMutation> mapSaveMediaMutations(List<Entries> entriesList) {
         return entriesList.stream()
             .flatMap(this::mapSaveMediaMutation)
             .collect(toMap(h -> RANDOM_KEY_SUPPLIER.get(), identity(), (a, b) -> a, LinkedHashMap::new));
     }
 
-    private Stream<SaveMediaListEntryAnilist> mapSaveMediaMutation(Entries entries) {
-        SaveMediaListEntryAnilist saveMediaListEntryAnilist = new SaveMediaListEntryAnilist(
+    private Stream<SaveMediaListEntryMutation> mapSaveMediaMutation(Entries entries) {
+        SaveMediaListEntryMutation saveMediaListEntryAnilist = new SaveMediaListEntryMutation(
             entries.getStatus(),
             entries.getMedia().getId(),
             entries.getProgress(),
@@ -124,7 +120,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
         if (COMPLETED == entries.getStatus() && entries.getProgress() < entries.getMedia().getEpisodes()) {
             log.debug("Added duplicate mutation for idMal={}", entries.getMedia().getIdMal());
-            return Stream.of(saveMediaListEntryAnilist, new SaveMediaListEntryAnilist(
+            return Stream.of(saveMediaListEntryAnilist, new SaveMediaListEntryMutation(
                 null,
                 entries.getMedia().getId(),
                 entries.getProgress(),
@@ -137,47 +133,28 @@ public class AnilistAdapter implements ImportAnimeOutbound {
     }
 
     private Map<Integer, Integer> getExistingNewIdsMap(List<Entries> changedAndNewAnimes) {
-        Map<String, PageAnilist> anilistMap = partition(changedAndNewAnimes, PER_PAGE).stream()
+        Map<String, PageQuery> anilistMap = partition(changedAndNewAnimes, PER_PAGE).stream()
             .map(entriesList -> entriesList.stream().map(Entries::getMedia).map(Media::getIdMal).toList())
-            .map(mediaIdList -> new MediaAnilist(ANIME, mediaIdList))
-            .map(mediaAnilist -> new PageAnilist(mediaAnilist, 1, PER_PAGE))
+            .map(mediaIdList -> new MediaQuery(ANIME, mediaIdList))
+            .map(mediaAnilist -> new PageQuery(mediaAnilist, 1, PER_PAGE))
             .collect(toMap(m -> RANDOM_KEY_SUPPLIER.get(), identity()));
 
         return anilistClient.execute(createQueries(anilistMap))
             .getData().values().stream()
-            .map(t -> getMapper().convertValue(t, PageMediaListRsAnilist.class))
-            .map(PageMediaListRsAnilist::getMedia)
+            .map(t -> getMapper().convertValue(t, PageMediaListResponse.class))
+            .map(PageMediaListResponse::getMedia)
             .flatMap(Collection::stream)
-            .collect(toMap(PageMediaListRsAnilist.Media::getIdMal, PageMediaListRsAnilist.Media::getId));
+            .collect(toMap(PageMediaListResponse.Media::getIdMal, PageMediaListResponse.Media::getId));
     }
 
     private Map<Integer, Entries> getOldAnimeList(Integer userId) {
         String key = RANDOM_KEY_SUPPLIER.get();
 
-        return anilistClient.execute(createQuery(key, new MediaListCollectionAnilist(userId, ANIME)))
-            .get(key, MediaListCollectionRsAnilist.class)
+        return anilistClient.execute(createQuery(key, new MediaListCollectionQuery(userId, ANIME)))
+            .get(key, MediaListCollectionResponse.class)
             .getLists().stream()
             .map(Lists::getEntries)
             .flatMap(Collection::stream)
             .collect(toMap(oldAnime -> oldAnime.getMedia().getIdMal(), identity()));
-    }
-
-    private Entries mapTargetAnime(Map<String, String> animeProperties) {
-        return new Entries(
-            null,
-            new Media(null, parseInt(animeProperties.get("series_animedb_id")), parseInt(animeProperties.get("series_episodes"))),
-            parseInt(animeProperties.get("my_watched_episodes")),
-            parseInt(animeProperties.get("my_times_watched")),
-            parseDouble(animeProperties.get("my_score")),
-            switch (animeProperties.get("shiki_status")) {
-                case "Completed" -> COMPLETED;
-                case "Dropped" -> DROPPED;
-                case "On-Hold" -> PAUSED;
-                case "Plan to Watch" -> PLANNING;
-                case "Watching" -> CURRENT;
-                case "Rewatching" -> REPEATING;
-                default -> throw new IllegalStateException("Unexpected value: " + animeProperties.get("shiki_status"));
-            }
-        );
     }
 }

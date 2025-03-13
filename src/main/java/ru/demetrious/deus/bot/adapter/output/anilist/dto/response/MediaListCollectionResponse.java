@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.ResponseRsAnilist;
 import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist;
+import ru.demetrious.deus.bot.domain.graphql.ResponseSerialize;
 
 @Data
-public class MediaListCollectionRsAnilist implements ResponseRsAnilist {
+public class MediaListCollectionResponse implements ResponseSerialize {
     private List<Lists> lists;
 
     @Data

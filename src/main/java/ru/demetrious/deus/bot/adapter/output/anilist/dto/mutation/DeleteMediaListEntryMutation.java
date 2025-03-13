@@ -1,13 +1,13 @@
 package ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation;
 
 import lombok.AllArgsConstructor;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.MutationAnilist;
+import ru.demetrious.deus.bot.domain.graphql.Mutation;
 
 /**
  * GraphQl mutation dto
  */
 @AllArgsConstructor
-public class DeleteMediaListEntryAnilist implements MutationAnilist {
+public class DeleteMediaListEntryMutation implements Mutation {
     private Integer id;
 
     @Override

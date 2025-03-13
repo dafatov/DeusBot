@@ -1,9 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,15 +102,14 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
             }
         }
 
-        Map<String, ?> animeListXml = getAnimeOutbound.getAnimeListXml();
         MessageData messageData = switch (method) {
             case METHOD_CHOICE_FILE -> new MessageData()
                 .setFiles(List.of(new MessageFile()
-                    .setData(getBytes(animeListXml))
+                    .setData(getAnimeListXml())
                     .setName("%s_animes.xml".formatted(shikimoriUser.get().getPrincipalName()))));
             case METHOD_CHOICE_ANILIST -> {
                 String anilistPrincipalName = anilistUser.get().getPrincipalName();
-                ImportAnimeContext importAnimeContext = importAnimeOutbound.execute(getAnimeList(animeListXml), parseInt(anilistPrincipalName));
+                ImportAnimeContext importAnimeContext = importAnimeOutbound.execute(getAnimeOutbound.getAnimeList(), parseInt(anilistPrincipalName));
 
                 yield new MessageData().setEmbeds(List.of(new MessageEmbed()
                     .setColor(MessageEmbed.ColorEnum.INFO)
@@ -135,24 +132,11 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
     // = Implementation
     // ===================================================================================================================
 
-    private byte[] getBytes(Map<String, ?> animeListXml) {
+    private byte[] getAnimeListXml() {
         try {
-            (getAnimeList(animeListXml)).forEach(stringStringLinkedHashMap -> stringStringLinkedHashMap.putAll(Map.of(
-                "my_start_date", List.of("0000-00-00"),
-                "my_finish_date", List.of("0000-00-00")
-            )));
-
-            return new XmlMapper()
-                .writerWithDefaultPrettyPrinter()
-                .withRootName("myanimelist")
-                .writeValueAsBytes(animeListXml);
+            return getAnimeOutbound.getAnimeListXml();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> List<Map<String, T>> getAnimeList(Map<String, ?> animeListXml) {
-        return (List<Map<String, T>>) animeListXml.get("anime");
     }
 }
