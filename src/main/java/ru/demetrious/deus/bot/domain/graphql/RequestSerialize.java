@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.dto;
+package ru.demetrious.deus.bot.domain.graphql;
 
 @FunctionalInterface
 public interface RequestSerialize {

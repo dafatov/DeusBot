@@ -1,11 +1,11 @@
 package ru.demetrious.deus.bot.adapter.output.anilist.dto.query;
 
 import lombok.AllArgsConstructor;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.QueryAnilist;
+import ru.demetrious.deus.bot.domain.graphql.Query;
 
 @AllArgsConstructor
-public class PageAnilist implements QueryAnilist {
-    private QueryAnilist query;
+public class PageQuery implements Query {
+    private Query query;
     private Integer page;
     private Integer perPage;
 

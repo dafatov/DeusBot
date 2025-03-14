@@ -1,13 +1,13 @@
 package ru.demetrious.deus.bot.adapter.output.shikimori;
 
-import java.util.Map;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import ru.demetrious.deus.bot.adapter.output.shikimori.dto.UserDto;
+import org.springframework.web.bind.annotation.PostMapping;
+import ru.demetrious.deus.bot.domain.graphql.Request;
+import ru.demetrious.deus.bot.domain.graphql.Response;
 import ru.demetrious.deus.bot.fw.config.feign.FeignConfig;
 
-import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.SHIKIMORI_REGISTRATION_ID;
 
 @FeignClient(
@@ -17,9 +17,8 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.S
     configuration = FeignConfig.class
 )
 public interface ShikimoriClient {
-    @GetMapping("/api/users/whoami")
-    UserDto getMe();
-
-    @GetMapping(value = "/{nickname}/list_export/animes.xml", produces = APPLICATION_XML_VALUE)
-    Map<String, ?> getAnimeListXml(@PathVariable("nickname") String nickname);
+    @PostMapping
+    @RateLimiter(name = "shikimori")
+    @Retry(name = "shikimori")
+    Response execute(Request requestShikimori);
 }

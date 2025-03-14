@@ -71,7 +71,7 @@ feign:
   svc:
     shikimori:
       url: ${SHIKIMORI_URL}
-      path: /
+      path: ${SHIKIMORI_GRAPHQL_PATH}
     anilist:
       url: ${ANILIST_GRAPHQL_URL}
       path: /
@@ -81,6 +81,20 @@ feign:
     arting:
       url: ${ARTING_URL}
       path: /api
+
+resilience4j:
+  ratelimiter:
+    instances:
+      shikimori:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+  retry:
+    instances:
+      shikimori:
+        wait-duration: 1s
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
 
 discord:
   token: ${DISCORD_TOKEN}

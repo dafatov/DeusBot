@@ -1,8 +1,11 @@
 package ru.demetrious.deus.bot.app.api.anime;
 
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.List;
+import ru.demetrious.deus.bot.domain.Anime;
 
-@FunctionalInterface
 public interface GetAnimeOutbound {
-    Map<String, ?> getAnimeListXml();
+    List<Anime> getAnimeList();
+
+    byte[] getAnimeListXml() throws JsonProcessingException;
 }
