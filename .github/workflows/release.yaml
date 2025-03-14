@@ -151,6 +151,7 @@ jobs:
       DATABASE_URL: ${{ vars.DATABASE_URL }}
       DISCORD_URL: ${{ vars.DISCORD_URL }}
       FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
+      SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
 
     steps:
@@ -183,5 +184,6 @@ jobs:
               -e DATABASE_URL=${{ vars.DATABASE_URL }} \
               -e DISCORD_URL=${{ vars.DISCORD_URL }} \
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
+              -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
             ${{ needs.install.outputs.url }}

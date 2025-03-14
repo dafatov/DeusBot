@@ -3,8 +3,8 @@ package ru.demetrious.deus.bot.adapter.output.anilist.dto.mutation;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.MutationAnilist;
 import ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist;
+import ru.demetrious.deus.bot.domain.graphql.Mutation;
 
 import static java.lang.String.join;
 import static java.util.Optional.ofNullable;
@@ -13,7 +13,7 @@ import static java.util.Optional.ofNullable;
  * GraphQl mutation dto
  */
 @AllArgsConstructor
-public class SaveMediaListEntryAnilist implements MutationAnilist {
+public class SaveMediaListEntryMutation implements Mutation {
     private MediaListStatusAnilist status;
     private Integer mediaId;
     private Integer progress;

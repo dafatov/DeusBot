@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.output.anilist.config;
+package ru.demetrious.deus.bot.fw.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -6,28 +6,28 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestAnilist;
-import ru.demetrious.deus.bot.adapter.output.anilist.dto.RequestSerialize;
+import ru.demetrious.deus.bot.domain.graphql.Request.RequestInner;
+import ru.demetrious.deus.bot.domain.graphql.RequestSerialize;
 
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
-public class RequestAnilistSerializer extends StdSerializer<RequestAnilist.QueryAnilist> {
+public class RequestSerializer extends StdSerializer<RequestInner> {
     @SuppressWarnings("unused")
-    public RequestAnilistSerializer() {
+    public RequestSerializer() {
         this(null);
     }
 
-    public RequestAnilistSerializer(Class<RequestAnilist.QueryAnilist> t) {
+    public RequestSerializer(Class<RequestInner> t) {
         super(t);
     }
 
     @Override
-    public void serialize(RequestAnilist.QueryAnilist queryAnilist, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+    public void serialize(RequestInner requestInner, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
         throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
-        serialize(stringBuilder, queryAnilist.getQuery(), "query");
-        serialize(stringBuilder, queryAnilist.getMutation(), "mutation");
+        serialize(stringBuilder, requestInner.getQuery(), "query");
+        serialize(stringBuilder, requestInner.getMutation(), "mutation");
 
         jsonGenerator.writeRawValue(stringBuilder.toString());
     }
