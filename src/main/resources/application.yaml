@@ -6,6 +6,12 @@ server:
     keyAlias: deus-bot
 
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: basic
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
@@ -85,16 +91,28 @@ feign:
 resilience4j:
   ratelimiter:
     instances:
-      shikimori:
-        limitForPeriod: 5
+      shikimori-rps:
+        limitForPeriod: 4
         limitRefreshPeriod: 1s
+        timeoutDuration: 0
+      shikimori-rpm:
+        limitForPeriod: 80
+        limitRefreshPeriod: 1m
         timeoutDuration: 0
   retry:
     instances:
-      shikimori:
+      shikimori-rps:
         wait-duration: 1s
         retry-exceptions:
           - io.github.resilience4j.ratelimiter.RequestNotPermitted
+      shikimori-rpm:
+        wait-duration: 1m
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+
+logging:
+  level:
+    ru.demetrious.deus.bot: debug
 
 discord:
   token: ${DISCORD_TOKEN}
