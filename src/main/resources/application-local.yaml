@@ -4,7 +4,7 @@ spring:
       client:
         config:
           default:
-            logger-level: FULL
+            logger-level: basic
   datasource:
     url: jdbc:postgresql://localhost:5432/deus-bot
     username: postgres
@@ -12,17 +12,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
 
 logging:
   level:
-    ru.demetrious.deus.bot: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    com.sedmelluq.discord.lavaplayer: DEBUG
-    dev.lavalink.youtube: DEBUG
+    ru.demetrious.deus.bot: debug
+    org.hibernate.orm.jdbc.bind: info
+    com.sedmelluq.discord.lavaplayer: info
+    dev.lavalink.youtube: info
 
 devs:
   ids: ${DEVS_DISCORD_IDS:}

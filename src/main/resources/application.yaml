@@ -83,16 +83,25 @@ feign:
       path: /api
 
 resilience4j:
+  # 80% from api doc values
   ratelimiter:
     instances:
-      shikimori:
-        limitForPeriod: 5
+      shikimori-rps:
+        limitForPeriod: 4
         limitRefreshPeriod: 1s
+        timeoutDuration: 0
+      shikimori-rpm:
+        limitForPeriod: 72
+        limitRefreshPeriod: 1m
         timeoutDuration: 0
   retry:
     instances:
-      shikimori:
+      shikimori-rps:
         wait-duration: 1s
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+      shikimori-rpm:
+        wait-duration: 1m
         retry-exceptions:
           - io.github.resilience4j.ratelimiter.RequestNotPermitted
 
