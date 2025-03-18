@@ -1,55 +1,22 @@
-name: Release
+name: Pre-release
 on:
   workflow_dispatch:
     inputs:
-      semver:
+      operation:
         required: true
         type: choice
-        default: patch
-        description: Semver options to bump version while releasing
+        default: deploy
+        description: What operation to start
         options:
-          - debug
-          - patch
-          - minor
-          - major
+          - deploy
+          - stop
+          - restart
 
 env:
-  IMAGE_NAME: deus-bot
+  IMAGE_NAME: deus-bot-test
+  LOCAL_IMAGE_NAME: deus-bot
 
 jobs:
-  bump:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    outputs:
-      version: ${{ steps.bump.outputs.version }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Bump version
-        id: bump
-        run: |
-          chmod +x ./.script/bump.sh
-          ./.script/bump.sh ${{ inputs.semver }}
-          echo ${{ steps.bump.outputs.version }}
-        shell: bash
-
-      - name: Update git
-        run: |
-          git config user.name "$(git log -n 1 --pretty=format:%an)"
-          git config user.email "$(git log -n 1 --pretty=format:%ae)"
-          git reset --soft HEAD~1
-          git add pom.xml
-          git commit --reuse-message=ORIG_HEAD
-          git push --force
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   install:
     runs-on: ubuntu-latest
 
@@ -57,21 +24,16 @@ jobs:
       contents: read
       packages: write
 
-    needs: bump
-
     outputs:
       url: ${{ steps.getImageUrl.outputs.url }}
+
+    if: contains(inputs.operation, 'deploy')
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Pull new version
         run: git pull --rebase
-
-      - name: Check new version
-        run: |
-          echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo $(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -84,10 +46,10 @@ jobs:
 
       - name: Set image url output variable
         id: getImageUrl
-        run: echo "url=ghcr.io/${GITHUB_REPOSITORY%/*}/${{ env.IMAGE_NAME }}:${{ needs.bump.outputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "url=ghcr.io/${GITHUB_REPOSITORY%/*}/${{ env.IMAGE_NAME }}:test" >> $GITHUB_OUTPUT
 
       - name: Tag docker image
-        run: docker tag ${{ env.IMAGE_NAME }}:${{ needs.bump.outputs.version }} ${{ steps.getImageUrl.outputs.url }}
+        run: docker tag ${{ env.LOCAL_IMAGE_NAME }}:$(mvn help:evaluate -Dexpression=revision -q -DforceStdout) ${{ steps.getImageUrl.outputs.url }}
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -95,32 +57,33 @@ jobs:
       - name: Publish to GitHub Container Registry
         run: docker push ${{ steps.getImageUrl.outputs.url }}
 
-  release:
+  stop:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
-    needs:
-      - bump
-      - install
+    env:
+      # Build secrets
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
-      - uses: ncipollo/release-action@v1
+      - name: Run multiple remote commands via SSH
+        uses: appleboy/ssh-action@v1.1.0
         with:
-          body: Docker-image можно найти по [ссылке](https://${{ needs.install.outputs.url }})
-          tag: v${{ needs.bump.outputs.version }}
-          generateReleaseNotes: true
-          allowUpdates: true
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            docker container rm -f ${{ env.IMAGE_NAME }} || true
 
   deploy:
     runs-on: ubuntu-latest
 
     needs:
       - install
-      - release
+      - stop
 
-    environment: 'production'
+    environment: 'pre-production'
 
     env:
       # Build secrets
@@ -129,6 +92,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       # Build vars
       CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
+      GITHUB_ACTOR: ${{ github.actor }}
 
       # App secrets
       ANILIST_OAUTH2_ID: ${{ secrets.ANILIST_OAUTH2_ID }}
@@ -154,6 +118,8 @@ jobs:
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
 
+    if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && !failure() }}
+
     steps:
       - name: Run multiple remote commands via SSH
         uses: appleboy/ssh-action@v1.1.0
@@ -162,8 +128,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            docker container rm -f ${{ env.IMAGE_NAME }} || true
-            docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
+            docker run -d -p 8080:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
               -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
               -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
               -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} \
@@ -186,4 +151,4 @@ jobs:
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
-            ${{ needs.install.outputs.url }}
+            ghcr.io/${{ env.GITHUB_ACTOR }}/${{ env.IMAGE_NAME }}:test
