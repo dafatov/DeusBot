@@ -26,6 +26,14 @@ public class RateLimiterWrapper<T> {
             .limitForPeriod(4)
             .limitRefreshPeriod(ofSeconds(1))
             .timeoutDuration(ofSeconds(2))
+            .drainPermissionsOnResult(either -> {
+                try {
+                    log.info("rps either={}", JacksonUtils.getMapper().writeValueAsString(either));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                return false;
+            })
             .build())
         .addRateLimiterConfig("rpm", RateLimiterConfig.custom()
             .limitForPeriod(72)
@@ -33,7 +41,7 @@ public class RateLimiterWrapper<T> {
             .timeoutDuration(ofMinutes(2))
             .drainPermissionsOnResult(either -> {
                 try {
-                    log.info("either={}", JacksonUtils.getMapper().writeValueAsString(either));
+                    log.info("rpm either={}", JacksonUtils.getMapper().writeValueAsString(either));
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
