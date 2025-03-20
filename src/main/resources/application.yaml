@@ -111,6 +111,7 @@ resilience4j:
 
 logging:
   level:
+    ru.demetrious.deus.bot: debug
     io.github.resilience4j: trace
 
 discord:
