@@ -109,6 +109,10 @@ resilience4j:
         retry-exceptions:
           - io.github.resilience4j.ratelimiter.RequestNotPermitted
 
+logging:
+  level:
+    io.github.resilience4j: trace
+
 discord:
   token: ${DISCORD_TOKEN}
 
