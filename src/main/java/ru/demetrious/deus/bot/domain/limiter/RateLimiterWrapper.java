@@ -1,7 +1,6 @@
 package ru.demetrious.deus.bot.domain.limiter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryConfig;
@@ -59,9 +58,20 @@ public class RateLimiterWrapper<T> {
                     LIMITER_REGISTRY.rateLimiter("rps"), function)));
         return f -> {
             try {
-                RateLimiter.Metrics rps = LIMITER_REGISTRY.rateLimiter("rps").getMetrics();
-                RateLimiter.Metrics rpm = LIMITER_REGISTRY.rateLimiter("rpm").getMetrics();
-                log.info("rps={av={};wt={}}; rpm={av={};wt={}}", rps.getAvailablePermissions(), rps.getNumberOfWaitingThreads(), rpm.getAvailablePermissions(), rpm.getNumberOfWaitingThreads());
+                LIMITER_REGISTRY.rateLimiter("rps").getEventPublisher()
+                    .onSuccess(event -> {
+                        log.info("rps success={}", event);
+                    })
+                    .onFailure(event -> {
+                        log.info("rps failure={}", event);
+                    });
+                LIMITER_REGISTRY.rateLimiter("rpm").getEventPublisher()
+                    .onSuccess(event -> {
+                        log.info("rpm success={}", event);
+                    })
+                    .onFailure(event -> {
+                        log.info("rpm failure={}", event);
+                    });
                 return raFunction.apply(f);
             } catch (Exception e) {
                 throw new RuntimeException(e);
