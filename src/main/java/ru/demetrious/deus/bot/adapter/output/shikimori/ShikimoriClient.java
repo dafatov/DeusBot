@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.output.shikimori;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,8 +18,10 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.S
     configuration = FeignConfig.class
 )
 public interface ShikimoriClient {
+    // Вроде рабочий вариант, если еще прикрутить rpm
+    @RateLimiter(name = "test")
+    @Bulkhead(name = "test")
+    @Retry(name = "test")
     @PostMapping
-    @RateLimiter(name = "shikimori")
-    @Retry(name = "shikimori")
     Response execute(Request requestShikimori);
 }

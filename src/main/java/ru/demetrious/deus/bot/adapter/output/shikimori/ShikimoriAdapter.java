@@ -17,6 +17,7 @@ import ru.demetrious.deus.bot.app.api.anime.GetAnimeOutbound;
 import ru.demetrious.deus.bot.domain.Anime;
 import ru.demetrious.deus.bot.domain.graphql.Request;
 import ru.demetrious.deus.bot.domain.graphql.Response;
+import ru.demetrious.deus.bot.domain.limiter.RateLimiterWrapper;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -36,6 +37,7 @@ public class ShikimoriAdapter implements GetAnimeOutbound {
 
     private final ShikimoriClient shikimoriClient;
     private final AnimeShikimoriMapper animeShikimoriMapper;
+    private final RateLimiterWrapper<ShikimoriClient> rateLimiterWrapper;
 
     @Override
     public List<Anime> getAnimeList() {
@@ -56,7 +58,7 @@ public class ShikimoriAdapter implements GetAnimeOutbound {
     private List<UserRateResponse> getUserRateResponseList() {
         String key = RANDOM_KEY_SUPPLIER.get();
         Request query = createQuery(key, new CurrentUserQuery());
-        Integer userId = shikimoriClient.execute(query).get(key, CurrentUserResponse.class).getId();
+        Integer userId = rateLimiterWrapper.wrap(shikimoriClient::execute).apply(query).get(key, CurrentUserResponse.class).getId();
         List<UserRateResponse> userRateResponseList = new ArrayList<>();
 
         List<UserRateResponse> userRateResponseChunk;
@@ -65,7 +67,7 @@ public class ShikimoriAdapter implements GetAnimeOutbound {
             Map<String, UserRatesQuery> userRatesQueries = range(page, page += PER_CHUNK)
                 .mapToObj(i -> new UserRatesQuery(userId, i, PER_PAGE, ANIME))
                 .collect(toMap(q -> RANDOM_KEY_SUPPLIER.get(), identity()));
-            Response response = shikimoriClient.execute(createQueries(userRatesQueries));
+            Response response = rateLimiterWrapper.wrap(shikimoriClient::execute).apply(createQueries(userRatesQueries));
 
             userRateResponseChunk = response.getPowerList(UserRateResponse.class).stream()
                 .flatMap(Collection::stream)

@@ -21,4 +21,5 @@ public class Log {
     @Column(length = 0)
     private String message;
     private Instant timestamp;
+    private String thread;
 }

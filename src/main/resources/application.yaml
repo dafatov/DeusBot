@@ -82,19 +82,58 @@ feign:
       url: ${ARTING_URL}
       path: /api
 
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    ratelimiters:
+      enabled: true
 resilience4j:
+  # 80% from api doc values
   ratelimiter:
     instances:
-      shikimori:
-        limitForPeriod: 5
+      shikimori-rps:
+        limitForPeriod: 4
         limitRefreshPeriod: 1s
         timeoutDuration: 0
+      shikimori-rpm:
+        limitForPeriod: 72
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0
+      test:
+        timeoutDuration: 2s
+        limitRefreshPeriod: 1s
+        limitForPeriod: 4
+        register-health-indicator: true
+  bulkhead:
+    instances:
+      test:
+        max-wait-duration: 0
+        max-concurrent-calls: 1
   retry:
     instances:
-      shikimori:
+      shikimori-rps:
         wait-duration: 1s
         retry-exceptions:
           - io.github.resilience4j.ratelimiter.RequestNotPermitted
+      shikimori-rpm:
+        wait-duration: 1m
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+      test:
+        enable-exponential-backoff: true
+        enable-randomized-wait: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 5m
+        wait-duration: 2s
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+
+logging:
+  level:
+    io.github.resilience4j: trace
 
 discord:
   token: ${DISCORD_TOKEN}
