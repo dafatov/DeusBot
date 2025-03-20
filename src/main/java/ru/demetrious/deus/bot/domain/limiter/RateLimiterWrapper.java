@@ -1,15 +1,14 @@
 package ru.demetrious.deus.bot.domain.limiter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
+import java.time.Instant;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.utils.JacksonUtils;
 
 import static io.github.resilience4j.core.IntervalFunction.ofExponentialRandomBackoff;
 import static io.github.resilience4j.ratelimiter.RateLimiter.decorateFunction;
@@ -26,27 +25,11 @@ public class RateLimiterWrapper<T> {
             .limitForPeriod(4)
             .limitRefreshPeriod(ofSeconds(1))
             .timeoutDuration(ofSeconds(2))
-            .drainPermissionsOnResult(either -> {
-                try {
-                    log.info("rps either={}", JacksonUtils.getMapper().writeValueAsString(either));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-                return false;
-            })
             .build())
         .addRateLimiterConfig("rpm", RateLimiterConfig.custom()
             .limitForPeriod(72)
             .limitRefreshPeriod(ofMinutes(1))
             .timeoutDuration(ofMinutes(2))
-            .drainPermissionsOnResult(either -> {
-                try {
-                    log.info("rpm either={}", JacksonUtils.getMapper().writeValueAsString(either));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-                return false;
-            })
             .build())
         .build();
     //private final List<Limiter<T>> limiterList;
@@ -64,22 +47,10 @@ public class RateLimiterWrapper<T> {
             retryRegistry.retry("retry"), decorateFunction(
                 LIMITER_REGISTRY.rateLimiter("rpm"), decorateFunction(
                     LIMITER_REGISTRY.rateLimiter("rps"), function)));
+
         return f -> {
             try {
-                LIMITER_REGISTRY.rateLimiter("rps").getEventPublisher()
-                    .onSuccess(event -> {
-                        log.info("rps success={}", event);
-                    })
-                    .onFailure(event -> {
-                        log.info("rps failure={}", event);
-                    });
-                LIMITER_REGISTRY.rateLimiter("rpm").getEventPublisher()
-                    .onSuccess(event -> {
-                        log.info("rpm success={}", event);
-                    })
-                    .onFailure(event -> {
-                        log.info("rpm failure={}", event);
-                    });
+                log.info("called in {}", Instant.now());
                 return raFunction.apply(f);
             } catch (Exception e) {
                 throw new RuntimeException(e);
