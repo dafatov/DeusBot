@@ -94,6 +94,10 @@ resilience4j:
         limitForPeriod: 72
         limitRefreshPeriod: 1m
         timeoutDuration: 0
+      test:
+        timeoutDuration: 5s
+        limitRefreshPeriod: 1s
+        limitForPeriod: 4
   retry:
     instances:
       shikimori-rps:

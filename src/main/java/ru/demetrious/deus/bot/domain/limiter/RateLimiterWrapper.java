@@ -1,60 +1,31 @@
 package ru.demetrious.deus.bot.domain.limiter;
 
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
-import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.RetryRegistry;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.time.Instant;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static io.github.resilience4j.core.IntervalFunction.ofExponentialRandomBackoff;
-import static io.github.resilience4j.ratelimiter.RateLimiter.decorateFunction;
-import static io.github.resilience4j.retry.Retry.decorateFunction;
-import static java.time.Duration.ofMinutes;
-import static java.time.Duration.ofSeconds;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class RateLimiterWrapper<T> {
-    private static final RateLimiterRegistry LIMITER_REGISTRY = RateLimiterRegistry.custom()
-        .addRateLimiterConfig("rps", RateLimiterConfig.custom()
-            .limitForPeriod(4)
-            .limitRefreshPeriod(ofSeconds(1))
-            .timeoutDuration(ofSeconds(2))
-            .build())
-        .addRateLimiterConfig("rpm", RateLimiterConfig.custom()
-            .limitForPeriod(72)
-            .limitRefreshPeriod(ofMinutes(1))
-            .timeoutDuration(ofMinutes(2))
-            .build())
-        .build();
     //private final List<Limiter<T>> limiterList;
 
     public <A, R> Function<A, R> wrap(Function<A, R> function) {
-        RetryRegistry retryRegistry = RetryRegistry.custom()
-            .addRetryConfig("retry", RetryConfig.custom()
-                .maxAttempts(6)
-                .intervalFunction(ofExponentialRandomBackoff(ofSeconds(2), 2, ofMinutes(5)))
-                .failAfterMaxAttempts(true)
-                .build())
-            .build();
-
-        Function<A, R> raFunction = decorateFunction(
-            retryRegistry.retry("retry"), decorateFunction(
-                LIMITER_REGISTRY.rateLimiter("rpm"), decorateFunction(
-                    LIMITER_REGISTRY.rateLimiter("rps"), function)));
-
         return f -> {
             try {
                 log.info("called in {}", Instant.now());
-                return raFunction.apply(f);
+                return call(f, function);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    @RateLimiter(name = "test")
+    public <R, A> R call(A arg, Function<A, R> function) {
+        return function.apply(arg);
     }
 }
