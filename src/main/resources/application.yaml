@@ -82,6 +82,10 @@ feign:
       url: ${ARTING_URL}
       path: /api
 
+management:
+  health:
+    ratelimiters:
+      enabled: true
 resilience4j:
   # 80% from api doc values
   ratelimiter:
@@ -98,6 +102,7 @@ resilience4j:
         timeoutDuration: 5s
         limitRefreshPeriod: 1s
         limitForPeriod: 4
+        register-health-indicator: true
   retry:
     instances:
       shikimori-rps:

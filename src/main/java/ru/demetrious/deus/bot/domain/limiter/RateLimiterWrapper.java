@@ -25,7 +25,7 @@ public class RateLimiterWrapper<T> {
     }
 
     @RateLimiter(name = "test")
-    public <R, A> R call(A arg, Function<A, R> function) {
+    public static <R, A> R call(A arg, Function<A, R> function) {
         return function.apply(arg);
     }
 }
