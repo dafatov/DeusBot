@@ -17,6 +17,6 @@ public class RateLimiterWrapper<T> {
             tmp = limiter.execute(tmp);
         }
 
-        return function;
+        return tmp;
     }
 }
