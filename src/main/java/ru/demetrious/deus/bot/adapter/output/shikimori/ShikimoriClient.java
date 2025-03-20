@@ -18,6 +18,7 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.S
     configuration = FeignConfig.class
 )
 public interface ShikimoriClient {
+    // Вроде рабочий вариант, если еще прикрутить rpm
     @RateLimiter(name = "test")
     @Bulkhead(name = "test")
     @Retry(name = "test")
