@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.domain.limiter;
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.time.Instant;
 import java.util.function.Function;
@@ -25,6 +26,7 @@ public class RateLimiterWrapper<T> {
     }
 
     @RateLimiter(name = "test")
+    @Bulkhead(name = "test")
     public static <R, A> R call(A arg, Function<A, R> function) {
         return function.apply(arg);
     }
