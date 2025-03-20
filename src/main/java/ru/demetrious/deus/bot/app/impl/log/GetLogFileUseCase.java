@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.app.impl.log;
 
+import java.time.Instant;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,9 @@ public class GetLogFileUseCase implements GetLogFileInbound {
     private final GetLogListOutbound getLogListOutbound;
 
     @Override
-    public byte[] getLogFile() {
+    public byte[] getLogFile(Instant after) {
         return getLogListOutbound.getLogList().stream()
+            .filter(log -> log.getTimestamp().isAfter(after))
             .sorted(comparing(Log::getTimestamp))
             .map(log -> join(" ",
                 String.valueOf(log.getId()),
