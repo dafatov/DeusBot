@@ -61,7 +61,7 @@ public class RateLimiterWrapper<T> {
             try {
                 RateLimiter.Metrics rps = LIMITER_REGISTRY.rateLimiter("rps").getMetrics();
                 RateLimiter.Metrics rpm = LIMITER_REGISTRY.rateLimiter("rpm").getMetrics();
-                log.info("rps={}; rpm={}", rps, rpm);
+                log.info("rps={av={};wt={}}; rpm={av={};wt={}}", rps.getAvailablePermissions(), rps.getNumberOfWaitingThreads(), rpm.getAvailablePermissions(), rpm.getNumberOfWaitingThreads());
                 return raFunction.apply(f);
             } catch (Exception e) {
                 throw new RuntimeException(e);
