@@ -89,11 +89,21 @@ resilience4j:
       shikimori-rps:
         limitForPeriod: 4
         limitRefreshPeriod: 1s
-        timeoutDuration: 1s
+        timeoutDuration: 0
       shikimori-rpm:
         limitForPeriod: 72
         limitRefreshPeriod: 1m
-        timeoutDuration: 1m
+        timeoutDuration: 0
+  retry:
+    instances:
+      shikimori-rps:
+        wait-duration: 1s
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+      shikimori-rpm:
+        wait-duration: 1m
+        retry-exceptions:
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
 
 discord:
   token: ${DISCORD_TOKEN}
