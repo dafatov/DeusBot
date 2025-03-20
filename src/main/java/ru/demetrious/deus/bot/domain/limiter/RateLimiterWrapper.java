@@ -29,17 +29,18 @@ public class RateLimiterWrapper<T> {
             .timeoutDuration(ofSeconds(2))
             .build())
         .build();
-    private static final RetryRegistry RETRY_REGISTRY = RetryRegistry.custom()
-        .addRetryConfig("retry", RetryConfig.custom()
-            .maxAttempts(6)
-            .intervalFunction(ofExponentialRandomBackoff(ofSeconds(1), 2, ofMinutes(5)))
-            .build())
-        .build();
     //private final List<Limiter<T>> limiterList;
 
     public <R, A> Function<R, A> wrap(Function<R, A> function) {
+        RetryRegistry retryRegistry = RetryRegistry.custom()
+            .addRetryConfig("retry", RetryConfig.custom()
+                .maxAttempts(6)
+                .intervalFunction(ofExponentialRandomBackoff(ofSeconds(1), 2, ofMinutes(5)))
+                .build())
+            .build();
+
         return decorateFunction(
-            RETRY_REGISTRY.retry("retry"), decorateFunction(
+            retryRegistry.retry("retry"), decorateFunction(
                 LIMITER_REGISTRY.rateLimiter("rpm"), decorateFunction(
                     LIMITER_REGISTRY.rateLimiter("rps"), function)));
     }
