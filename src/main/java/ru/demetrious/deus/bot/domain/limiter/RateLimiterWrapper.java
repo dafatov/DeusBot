@@ -1,12 +1,14 @@
 package ru.demetrious.deus.bot.domain.limiter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.utils.JacksonUtils;
 
@@ -16,6 +18,7 @@ import static io.github.resilience4j.retry.Retry.decorateFunction;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class RateLimiterWrapper<T> {
@@ -31,7 +34,7 @@ public class RateLimiterWrapper<T> {
             .timeoutDuration(ofMinutes(2))
             .drainPermissionsOnResult(either -> {
                 try {
-                    JacksonUtils.getMapper().writeValueAsString(either);
+                    log.info("either={}", JacksonUtils.getMapper().writeValueAsString(either));
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -41,7 +44,7 @@ public class RateLimiterWrapper<T> {
         .build();
     //private final List<Limiter<T>> limiterList;
 
-    public <R, A> Function<R, A> wrap(Function<R, A> function) {
+    public <A, R> Function<A, R> wrap(Function<A, R> function) {
         RetryRegistry retryRegistry = RetryRegistry.custom()
             .addRetryConfig("retry", RetryConfig.custom()
                 .maxAttempts(6)
@@ -50,9 +53,19 @@ public class RateLimiterWrapper<T> {
                 .build())
             .build();
 
-        return decorateFunction(
+        Function<A, R> raFunction = decorateFunction(
             retryRegistry.retry("retry"), decorateFunction(
                 LIMITER_REGISTRY.rateLimiter("rpm"), decorateFunction(
                     LIMITER_REGISTRY.rateLimiter("rps"), function)));
+        return f -> {
+            try {
+                RateLimiter.Metrics rps = LIMITER_REGISTRY.rateLimiter("rps").getMetrics();
+                RateLimiter.Metrics rpm = LIMITER_REGISTRY.rateLimiter("rpm").getMetrics();
+                log.info("rps={}; rpm={}", rps, rpm);
+                return raFunction.apply(f);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }
