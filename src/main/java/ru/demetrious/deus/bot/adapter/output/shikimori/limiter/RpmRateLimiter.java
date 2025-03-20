@@ -1,6 +1,6 @@
 package ru.demetrious.deus.bot.adapter.output.shikimori.limiter;
 
-import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
@@ -12,7 +12,7 @@ import ru.demetrious.deus.bot.domain.limiter.Limiter;
 @Component
 @Order(2)
 public class RpmRateLimiter implements Limiter<ShikimoriClient> {
-    @Retry(name = "shikimori-rpm")
+    @RateLimiter(name = "shikimori-rpm")
     @Override
     public <R, A> Function<R, A> execute(Function<R, A> function) {
         return Limiter.super.execute(function);
