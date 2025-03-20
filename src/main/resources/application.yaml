@@ -102,13 +102,11 @@ resilience4j:
         limitRefreshPeriod: 1m
         timeoutDuration: 0
       test:
-        timeoutDuration: 5s
+        timeoutDuration: 2s
         limitRefreshPeriod: 1s
         limitForPeriod: 4
         register-health-indicator: true
   bulkhead:
-    metrics:
-      enabled: true
     instances:
       test:
         max-wait-duration: 0
