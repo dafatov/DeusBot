@@ -1,7 +1,9 @@
 <Configuration>
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%black{%d{ISO8601}} %highlight{%-5level{5}} %yellow{%-80logger{80}}: %msg%n%throwable"/>
+      <PatternLayout
+              pattern="%black{%d{ISO8601}} %highlight{%-5level{5}} [%black{%-24.-24thread{24}}] %yellow{%-80logger{80}}: %msg%n%throwable"
+      />
     </Console>
 
     <JDBC name="Database" tableName="log">
@@ -10,6 +12,7 @@
                      password="${spring:spring.datasource.password}"/>
 
       <ColumnMapping name="id" pattern="%uuid{TIME}" columnType="java.util.UUID"/>
+      <ColumnMapping name="thread" pattern="%thread"/>
       <ColumnMapping name="exception" pattern="%throwable{full}"/>
       <ColumnMapping name="level" pattern="%level"/>
       <ColumnMapping name="logger" pattern="%logger"/>

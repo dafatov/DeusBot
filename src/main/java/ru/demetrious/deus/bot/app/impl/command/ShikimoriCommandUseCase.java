@@ -62,11 +62,11 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
                 .setRequired(true)
                 .setChoices(List.of(
                     new OptionChoice()
-                        .setName("Получить файлом")
-                        .setValue(METHOD_CHOICE_FILE),
-                    new OptionChoice()
                         .setName("Импортировать на anilist.co")
-                        .setValue(METHOD_CHOICE_ANILIST)
+                        .setValue(METHOD_CHOICE_ANILIST),
+                    new OptionChoice()
+                        .setName("Получить файлом")
+                        .setValue(METHOD_CHOICE_FILE)
                 ))));
     }
 

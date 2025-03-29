@@ -83,18 +83,15 @@ feign:
       path: /api
 
 resilience4j:
-  ratelimiter:
-    instances:
-      shikimori:
-        limitForPeriod: 5
-        limitRefreshPeriod: 1s
-        timeoutDuration: 0
   retry:
     instances:
       shikimori:
-        wait-duration: 1s
-        retry-exceptions:
-          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+        enable-exponential-backoff: true
+        enable-randomized-wait: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 5m
+        wait-duration: 2s
+        max-attempts: 100
 
 discord:
   token: ${DISCORD_TOKEN}
