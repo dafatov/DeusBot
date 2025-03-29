@@ -1,0 +1,2 @@
+ALTER TABLE log
+    ADD thread VARCHAR(255);
