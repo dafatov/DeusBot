@@ -2,11 +2,12 @@ package ru.demetrious.deus.bot.adapter.output.shikimori.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.time.Instant;
-import java.util.Arrays;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ru.demetrious.deus.bot.domain.graphql.ResponseSerialize;
+
+import static java.util.Arrays.stream;
 
 @Data
 public class UserRateResponse implements ResponseSerialize {
@@ -33,7 +34,7 @@ public class UserRateResponse implements ResponseSerialize {
 
         @JsonCreator
         public static Status fromValue(String value) {
-            return Arrays.stream(values())
+            return stream(values())
                 .filter(v -> v.getValue().equals(value))
                 .findFirst()
                 .orElseThrow();

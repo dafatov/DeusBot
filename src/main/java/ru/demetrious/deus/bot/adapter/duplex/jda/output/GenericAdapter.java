@@ -103,6 +103,20 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
     }
 
     @Override
+    public void notify(MessageData messageData, String threadName) {
+        if (getEvent().getChannel() instanceof MessageChannelUnion messageChannelUnion) {
+            MessageCreateData content = messageDataMapper.mapToMessageCreate(messageData);
+
+            messageChannelUnion.asTextChannel().createThreadChannel(threadName)
+                .complete()
+                .sendMessage(content)
+                .queue();
+        } else {
+            notify(messageData);
+        }
+    }
+
+    @Override
     public void notifyUnauthorized(Pair<String, URI> authorizeData) {
         MessageData messageData = new MessageData()
             .setEmbeds(List.of(new MessageEmbed()

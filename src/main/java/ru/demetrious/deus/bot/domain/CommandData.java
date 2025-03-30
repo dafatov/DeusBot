@@ -20,10 +20,14 @@ public class CommandData {
     private String description;
     private List<OptionData> options = new ArrayList<>();
 
+    @Getter
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum Name {
         AI_IMAGE("ai", "image"),
+        ANIGUESSR_START("aniguessr", "start"),
+        ANIGUESSR_GUESS("aniguessr", "guess"),
+        ANIGUESSR_CONCEDE("aniguessr", "concede"),
         CLEAR("clear"),
         EVENT_CREATE("event", "create"),
         EVENT_HELP("event", "help"),
@@ -48,11 +52,8 @@ public class CommandData {
         STATISTIC_SESSION("statistic", "session"),
         STATISTIC_VOICE("statistic", "voice");
 
-        @Getter
         private final String commandName;
-        @Getter
         private String groupName;
-        @Getter
         private String subcommandName;
 
         Name(String commandName, String subcommandName) {
