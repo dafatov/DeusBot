@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.output.shikimori.dto.query.AnimesQuery;
@@ -35,6 +36,7 @@ import static ru.demetrious.deus.bot.domain.graphql.Request.createQueries;
 import static ru.demetrious.deus.bot.domain.graphql.Request.createQuery;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.getXmlMapper;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class ShikimoriAdapter implements GetAnimeOutbound, GetFranchiseOutbound {
@@ -77,6 +79,7 @@ public class ShikimoriAdapter implements GetAnimeOutbound, GetFranchiseOutbound 
             animeResponseList.addAll(animeResponseChunk);
         } while (animeResponseChunk.size() >= PER_PAGE * PER_CHUNK);
 
+        log.info("animeResponseList={}", animeResponseList);
         return franchiseShikimoriMapper.map(animeResponseList.stream()
             .filter(a -> nonNull(a.getFranchise()))
             .collect(groupingBy(AnimeResponse::getFranchise)));
