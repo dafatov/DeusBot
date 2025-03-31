@@ -6,6 +6,12 @@ server:
     keyAlias: deus-bot
 
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: full
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
@@ -101,6 +107,10 @@ resilience4j:
         exponential-max-wait-duration: 5m
         wait-duration: 2s
         max-attempts: 3
+
+logging:
+  level:
+    ru.demetrious.deus.bot: debug
 
 cache:
   configs:
