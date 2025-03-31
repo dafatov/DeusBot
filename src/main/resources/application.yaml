@@ -5,6 +5,7 @@ server:
     keyStoreType: PKCS12
     keyAlias: deus-bot
 
+spring:
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
