@@ -10,6 +10,6 @@ public class AnimesQuery implements Query {
 
     @Override
     public String serialize() {
-        return "animes(page:%s,limit:%s,status:\\\"released\\\"){airedOn{date,year},franchise,genres{kind,russian},japanese,name,origin,russian,score,studios{name},synonyms}".formatted(page, limit);
+        return "animes(page:%s,limit:%s,status:\\\"released\\\"){airedOn{date},franchise,genres{kind,russian},japanese,name,origin,russian,score,studios{name},synonyms}".formatted(page, limit);
     }
 }

@@ -58,7 +58,6 @@ public class AnimeResponse implements ResponseSerialize {
     @Data
     public static class IncompleteDate {
         private LocalDate date;
-        private int year;
     }
 
     @Data

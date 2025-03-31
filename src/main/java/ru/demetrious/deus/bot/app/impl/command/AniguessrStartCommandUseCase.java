@@ -25,6 +25,7 @@ import static java.util.UUID.randomUUID;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_START;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.SHIKIMORI_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.utils.JacksonUtils.writeAsString;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -55,6 +56,7 @@ public class AniguessrStartCommandUseCase implements AniguessrStartCommandInboun
         }
 
         List<Franchise> franchiseList = getFranchiseOutbound.getFranchiseList();
+        log.info("franchiseList={}", writeAsString(franchiseList));
         Franchise franchise = franchiseList.get(new Random().nextInt(franchiseList.size()));
         UUID gameId = randomUUID();
         MessageEmbed messageEmbed = createThreadOutbound.createThread("Aniguessr %s".formatted(gameId)).map(

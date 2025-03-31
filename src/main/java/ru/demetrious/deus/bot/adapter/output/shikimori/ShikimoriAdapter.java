@@ -79,7 +79,6 @@ public class ShikimoriAdapter implements GetAnimeOutbound, GetFranchiseOutbound 
             animeResponseList.addAll(animeResponseChunk);
         } while (animeResponseChunk.size() >= PER_PAGE * PER_CHUNK);
 
-        log.info("animeResponseList={}", animeResponseList);
         return franchiseShikimoriMapper.map(animeResponseList.stream()
             .filter(a -> nonNull(a.getFranchise()))
             .collect(groupingBy(AnimeResponse::getFranchise)));
