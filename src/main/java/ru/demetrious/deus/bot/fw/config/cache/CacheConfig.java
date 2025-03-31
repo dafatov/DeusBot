@@ -3,14 +3,12 @@ package ru.demetrious.deus.bot.fw.config.cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static com.github.benmanes.caffeine.cache.Caffeine.newBuilder;
 
-@EnableCaching
 @Configuration
 @RequiredArgsConstructor
 public class CacheConfig {

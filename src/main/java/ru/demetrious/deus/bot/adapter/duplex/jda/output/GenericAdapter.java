@@ -70,8 +70,6 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
         return CommandData.Name.from(strings[0], strings[1], strings[2]);
     }
 
-    protected abstract @NotNull I getInteraction();
-
     @Override
     public void defer() {
         getEvent().deferReply().queue();
@@ -191,6 +189,8 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
         return ofNullable(getEvent().getChannel())
             .map(ISnowflake::getId);
     }
+
+    protected abstract @NotNull I getInteraction();
 
     // ===================================================================================================================
     // = Implementation

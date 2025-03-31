@@ -3,7 +3,6 @@ package ru.demetrious.deus.bot.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
@@ -23,10 +22,5 @@ public class JacksonUtils {
 
     public static ObjectMapper getXmlMapper() {
         return XML_MAPPER;
-    }
-
-    @SneakyThrows
-    public static <T> String writeAsString(T value) {
-        return getMapper().writeValueAsString(value);
     }
 }

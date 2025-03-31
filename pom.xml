@@ -52,6 +52,7 @@
 		<jackson.version>2.17.1</jackson.version>
 		<commons-lang3.version>3.15.0</commons-lang3.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
+		<caffeine.version>3.1.8</caffeine.version>
 
 		<!-- Discord -->
 		<JDA.version>5.2.1</JDA.version>
@@ -199,7 +200,7 @@
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
-      <version>3.1.8</version>
+			<version>${caffeine.version}</version>
     </dependency>
 
     <!-- Test -->

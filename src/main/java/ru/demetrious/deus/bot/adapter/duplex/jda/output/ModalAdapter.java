@@ -42,11 +42,6 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
     }
 
     @Override
-    protected @NotNull ModalInteraction getInteraction() {
-        return getEvent().getInteraction();
-    }
-
-    @Override
     public CommandData.Name getCommandName() {
         return getName(getEvent().getModalId().split(DATA_DIVIDER)[0].split(" "));
     }
@@ -54,5 +49,10 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
     @Override
     public String getModalId() {
         return getEvent().getModalId();
+    }
+
+    @Override
+    protected @NotNull ModalInteraction getInteraction() {
+        return getEvent().getInteraction();
     }
 }
