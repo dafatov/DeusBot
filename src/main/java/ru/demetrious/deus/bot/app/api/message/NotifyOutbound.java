@@ -11,7 +11,5 @@ public interface NotifyOutbound<I extends Interaction> extends HasEventOutbound 
 
     void notify(MessageData messageData);
 
-    void notify(MessageData messageData, String threadName);
-
     void notifyUnauthorized(Pair<String, URI> authorizeData);
 }

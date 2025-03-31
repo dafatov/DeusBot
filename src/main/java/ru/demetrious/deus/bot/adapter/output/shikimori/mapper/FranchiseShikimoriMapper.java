@@ -15,7 +15,9 @@ import ru.demetrious.deus.bot.adapter.output.shikimori.dto.response.AnimeRespons
 import ru.demetrious.deus.bot.domain.Franchise;
 import ru.demetrious.deus.bot.domain.Franchise.Source;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static ru.demetrious.deus.bot.adapter.output.shikimori.dto.response.AnimeResponse.Genre.Kind.GENRE;
 import static ru.demetrious.deus.bot.adapter.output.shikimori.dto.response.AnimeResponse.Genre.Kind.THEME;
 
@@ -25,6 +27,10 @@ public interface FranchiseShikimoriMapper {
         return franchises.entrySet().stream()
             .map(franchise -> new Franchise()
                 .setName(franchise.getKey())
+                .setFirstTitle(franchise.getValue().stream()
+                    .min(comparing(a -> a.getAiredOn().getDate()))
+                    .map(animeResponse -> defaultIfBlank(animeResponse.getRussian(), animeResponse.getName()))
+                    .orElseThrow())
                 .setAverageScore(franchise.getValue().stream()
                     .map(AnimeResponse::getScore)
                     .flatMapToDouble(DoubleStream::of)
@@ -48,8 +54,8 @@ public interface FranchiseShikimoriMapper {
                     .collect(toSet()))
                 .setMinAiredOnYear(franchise.getValue().stream()
                     .map(AnimeResponse::getAiredOn)
+                    .min(comparing(IncompleteDate::getDate))
                     .map(IncompleteDate::getYear)
-                    .min(Integer::compareTo)
                     .orElseThrow())
                 .setSources(franchise.getValue().stream()
                     .map(AnimeResponse::getOrigin)

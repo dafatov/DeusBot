@@ -6,22 +6,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
+import ru.demetrious.deus.bot.app.api.channel.GetChannelIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.AniguessrConcedeCommandInbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.option.GetFocusedOptionOutbound;
+import ru.demetrious.deus.bot.app.api.thread.LeaveThreadOutbound;
 import ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder;
 import ru.demetrious.deus.bot.domain.AutocompleteOption;
 import ru.demetrious.deus.bot.domain.CommandData;
-import ru.demetrious.deus.bot.domain.Franchise;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_CONCEDE;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 
 @RequiredArgsConstructor
@@ -35,6 +39,8 @@ public class AniguessrConcedeCommandUseCase implements AniguessrConcedeCommandIn
     private final ReplyChoicesOutbound replyChoicesOutbound;
     private final GetFocusedOptionOutbound getFocusedOptionOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
+    private final GetChannelIdOutbound<SlashCommandInteractionInbound> getChannelIdOutbound;
+    private final LeaveThreadOutbound<SlashCommandInteractionInbound> leaveThreadOutbound;
 
     @Override
     public CommandData getData() {
@@ -63,6 +69,7 @@ public class AniguessrConcedeCommandUseCase implements AniguessrConcedeCommandIn
                     .map(g -> new OptionChoice()
                         .setName(g.toString())
                         .setValue(g.toString()))
+                    .limit(MAX_CHOICES)
                     .toList();
             }
         }
@@ -72,15 +79,28 @@ public class AniguessrConcedeCommandUseCase implements AniguessrConcedeCommandIn
 
     @Override
     public void execute() {
-        UUID id = getStringOptionOutbound.getStringOption(GAME_OPTION)
+        UUID gameId = getStringOptionOutbound.getStringOption(GAME_OPTION)
             .map(UUID::fromString)
             .orElseThrow();
-        Franchise franchise = aniguessrGamesHolder.concede(id);
+        String threadId = aniguessrGamesHolder.getThreadId(gameId);
+
+        if (!isBlank(threadId) && !getChannelIdOutbound.getChannelId().map(threadId::equals).orElse(false)) {
+            MessageData messageData = new MessageData()
+                .setEmbeds(List.of(new MessageEmbed()
+                    .setColor(WARNING)
+                    .setTitle("Нельзя спамить!")
+                    .setDescription("Нельзя играть не в созданном трэде, так как так мы засрем все что можно...\nПерейди в <#%s>".formatted(threadId))));
+
+            notifyOutbound.notify(messageData);
+            log.warn("Произошла попытка играть в игру вне созданного трэда");
+            return;
+        }
+
         MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
             .setTitle("Игра сдана")
-            .setDescription("Загадана была франшиза: %s".formatted(franchise.getName()))));
-
+            .setDescription(aniguessrGamesHolder.remove(gameId))));
         notifyOutbound.notify(messageData);
+        leaveThreadOutbound.leaveThread(threadId);
         log.info("Игра успешно сдана");
     }
 }

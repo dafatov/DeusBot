@@ -19,6 +19,7 @@ import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
 
 import static java.time.Instant.now;
+import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.EVENT_REMOVE;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.INFO;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
@@ -58,6 +59,7 @@ public class EventRemoveCommandUseCase implements EventRemoveCommandInbound {
             .map(title -> new OptionChoice()
                 .setName(title)
                 .setValue(title))
+            .limit(MAX_CHOICES)
             .toList();
 
         replyChoicesOutbound.replyChoices(optionChoiceList);

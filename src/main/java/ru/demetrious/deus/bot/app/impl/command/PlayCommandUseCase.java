@@ -37,7 +37,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
-import static ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper.MAX_COMPONENTS;
+import static ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound.MAX_COMPONENTS;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.PLAY;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.ATTACHMENT;

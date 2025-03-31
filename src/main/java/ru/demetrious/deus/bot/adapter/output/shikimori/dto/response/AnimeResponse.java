@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.adapter.output.shikimori.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.time.LocalDate;
 import java.util.Set;
 import lombok.Data;
 import lombok.Getter;
@@ -56,6 +57,7 @@ public class AnimeResponse implements ResponseSerialize {
 
     @Data
     public static class IncompleteDate {
+        private LocalDate date;
         private int year;
     }
 

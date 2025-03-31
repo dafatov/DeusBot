@@ -13,8 +13,6 @@ import ru.demetrious.deus.bot.domain.TextInputComponent;
 
 @Mapper
 public interface ModalDataMapper {
-    int MAX_COMPONENTS = Modal.MAX_COMPONENTS;
-
     default Modal mapModal(ModalData modalData) {
         return Modal.create(modalData.getCustomId(), modalData.getTitle())
             .addComponents(mapComponent(modalData.getComponents()))

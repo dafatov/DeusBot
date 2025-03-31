@@ -12,6 +12,7 @@ import ru.demetrious.deus.bot.app.api.anime.GetFranchiseOutbound;
 import ru.demetrious.deus.bot.app.api.command.AniguessrStartCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
+import ru.demetrious.deus.bot.app.api.thread.CreateThreadOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -20,7 +21,9 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
+import static java.util.UUID.randomUUID;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_START;
+import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.SHIKIMORI_REGISTRATION_ID;
 
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class AniguessrStartCommandUseCase implements AniguessrStartCommandInboun
     private final GetFranchiseOutbound getFranchiseOutbound;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
+    private final CreateThreadOutbound<SlashCommandInteractionInbound> createThreadOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final AniguessrGamesHolder aniguessrGamesHolder;
 
@@ -52,13 +56,21 @@ public class AniguessrStartCommandUseCase implements AniguessrStartCommandInboun
 
         List<Franchise> franchiseList = getFranchiseOutbound.getFranchiseList();
         Franchise franchise = franchiseList.get(new Random().nextInt(franchiseList.size()));
-        UUID id = aniguessrGamesHolder.create(franchise);
-        MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Игра начата")
-            .setDescription("Игра с идентификатором ```%s```".formatted(id))));
+        UUID gameId = randomUUID();
+        MessageEmbed messageEmbed = createThreadOutbound.createThread("Aniguessr %s".formatted(gameId)).map(
+                threadId -> {
+                    aniguessrGamesHolder.create(gameId, threadId, franchise);
+                    return new MessageEmbed()
+                        .setTitle("Игра создана")
+                        .setDescription("Предлагается вести игру в отдельном трэде: <#%s>".formatted(threadId));
+                })
+            .orElseGet(() -> new MessageEmbed()
+                .setColor(WARNING)
+                .setTitle("Игра не создана")
+                .setDescription("Что пошло нет так при создании отдельного трэда. Его можно создать только из текстового канала")
+            );
 
-        notifyOutbound.notify(new MessageData().setContent("## Предлагается вести игру в отдельном трэде"));
-        notifyOutbound.notify(messageData, "Игра %s".formatted(id));
+        notifyOutbound.notify(new MessageData().setEmbeds(List.of(messageEmbed)));
         log.info("Игра успешно начата: {}", franchise.getName());
     }
 }
