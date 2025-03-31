@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DeuSBotApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <option name="ACTIVE_PROFILES" value="local"/>
+    <output_file path="target\latest.log" is_save="true"/>
     <module name="deus-bot"/>
     <option name="SPRING_BOOT_MAIN_CLASS" value="ru.demetrious.deus.bot.DeuSBotApplication"/>
     <method v="2">
