@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.output.anilist;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import ru.demetrious.deus.bot.domain.graphql.Request;
@@ -15,6 +16,7 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.A
     configuration = FeignConfig.class
 )
 public interface AnilistClient {
+    @Retry(name = "anilist")
     @PostMapping
     Response execute(Request requestAnilist);
 }

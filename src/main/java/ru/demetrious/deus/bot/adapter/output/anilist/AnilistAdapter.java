@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.adapter.output.anilist;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
     @Override
     public ImportAnimeContext execute(List<Anime> targetAnimeList, Integer userId) {
-        Map<Integer, Entries> oldAnimeMap = getOldAnimeList(userId);
+        Map<Integer, Entries> oldAnimeMap = getOldAnimeMap(userId);
         List<Entries> changedAndNewAnimes = new ArrayList<>();
 
         targetAnimeList.stream().map(animeAnilistMapper::map).forEach(anime -> {
@@ -147,14 +148,22 @@ public class AnilistAdapter implements ImportAnimeOutbound {
             .collect(toMap(PageMediaListResponse.Media::getIdMal, PageMediaListResponse.Media::getId));
     }
 
-    private Map<Integer, Entries> getOldAnimeList(Integer userId) {
+    private Map<Integer, Entries> getOldAnimeMap(Integer userId) {
         String key = RANDOM_KEY_SUPPLIER.get();
+        Map<Integer, Entries> oldAnimeMap = new HashMap<>();
 
-        return anilistClient.execute(createQuery(key, new MediaListCollectionQuery(userId, ANIME)))
-            .get(key, MediaListCollectionResponse.class)
-            .getLists().stream()
-            .map(Lists::getEntries)
-            .flatMap(Collection::stream)
-            .collect(toMap(oldAnime -> oldAnime.getMedia().getIdMal(), identity()));
+        Map<Integer, Entries> entriesMapChunk;
+        int chunk = 1;
+        do {
+            entriesMapChunk = anilistClient.execute(createQuery(key, new MediaListCollectionQuery(userId, chunk++)))
+                .get(key, MediaListCollectionResponse.class)
+                .getLists().stream()
+                .map(Lists::getEntries)
+                .flatMap(Collection::stream)
+                .collect(toMap(oldAnime -> oldAnime.getMedia().getIdMal(), identity()));
+            oldAnimeMap.putAll(entriesMapChunk);
+        } while (!entriesMapChunk.isEmpty());
+
+        return oldAnimeMap;
     }
 }
