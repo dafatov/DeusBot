@@ -1,7 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,6 @@ import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
 import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Status.DUPLICATE;
 import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Status.GUESSED;
@@ -39,7 +38,6 @@ import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 @Component
 public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInbound {
     private static final String ANIME_OPTION = "anime";
-    private static final String GAME_OPTION = "game";
 
     private final GetFranchiseOutbound getFranchiseOutbound;
     private final AniguessrGamesHolder aniguessrGamesHolder;
@@ -58,12 +56,6 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
             .setOptions(List.of(
                 new OptionData()
                     .setType(STRING)
-                    .setName(GAME_OPTION)
-                    .setDescription("Игра")
-                    .setRequired(true)
-                    .setAutoComplete(true),
-                new OptionData()
-                    .setType(STRING)
                     .setName(ANIME_OPTION)
                     .setDescription("Аниме")
                     .setRequired(true)
@@ -77,23 +69,14 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
         List<OptionChoice> optionList = List.of();
 
         if (!aniguessrGamesHolder.getGames().isEmpty()) {
-            switch (focusedOption.getName()) {
-                case ANIME_OPTION -> optionList = getFranchiseOutbound.getFranchiseList().stream()
-                    .flatMap(f -> f.getTitles().stream()
-                        .filter(title -> containsIgnoreCase(title, focusedOption.getValue()))
-                        .map(t -> new OptionChoice()
-                            .setValue(f.getName())
-                            .setName(t)))
-                    .limit(MAX_CHOICES)
-                    .toList();
-                case GAME_OPTION -> optionList = aniguessrGamesHolder.getGames().stream()
-                    .filter(title -> containsIgnoreCase(title.toString(), focusedOption.getValue()))
-                    .map(g -> new OptionChoice()
-                        .setName(g.toString())
-                        .setValue(g.toString()))
-                    .limit(MAX_CHOICES)
-                    .toList();
-            }
+            optionList = getFranchiseOutbound.getFranchiseList().stream()
+                .flatMap(f -> f.getTitles().stream()
+                    .filter(title -> containsIgnoreCase(title, focusedOption.getValue()))
+                    .map(t -> new OptionChoice()
+                        .setValue(f.getName())
+                        .setName(t)))
+                .limit(MAX_CHOICES)
+                .toList();
         }
 
         replyChoicesOutbound.replyChoices(optionList);
@@ -101,43 +84,40 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
 
     @Override
     public void execute() {
-        UUID gameId = getStringOptionOutbound.getStringOption(GAME_OPTION)
-            .map(UUID::fromString)
-            .orElseThrow();
-        String threadId = aniguessrGamesHolder.getThreadId(gameId);
+        Optional<String> channelIdOptional = getChannelIdOutbound.getChannelId();
 
-        if (!isBlank(threadId) && !getChannelIdOutbound.getChannelId().map(threadId::equals).orElse(false)) {
+        if (!channelIdOptional.map(aniguessrGamesHolder::exists).orElse(false)) {
             MessageData messageData = new MessageData()
                 .setEmbeds(List.of(new MessageEmbed()
                     .setColor(WARNING)
                     .setTitle("Нельзя спамить!")
-                    .setDescription("Нельзя играть не в созданном трэде, так как так мы засрем все что можно...\nПерейди в <#%s>".formatted(threadId))));
+                    .setDescription("Нельзя играть не в созданном трэде, так как так мы засрем все что можно...")));
 
             b(notifyOutbound).notify(messageData);
             log.warn("Произошла попытка играть в игру вне созданного трэда");
             return;
         }
 
+        String threadId = channelIdOptional.get();
         String franchiseName = getStringOptionOutbound.getStringOption(ANIME_OPTION)
             .orElseThrow();
         Franchise franchise = getFranchiseOutbound.getFranchiseList().stream()
             .filter(f -> f.getName().equals(franchiseName))
             .findFirst()
             .orElseThrow();
-        Status status = aniguessrGamesHolder.guess(gameId, franchise);
+        Status status = aniguessrGamesHolder.guess(threadId, franchise);
 
         MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
             .setTitle(switch (status) {
-                case GUESSED -> "Угадал. Молодец (за %s попыток)".formatted(aniguessrGamesHolder.getGuessesCount(gameId));
+                case GUESSED -> "Угадал. Молодец (за %s попыток)".formatted(aniguessrGamesHolder.getGuessesCount(threadId));
                 case DUPLICATE -> "Уже было попробуй заново";
-                case ADDED -> "Попытка засчитана (#%s)".formatted(aniguessrGamesHolder.getGuessesCount(gameId));
+                case ADDED -> "Попытка засчитана (#%s)".formatted(aniguessrGamesHolder.getGuessesCount(threadId));
             })
-            .setDescription(status == DUPLICATE ? "Baka~" : aniguessrGamesHolder.getLastGuess(gameId))
-            .setFooter(gameId.toString())));
+            .setDescription(status == DUPLICATE ? "Baka~" : aniguessrGamesHolder.getLastGuess(threadId))));
         b(notifyOutbound).notify(messageData);
 
         if (status == GUESSED) {
-            aniguessrGamesHolder.remove(gameId);
+            aniguessrGamesHolder.remove(threadId);
             leaveThreadOutbound.leaveThread(threadId);
         }
         log.info("Попытка угадать успешно засчитана");

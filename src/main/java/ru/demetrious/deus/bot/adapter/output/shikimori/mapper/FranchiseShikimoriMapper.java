@@ -43,14 +43,18 @@ public interface FranchiseShikimoriMapper {
                 }
 
                 int episodes = animeResponseList.stream()
-                    .mapToInt(a -> a.getEpisodes() == 0 ? a.getEpisodesAired() : a.getEpisodes())
+                    .mapToInt(this::getEpisodes)
                     .sum();
 
                 return new Franchise()
                     .setName(franchise.getKey())
                     .setFirstTitle(animeResponseList.stream()
                         .min(comparing(a -> a.getAiredOn().getDate()))
-                        .map(animeResponse -> defaultIfBlank(animeResponse.getRussian(), animeResponse.getName()))
+                        .map(a -> defaultIfBlank(a.getRussian(), a.getName()))
+                        .orElseThrow())
+                    .setFirstUrl(animeResponseList.stream()
+                        .min(comparing(a -> a.getAiredOn().getDate()))
+                        .map(AnimeResponse::getUrl)
                         .orElseThrow())
                     .setAverageScore(animeResponseList.stream()
                         .map(AnimeResponse::getScore)
@@ -90,7 +94,7 @@ public interface FranchiseShikimoriMapper {
                         .collect(toSet()))
                     .setEpisodes(episodes)
                     .setAverageDuration(divideExact(60 * animeResponseList.stream()
-                        .mapToInt(a -> a.getDuration() * a.getEpisodes())
+                        .mapToInt(a -> a.getDuration() * getEpisodes(a))
                         .sum(), episodes));
             })
             .filter(Objects::nonNull)
@@ -102,6 +106,10 @@ public interface FranchiseShikimoriMapper {
     // ===================================================================================================================
     // = Implementation
     // ===================================================================================================================
+
+    private int getEpisodes(AnimeResponse a) {
+        return a.getEpisodes() == 0 ? a.getEpisodesAired() : a.getEpisodes();
+    }
 
     private void mapTitles(AnimeResponse animeResponse, Consumer<String> objectConsumer) {
         objectConsumer.accept(animeResponse.getName());

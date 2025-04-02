@@ -3,7 +3,6 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -21,7 +20,6 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
-import static java.util.UUID.randomUUID;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_START;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.SHIKIMORI_REGISTRATION_ID;
@@ -56,10 +54,9 @@ public class AniguessrStartCommandUseCase implements AniguessrStartCommandInboun
 
         List<Franchise> franchiseList = getFranchiseOutbound.getFranchiseList();
         Franchise franchise = franchiseList.get(new Random().nextInt(franchiseList.size()));
-        UUID gameId = randomUUID();
-        MessageEmbed messageEmbed = createThreadOutbound.createThread("Aniguessr %s".formatted(gameId)).map(
+        MessageEmbed messageEmbed = createThreadOutbound.createThread("Aniguessr").map(
                 threadId -> {
-                    aniguessrGamesHolder.create(gameId, threadId, franchise);
+                    aniguessrGamesHolder.create(threadId, franchise);
                     return new MessageEmbed()
                         .setTitle("Игра создана")
                         .setDescription("""

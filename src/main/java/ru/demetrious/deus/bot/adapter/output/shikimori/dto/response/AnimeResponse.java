@@ -26,6 +26,7 @@ public class AnimeResponse implements ResponseSerialize {
     private double score;
     private Set<Studio> studios;
     private Set<String> synonyms;
+    private String url;
 
     @Getter
     @RequiredArgsConstructor

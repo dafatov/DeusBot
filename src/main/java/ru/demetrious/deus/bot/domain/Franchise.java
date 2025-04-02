@@ -17,6 +17,7 @@ public class Franchise {
     @EqualsAndHashCode.Include
     private String name;
     private String firstTitle;
+    private String firstUrl;
     private Set<String> genres;
     private Set<String> themes;
     private Set<String> titles;
