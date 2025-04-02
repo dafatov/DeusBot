@@ -13,15 +13,43 @@ import static java.util.Arrays.stream;
 @Data
 public class AnimeResponse implements ResponseSerialize {
     private IncompleteDate airedOn;
+    private int duration;
+    private int episodes;
+    private int episodesAired;
     private String franchise;
     private Set<Genre> genres;
     private String japanese;
+    private Kind kind;
     private String name;
     private Origin origin;
     private String russian;
     private double score;
     private Set<Studio> studios;
     private Set<String> synonyms;
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum Kind {
+        TV("tv"),
+        MOVIE("movie"),
+        OVA("ova"),
+        ONA("ona"),
+        SPECIAL("special"),
+        TV_SPECIAL("tv_special"),
+        MUSIC("music"),
+        PV("pv"),
+        CM("cm");
+
+        private final String value;
+
+        @JsonCreator
+        public static Kind fromValue(String value) {
+            return stream(values())
+                .filter(v -> v.getValue().equals(value))
+                .findFirst()
+                .orElseThrow();
+        }
+    }
 
     @Getter
     @RequiredArgsConstructor

@@ -24,6 +24,8 @@ public class Franchise {
     private double averageScore;
     private Set<String> studios;
     private Set<Source> sources;
+    private int episodes;
+    private long averageDuration;
 
     @Getter
     @RequiredArgsConstructor

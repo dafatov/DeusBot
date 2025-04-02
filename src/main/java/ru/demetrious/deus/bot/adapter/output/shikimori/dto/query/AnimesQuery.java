@@ -1,15 +1,16 @@
 package ru.demetrious.deus.bot.adapter.output.shikimori.dto.query;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import ru.demetrious.deus.bot.domain.graphql.Query;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AnimesQuery implements Query {
-    private int page;
-    private int limit;
+    private final int page;
+    private final int limit;
 
     @Override
     public String serialize() {
-        return "animes(page:%s,limit:%s,status:\\\"released\\\"){airedOn{date},franchise,genres{kind,russian},japanese,name,origin,russian,score,studios{name},synonyms}".formatted(page, limit);
+        return ("animes(page:%s,limit:%s,status:%s){airedOn{date},duration,episodes,episodesAired,franchise,genres{kind,russian},japanese,kind,name,origin,russian,score,studios{name},synonyms}")
+            .formatted(page, limit, "\\\"!anons\\\"");
     }
 }

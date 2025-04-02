@@ -62,7 +62,10 @@ public class AniguessrStartCommandUseCase implements AniguessrStartCommandInboun
                     aniguessrGamesHolder.create(gameId, threadId, franchise);
                     return new MessageEmbed()
                         .setTitle("Игра создана")
-                        .setDescription("Предлагается вести игру в отдельном трэде: <#%s>".formatted(threadId));
+                        .setDescription("""
+                            Предлагается вести игру в отдельном трэде: <#%s>
+                            Во франшизах не учитываются анонсированные тайтлы, тайтлы без оценки, без даты выхода, а также клипы, проморолики и рекламы
+                            """.formatted(threadId));
                 })
             .orElseGet(() -> new MessageEmbed()
                 .setColor(WARNING)

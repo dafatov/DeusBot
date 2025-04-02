@@ -20,6 +20,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Status.ADDED;
 import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Status.DUPLICATE;
 import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Status.GUESSED;
+import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
 @Component
 public class AniguessrGamesHolder {
@@ -79,14 +80,16 @@ public class AniguessrGamesHolder {
     // ===================================================================================================================
 
     private String mapGuess(Franchise answer, Franchise guess) {
-        return "### - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s".formatted(
+        return "### - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s\n-# - %s".formatted(
             defaultIfBlank(guess.getFirstTitle(), guess.getName()),
             defaultIfBlank(w(compare(answer.getMinAiredOnYear(), guess.getMinAiredOnYear()), valueOf(guess.getMinAiredOnYear())), "-"),
             defaultIfBlank(guess.getThemes().stream().map(f -> w(answer.getThemes().contains(f), f)).collect(joining(", ")), "-"),
             defaultIfBlank(guess.getGenres().stream().map(f -> w(answer.getGenres().contains(f), f)).collect(joining(", ")), "-"),
             defaultIfBlank(guess.getStudios().stream().map(f -> w(answer.getStudios().contains(f), f)).collect(joining(", ")), "-"),
             defaultIfBlank(guess.getSources().stream().map(f -> w(answer.getSources().contains(f), f.getLocalized())).collect(joining(", ")), "-"),
-            defaultIfBlank(w(Double.compare(answer.getAverageScore(), guess.getAverageScore()), format("%.2f", guess.getAverageScore())), "-")
+            defaultIfBlank(w(Double.compare(answer.getAverageScore(), guess.getAverageScore()), format("%.2f", guess.getAverageScore())), "-"),
+            defaultIfBlank(w(compare(answer.getEpisodes(), guess.getEpisodes()), valueOf(guess.getEpisodes())), "-"),
+            defaultIfBlank(w(Long.compare(answer.getAverageDuration(), guess.getAverageDuration()), prettifySeconds(guess.getAverageDuration())), "-")
         );
     }
 
