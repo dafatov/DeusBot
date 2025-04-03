@@ -8,20 +8,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.callbacks.IDeferrableCallback;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.MessageDataMapper;
+import ru.demetrious.deus.bot.app.api.channel.GetChannelIdOutbound;
 import ru.demetrious.deus.bot.app.api.guild.GetGuildIdOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.DeferOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.Interaction;
@@ -29,6 +34,8 @@ import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.player.ConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotCanConnectOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotConnectedSameChannelOutbound;
+import ru.demetrious.deus.bot.app.api.thread.CreateThreadOutbound;
+import ru.demetrious.deus.bot.app.api.thread.LeaveThreadOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetAuthorIdOutbound;
 import ru.demetrious.deus.bot.domain.ButtonComponent;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -37,6 +44,7 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static net.dv8tion.jda.api.entities.Message.MessageFlag.LOADING;
 import static ru.demetrious.deus.bot.domain.ButtonComponent.StyleEnum.LINK;
@@ -46,7 +54,7 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 @RequiredArgsConstructor
 public abstract class GenericAdapter<A extends Interaction, E extends IReplyCallback, I extends IDeferrableCallback> extends BaseAdapter<E, A>
     implements NotifyOutbound<A>, GetGuildIdOutbound<A>, IsNotConnectedSameChannelOutbound<A>, IsNotCanConnectOutbound<A>, GetAuthorIdOutbound<A>,
-    ConnectOutbound<A>, DeferOutbound<A> {
+    ConnectOutbound<A>, DeferOutbound<A>, CreateThreadOutbound<A>, GetChannelIdOutbound<A>, LeaveThreadOutbound<A> {
     @Autowired
     protected MessageDataMapper messageDataMapper;
 
@@ -61,8 +69,6 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
 
         return CommandData.Name.from(strings[0], strings[1], strings[2]);
     }
-
-    protected abstract @NotNull I getInteraction();
 
     @Override
     public void defer() {
@@ -100,6 +106,25 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
     @Override
     public void notify(MessageData messageData) {
         notify(messageData, false);
+    }
+
+    @Override
+    public Optional<String> createThread(String threadName) {
+        if (getEvent().getChannel() instanceof MessageChannelUnion messageChannelUnion && messageChannelUnion instanceof TextChannel textChannel) {
+            return textChannel.createThreadChannel(threadName)
+                .map(ISnowflake::getId)
+                .map(Optional::ofNullable)
+                .complete();
+        }
+
+        return empty();
+    }
+
+    @Override
+    public void leaveThread(String id) {
+        ofNullable(getEvent().getJDA().getThreadChannelById(id))
+            .map(ThreadChannel::leave)
+            .ifPresent(RestAction::queue);
     }
 
     @Override
@@ -158,6 +183,14 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
     public String getUserId() {
         return getEvent().getUser().getId();
     }
+
+    @Override
+    public Optional<String> getChannelId() {
+        return ofNullable(getEvent().getChannel())
+            .map(ISnowflake::getId);
+    }
+
+    protected abstract @NotNull I getInteraction();
 
     // ===================================================================================================================
     // = Implementation

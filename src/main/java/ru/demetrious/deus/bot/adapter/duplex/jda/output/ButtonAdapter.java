@@ -36,11 +36,6 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
     }
 
     @Override
-    protected @NotNull ButtonInteraction getInteraction() {
-        return getEvent().getInteraction();
-    }
-
-    @Override
     public void defer() {
         getEvent().deferEdit().queue();
         log.debug("Deferred command's edit");
@@ -62,5 +57,10 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
             .map(cN -> cN.split(" "))
             .map(GenericAdapter::getName)
             .orElseThrow();
+    }
+
+    @Override
+    protected @NotNull ButtonInteraction getInteraction() {
+        return getEvent().getInteraction();
     }
 }

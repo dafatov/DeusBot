@@ -27,7 +27,7 @@
 
 	<properties>
 		<!-- Service -->
-		<revision>2.1.5</revision>
+		<revision>2.2.0</revision>
 
 		<!-- Engines -->
 		<java.version>21</java.version>
@@ -52,6 +52,7 @@
 		<jackson.version>2.17.1</jackson.version>
 		<commons-lang3.version>3.15.0</commons-lang3.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
+		<caffeine.version>3.1.8</caffeine.version>
 
 		<!-- Discord -->
 		<JDA.version>5.2.1</JDA.version>
@@ -120,6 +121,11 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 			<version>${spring-boot-starter.version}</version>
 		</dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+      <version>${spring-boot-starter.version}</version>
+    </dependency>
 
 		<!-- Database -->
 		<dependency>
@@ -191,6 +197,11 @@
 			<artifactId>resilience4j-spring-boot3</artifactId>
 			<version>${resilience4j.version}</version>
 		</dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+			<version>${caffeine.version}</version>
+    </dependency>
 
     <!-- Test -->
     <!-- Spring Starters -->
@@ -273,6 +284,7 @@
 					<image>
 						<env>
 							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+							<JAVA_OPTS>-Xmx512m</JAVA_OPTS>
 						</env>
 					</image>
 					<excludes>

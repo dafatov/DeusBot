@@ -17,6 +17,11 @@ public abstract class BaseAdapter<E, A extends Interaction> implements GetComman
         log.debug("Event removed for class: {}", this.getClass());
     }
 
+    @Override
+    public boolean hasEvent() {
+        return nonNull(getEvent());
+    }
+
     protected E getEvent() {
         return event.get();
     }
@@ -24,10 +29,5 @@ public abstract class BaseAdapter<E, A extends Interaction> implements GetComman
     public void setEvent(@NotNull E event) {
         this.event.set(event);
         log.debug("Event set for class: {}", this.getClass());
-    }
-
-    @Override
-    public boolean hasEvent() {
-        return nonNull(getEvent());
     }
 }

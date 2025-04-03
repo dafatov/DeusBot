@@ -37,11 +37,6 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
     private final ModalDataMapper modalDataMapper;
 
     @Override
-    protected @NotNull SlashCommandInteraction getInteraction() {
-        return getEvent().getInteraction();
-    }
-
-    @Override
     public String getLatency() {
         return "?";
     }
@@ -87,6 +82,11 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
         return getOption(name)
             .map(OptionMapping::getAsUser)
             .map(ISnowflake::getId);
+    }
+
+    @Override
+    protected @NotNull SlashCommandInteraction getInteraction() {
+        return getEvent().getInteraction();
     }
 
     // ===================================================================================================================
