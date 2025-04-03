@@ -5,22 +5,16 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
 import ru.demetrious.deus.bot.app.api.channel.GetChannelIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.AniguessrConcedeCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
-import ru.demetrious.deus.bot.app.api.option.GetFocusedOptionOutbound;
 import ru.demetrious.deus.bot.app.api.thread.LeaveThreadOutbound;
 import ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder;
-import ru.demetrious.deus.bot.domain.AutocompleteOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
-import ru.demetrious.deus.bot.domain.OptionChoice;
 
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_CONCEDE;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 
@@ -30,8 +24,6 @@ import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 public class AniguessrConcedeCommandUseCase implements AniguessrConcedeCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
     private final AniguessrGamesHolder aniguessrGamesHolder;
-    private final ReplyChoicesOutbound replyChoicesOutbound;
-    private final GetFocusedOptionOutbound getFocusedOptionOutbound;
     private final GetChannelIdOutbound<SlashCommandInteractionInbound> getChannelIdOutbound;
     private final LeaveThreadOutbound<SlashCommandInteractionInbound> leaveThreadOutbound;
 
@@ -40,24 +32,6 @@ public class AniguessrConcedeCommandUseCase implements AniguessrConcedeCommandIn
         return new CommandData()
             .setName(ANIGUESSR_CONCEDE)
             .setDescription("Признает поражение и завершает игру");
-    }
-
-    @Override
-    public void onAutocomplete() {
-        AutocompleteOption focusedOption = getFocusedOptionOutbound.getFocusedOption();
-        List<OptionChoice> optionList = List.of();
-
-        if (!aniguessrGamesHolder.getGames().isEmpty()) {
-            optionList = aniguessrGamesHolder.getGames().stream()
-                .filter(title -> containsIgnoreCase(title, focusedOption.getValue()))
-                .map(g -> new OptionChoice()
-                    .setName(g)
-                    .setValue(g))
-                .limit(MAX_CHOICES)
-                .toList();
-        }
-
-        replyChoicesOutbound.replyChoices(optionList);
     }
 
     @Override

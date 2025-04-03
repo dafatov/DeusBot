@@ -31,7 +31,6 @@ import static ru.demetrious.deus.bot.app.impl.aniguessr.AniguessrGamesHolder.Sta
 import static ru.demetrious.deus.bot.domain.CommandData.Name.ANIGUESSR_GUESS;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
-import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -44,7 +43,7 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
     private final ReplyChoicesOutbound replyChoicesOutbound;
     private final GetFocusedOptionOutbound getFocusedOptionOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
-    private final List<NotifyOutbound<?>> notifyOutbound;
+    private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
     private final GetChannelIdOutbound<SlashCommandInteractionInbound> getChannelIdOutbound;
     private final LeaveThreadOutbound<SlashCommandInteractionInbound> leaveThreadOutbound;
 
@@ -93,7 +92,7 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
                     .setTitle("Нельзя спамить!")
                     .setDescription("Нельзя играть не в созданном трэде, так как так мы засрем все что можно...")));
 
-            b(notifyOutbound).notify(messageData);
+            notifyOutbound.notify(messageData);
             log.warn("Произошла попытка играть в игру вне созданного трэда");
             return;
         }
@@ -114,7 +113,7 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
                 case ADDED -> "Попытка засчитана (#%s)".formatted(aniguessrGamesHolder.getGuessesCount(threadId));
             })
             .setDescription(status == DUPLICATE ? "Baka~" : aniguessrGamesHolder.getLastGuess(threadId))));
-        b(notifyOutbound).notify(messageData);
+        notifyOutbound.notify(messageData);
 
         if (status == GUESSED) {
             aniguessrGamesHolder.remove(threadId);
