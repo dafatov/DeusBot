@@ -35,29 +35,19 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<!-- Spring Starters-->
-		<spring-boot-starter.version>3.3.1</spring-boot-starter.version>
-		<spring-cloud-starter.version>4.1.2</spring-cloud-starter.version>
-
-		<!-- Database -->
-		<postgresql.version>42.7.3</postgresql.version>
-		<flyway.version>10.10.0</flyway.version>
+		<!-- Spring-->
+		<spring-boot.version>3.4.4</spring-boot.version>
+		<spring-cloud.version>2024.0.1</spring-cloud.version>
 
 		<!-- Annotation Processors -->
-		<lombok.version>1.18.32</lombok.version>
+		<lombok.version>1.18.36</lombok.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
-		<!-- Applied -->
-		<jackson.version>2.17.1</jackson.version>
-		<commons-lang3.version>3.15.0</commons-lang3.version>
-		<resilience4j.version>2.2.0</resilience4j.version>
-		<caffeine.version>3.1.8</caffeine.version>
-
 		<!-- Discord -->
-		<JDA.version>5.2.1</JDA.version>
-		<lavaplayer.version>2.2.2</lavaplayer.version>
-		<lavalink.youtube-common.version>1.11.4</lavalink.youtube-common.version>
+		<JDA.version>5.3.1</JDA.version>
+		<lavaplayer.version>2.2.3</lavaplayer.version>
+		<lavalink.youtube-common.version>1.12.0</lavalink.youtube-common.version>
 
 		<!-- Plugins -->
 		<git-commit-id.version>9.0.0</git-commit-id.version>
@@ -72,13 +62,32 @@
 		</repository>
 	</repositories>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<!-- Main -->
 		<!-- Spring Starters -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring-boot-starter.version}</version>
+			<version>${spring-boot.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -89,60 +98,49 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>${spring-boot-starter.version}</version>
 		</dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-openfeign</artifactId>
-      <version>${spring-cloud-starter.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
-      <version>${spring-boot-starter.version}</version>
     </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
-			<version>${spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-			<version>${spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
-			<version>${spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
-			<version>${spring-boot-starter.version}</version>
 		</dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-cache</artifactId>
-      <version>${spring-boot-starter.version}</version>
     </dependency>
 
 		<!-- Database -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>${postgresql.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>${flyway.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
-			<version>${flyway.version}</version>
 		</dependency>
 
 		<!-- Annotation Processors -->
@@ -185,22 +183,18 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>${commons-lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-spring-boot3</artifactId>
-			<version>${resilience4j.version}</version>
 		</dependency>
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
-			<version>${caffeine.version}</version>
     </dependency>
 
     <!-- Test -->
@@ -208,24 +202,8 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>${spring-boot-starter.version}</version>
     </dependency>
   </dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
@@ -234,6 +212,7 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring-boot.version}</version>
 				</plugin>
 
 				<!-- Compiler -->
@@ -249,13 +228,6 @@
 					<artifactId>git-commit-id-maven-plugin</artifactId>
 					<version>${git-commit-id.version}</version>
 				</plugin>
-
-				<!-- Maven Clean -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>${spring-boot-starter.version}</version>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -264,7 +236,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-boot-starter.version}</version>
 				<executions>
 					<execution>
 						<goals>
