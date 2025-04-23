@@ -117,6 +117,7 @@ jobs:
       FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
+      DEUS_URL: ${{ vars.DEUS_URL }}
 
     if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && !failure() }}
 
@@ -151,4 +152,5 @@ jobs:
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
+              -e DEUS_URL=${{ vars.DEUS_URL }} \
             ghcr.io/${{ env.GITHUB_ACTOR }}/${{ env.IMAGE_NAME }}:test

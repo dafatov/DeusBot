@@ -255,7 +255,7 @@
 					<image>
 						<env>
 							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-							<JAVA_OPTS>-Xmx512m</JAVA_OPTS>
+							<BPE_JAVA_TOOL_OPTIONS>-Xmx256m</BPE_JAVA_TOOL_OPTIONS>
 						</env>
 					</image>
 					<excludes>

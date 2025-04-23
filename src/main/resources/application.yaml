@@ -81,6 +81,9 @@ feign:
     arting:
       url: ${ARTING_URL}
       path: /api
+    deus:
+      url: ${DEUS_URL}
+      path: /
 
 resilience4j:
   retry:
