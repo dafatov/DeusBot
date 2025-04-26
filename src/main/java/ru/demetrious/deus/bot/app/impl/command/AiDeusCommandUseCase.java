@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
+import ru.demetrious.deus.bot.app.api.channel.GetChannelIdOutbound;
 import ru.demetrious.deus.bot.app.api.command.AiDeusCommandInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.player.IsNotCanConnectOutbound;
@@ -36,12 +37,18 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
     private final GetCustomIdOutbound getCustomIdOutbound;
     private final List<GetAuthorIdOutbound<?>> getAuthorIdOutbound;
     private final AskByVoiceOutbound askByVoiceOutbound;
+    private final List<GetChannelIdOutbound<?>> getChannelIdOutbound;
 
     @Override
     public CommandData getData() {
         return new CommandData()
             .setName(AI_DEUS)
             .setDescription("Ответить на любой вопрос, заданный голосом");
+    }
+
+    @Override
+    public boolean isDefer() {
+        return false;
     }
 
     @Override
@@ -65,7 +72,7 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
         MessageData messageData = new MessageData().setComponents(List.of(new MessageComponent().setButtons(List.of(new ButtonComponent()
             .setId(START_BUTTON)
             .setLabel("Начать запись")))));
-        b(notifyOutbound).notify(messageData);
+        b(notifyOutbound).notify(messageData, true);
         log.info("Успешно создана кнопка для начала записи");
     }
 
@@ -82,7 +89,7 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
                 .setTitle("Лишнее движение")
                 .setDescription("Пользователь <@%s> уже начал запись когда-то ранее".formatted(userId))));
             b(notifyOutbound).notify(messageData);
-            log.info("Запись пользователя уже была начата");
+            log.warn("Запись пользователя уже была начата");
             return;
         }
 
@@ -104,14 +111,16 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
                 .setTitle("Косое движение")
                 .setDescription("Пользователь <@%s> еще не начал запись".formatted(userId))));
             b(notifyOutbound).notify(messageData);
-            log.info("Запись пользователя еще не была начата");
+            log.warn("Запись пользователя еще не была начата");
             return;
         }
 
-        String answer = askByVoiceOutbound.ask(audioOptional.get(), userId);
         MessageData messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Ответ <@%s>".formatted(userId))
-            .setDescription(answer)));
+            .setTitle("Запись обрабатывается...")
+            .setDescription("**Это может занять некоторое время. Пожалуйста подождите**")));
         b(notifyOutbound).notify(messageData);
+
+        askByVoiceOutbound.ask(audioOptional.get(), userId, b(getChannelIdOutbound).getChannelId().orElseThrow());
+        log.info("Успешно отправлена запись на обработку");
     }
 }

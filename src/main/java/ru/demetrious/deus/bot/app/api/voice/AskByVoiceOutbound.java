@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.app.api.voice;
 
+@FunctionalInterface
 public interface AskByVoiceOutbound {
-    String ask(byte[] audio, String userId);
+    void ask(byte[] audio, String userId, String channelId);
 }

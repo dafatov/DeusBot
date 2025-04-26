@@ -99,7 +99,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
                     .queue();
             }
         } catch (Exception e) {
-            log.warn("Cannot reply onModal interaction", e);
+            log.warn("Cannot reply interaction", e);
             ((MessageChannelUnion) requireNonNull(getEvent().getChannel()))
                 .sendMessage(content)
                 .queue();

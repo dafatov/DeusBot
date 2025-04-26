@@ -3,7 +3,7 @@ package ru.demetrious.deus.bot.adapter.output.deus;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import ru.demetrious.deus.bot.adapter.output.deus.dto.DeusContext;
 
 @FeignClient(
     name = "deus-client",
@@ -12,5 +12,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface DeusClient {
     @PostMapping("/webhook/voice")
-    String askByVoice(@RequestBody byte[] audio, @RequestParam("userId") String userId);
+    void askByVoice(@RequestBody DeusContext context);
 }
