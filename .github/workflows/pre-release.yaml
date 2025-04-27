@@ -66,6 +66,8 @@ jobs:
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
+    if: inputs.operation == 'deploy' || inputs.operation == 'restart' || inputs.operation == 'stop'
+
     steps:
       - name: Run multiple remote commands via SSH
         uses: appleboy/ssh-action@v1.1.0
@@ -119,7 +121,10 @@ jobs:
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
       DEUS_URL: ${{ vars.DEUS_URL }}
 
-    if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && (!failure() || !cancelled()) }}
+    if: |
+      (inputs.operation == 'deploy' || inputs.operation == 'restart') &&
+      (inputs.operation != 'deploy' || needs.install.result == 'success') &&
+      (needs.stop.result == 'success')
 
     steps:
       - name: Run multiple remote commands via SSH
