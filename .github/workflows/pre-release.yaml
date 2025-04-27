@@ -27,7 +27,7 @@ jobs:
     outputs:
       url: ${{ steps.getImageUrl.outputs.url }}
 
-    if: contains(inputs.operation, 'deploy')
+    if: inputs.operation == 'deploy'
 
     steps:
       - uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    if: contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart') || contains(inputs.operation, 'stop')
+    if: inputs.operation == 'deploy' || inputs.operation == 'restart' || inputs.operation == 'stop'
 
     steps:
       - name: Run multiple remote commands via SSH
@@ -122,8 +122,8 @@ jobs:
       DEUS_URL: ${{ vars.DEUS_URL }}
 
     if: |
-      (contains(inputs.operation, 'deploy') && contains(needs.install.result, 'success') && contains(needs.stop.result, 'success')) 
-      || (contains(inputs.operation, 'restart') && contains(needs.stop.result, 'success'))
+      (inputs.operation == 'deploy' && needs.install.result == 'success' && needs.stop.result == 'success') ||
+      (inputs.operation == 'restart' && (needs.install.result == 'skipped' || needs.install.result == 'success') && needs.stop.result == 'success')
 
     steps:
       - name: Run multiple remote commands via SSH
