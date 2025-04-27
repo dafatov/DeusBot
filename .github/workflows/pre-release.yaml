@@ -27,7 +27,7 @@ jobs:
     outputs:
       url: ${{ steps.getImageUrl.outputs.url }}
 
-    if: inputs.operation == 'deploy'
+    if: contains(inputs.operation, 'deploy')
 
     steps:
       - uses: actions/checkout@v4
@@ -60,16 +60,11 @@ jobs:
   stop:
     runs-on: ubuntu-latest
 
-    needs:
-      - install
-
     env:
       # Build secrets
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    if: inputs.operation == 'deploy' || inputs.operation == 'restart' || inputs.operation == 'stop'
 
     steps:
       - name: Run multiple remote commands via SSH
@@ -85,6 +80,7 @@ jobs:
     runs-on: ubuntu-latest
 
     needs:
+      - install
       - stop
 
     environment: 'pre-production'
@@ -123,9 +119,7 @@ jobs:
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
       DEUS_URL: ${{ vars.DEUS_URL }}
 
-    if: |
-      (inputs.operation == 'deploy' && needs.install.result == 'success' && needs.stop.result == 'success') ||
-      (inputs.operation == 'restart' && needs.stop.result == 'success')
+    if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && !failure() }}
 
     steps:
       - name: Run multiple remote commands via SSH
