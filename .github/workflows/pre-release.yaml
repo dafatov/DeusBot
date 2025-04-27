@@ -123,7 +123,7 @@ jobs:
 
     if: |
       (inputs.operation == 'deploy' && needs.install.result == 'success' && needs.stop.result == 'success') ||
-      (inputs.operation == 'restart' && (needs.install.result == 'skipped' || needs.install.result == 'success') && needs.stop.result == 'success')
+      (inputs.operation == 'restart' && needs.stop.result == 'success')
 
     steps:
       - name: Run multiple remote commands via SSH
