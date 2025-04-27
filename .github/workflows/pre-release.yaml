@@ -119,7 +119,7 @@ jobs:
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
       DEUS_URL: ${{ vars.DEUS_URL }}
 
-    if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && !failure() }}
+    if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && (!failure() || !cancelled()) }}
 
     steps:
       - name: Run multiple remote commands via SSH
