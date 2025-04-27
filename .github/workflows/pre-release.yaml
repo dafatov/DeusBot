@@ -82,7 +82,6 @@ jobs:
     runs-on: ubuntu-latest
 
     needs:
-      - install
       - stop
 
     environment: 'pre-production'
