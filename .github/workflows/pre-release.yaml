@@ -122,9 +122,8 @@ jobs:
       DEUS_URL: ${{ vars.DEUS_URL }}
 
     if: |
-      (inputs.operation == 'deploy' || inputs.operation == 'restart') &&
-      (inputs.operation != 'deploy' || needs.install.result == 'success') &&
-      (needs.stop.result == 'success')
+      (inputs.operation == 'deploy' && needs.install.result == 'success' && needs.stop.result == 'success') ||
+      (inputs.operation == 'restart' && needs.stop.result == 'success')
 
     steps:
       - name: Run multiple remote commands via SSH
