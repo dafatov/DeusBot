@@ -20,6 +20,10 @@ import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
+import static java.lang.String.join;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static ru.demetrious.deus.bot.app.api.message.PublishMessageInbound.MESSAGE_PATH;
+import static ru.demetrious.deus.bot.app.api.message.PublishMessageInbound.PUBLISH_PATH;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.AI_DEUS;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 
@@ -120,7 +124,7 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
             .setDescription("**Это может занять некоторое время. Пожалуйста подождите**")));
         b(notifyOutbound).notify(messageData);
 
-        askByVoiceOutbound.ask(audioOptional.get(), userId, b(getChannelIdOutbound).getChannelId().orElseThrow());
+        askByVoiceOutbound.ask(audioOptional.get(), userId, b(getChannelIdOutbound).getChannelId().orElseThrow(), join(EMPTY, MESSAGE_PATH, PUBLISH_PATH));
         log.info("Успешно отправлена запись на обработку");
     }
 }
