@@ -27,7 +27,7 @@
 
 	<properties>
 		<!-- Service -->
-		<revision>2.2.1</revision>
+		<revision>2.3.0</revision>
 
 		<!-- Engines -->
 		<java.version>21</java.version>
@@ -127,6 +127,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 
 		<!-- Database -->
 		<dependency>
@@ -255,7 +259,7 @@
 					<image>
 						<env>
 							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-							<JAVA_OPTS>-Xmx512m</JAVA_OPTS>
+							<BPE_JAVA_TOOL_OPTIONS>-Xmx256m</BPE_JAVA_TOOL_OPTIONS>
 						</env>
 					</image>
 					<excludes>

@@ -24,10 +24,11 @@ public class CommandData {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum Name {
+        AI_DEUS("ai", "deus"),
         AI_IMAGE("ai", "image"),
-        ANIGUESSR_START("aniguessr", "start"),
-        ANIGUESSR_GUESS("aniguessr", "guess"),
         ANIGUESSR_CONCEDE("aniguessr", "concede"),
+        ANIGUESSR_GUESS("aniguessr", "guess"),
+        ANIGUESSR_START("aniguessr", "start"),
         CLEAR("clear"),
         EVENT_CREATE("event", "create"),
         EVENT_HELP("event", "help"),

@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioReceiveHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.config.AudioSendHandler;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.MessageDataMapper;
 import ru.demetrious.deus.bot.app.api.channel.GetChannelIdOutbound;
@@ -57,6 +58,8 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
     ConnectOutbound<A>, DeferOutbound<A>, CreateThreadOutbound<A>, GetChannelIdOutbound<A>, LeaveThreadOutbound<A> {
     @Autowired
     protected MessageDataMapper messageDataMapper;
+    @Autowired
+    protected AudioReceiveHandler audioReceiveHandler;
 
     protected static CommandData.Name getName(String[] strings) {
         if (strings.length == 1) {
@@ -96,7 +99,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
                     .queue();
             }
         } catch (Exception e) {
-            log.warn("Cannot reply onModal interaction", e);
+            log.warn("Cannot reply interaction", e);
             ((MessageChannelUnion) requireNonNull(getEvent().getChannel()))
                 .sendMessage(content)
                 .queue();
@@ -176,6 +179,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
         }
 
         audioManager.setSendingHandler(audioSendHandler);
+        audioManager.setReceivingHandler(audioReceiveHandler);
         audioManager.openAudioConnection(getVoiceChannel());
     }
 

@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static java.nio.ByteBuffer.wrap;
+
 @RequiredArgsConstructor
 @Component
 public class AudioSendHandler implements net.dv8tion.jda.api.audio.AudioSendHandler {
@@ -22,7 +24,7 @@ public class AudioSendHandler implements net.dv8tion.jda.api.audio.AudioSendHand
 
     @Override
     public ByteBuffer provide20MsAudio() {
-        return ByteBuffer.wrap(lastFrame.getData());
+        return wrap(lastFrame.getData());
     }
 
     @Override

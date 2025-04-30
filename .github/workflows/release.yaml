@@ -153,6 +153,7 @@ jobs:
       FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
+      DEUS_URL: ${{ vars.DEUS_URL }}
 
     steps:
       - name: Run multiple remote commands via SSH
@@ -186,4 +187,5 @@ jobs:
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
+              -e DEUS_URL=${{ vars.DEUS_URL }} \
             ${{ needs.install.outputs.url }}
