@@ -45,9 +45,9 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
 		<!-- Discord -->
-		<JDA.version>5.3.1</JDA.version>
+		<JDA.version>5.5.1</JDA.version>
 		<lavaplayer.version>2.2.3</lavaplayer.version>
-		<lavalink.youtube-common.version>1.12.0</lavalink.youtube-common.version>
+		<lavalink.youtube-common.version>1.13.2</lavalink.youtube-common.version>
 
 		<!-- Plugins -->
 		<git-commit-id.version>9.0.0</git-commit-id.version>
