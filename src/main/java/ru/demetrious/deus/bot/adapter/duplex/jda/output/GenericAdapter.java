@@ -143,7 +143,7 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
                 .setId(authorizeData.getValue().toString())))));
 
         notify(messageData, true);
-        log.warn("Произошла попытка запуска неавторизованного запуска команды");
+        log.warn("Произошла попытка неавторизованного запуска команды");
     }
 
     @Override
