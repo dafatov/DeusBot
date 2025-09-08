@@ -27,6 +27,7 @@ public class AuthorizationComponent {
     public static final String DISCORD_REGISTRATION_ID = "discord";
     public static final String ANILIST_REGISTRATION_ID = "anilist";
     public static final String SHIKIMORI_REGISTRATION_ID = "shikimori";
+    public static final String GOOGLE_REGISTRATION_ID = "google";
     protected static final String QUERY_DISCORD_USER_ID = "id";
 
     private final OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
@@ -40,6 +41,8 @@ public class AuthorizationComponent {
     private String discordUrl;
     @Value("${SHIKIMORI_URL}")
     private String shikimoriUrl;
+    @Value("${GOOGLE_URL}")
+    private String googleUrl;
 
     public Optional<OAuth2AuthorizedClient> authorize(String registrationId, String userId) {
         Optional<OAuth2AuthorizedClient> oAuth2AuthorizedClientOptional;
@@ -89,6 +92,7 @@ public class AuthorizationComponent {
             case DISCORD_REGISTRATION_ID -> discordUrl;
             case ANILIST_REGISTRATION_ID -> anilistUrl;
             case SHIKIMORI_REGISTRATION_ID -> shikimoriUrl;
+            case GOOGLE_REGISTRATION_ID -> googleUrl;
             default -> throw new IllegalArgumentException("Unexpected registrationId=%s".formatted(registrationId));
         };
     }

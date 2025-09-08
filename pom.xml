@@ -1,104 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>ru.demetrious</groupId>
-	<artifactId>deus-bot</artifactId>
-	<name>DeuSBot</name>
-	<version>${revision}</version>
+  <groupId>ru.demetrious</groupId>
+  <artifactId>deus-bot</artifactId>
+  <name>DeuSBot</name>
+  <version>${revision}</version>
 
-	<profiles>
-		<profile>
-			<id>local</id>
-			<properties>
-				<spring-dotenv.version>4.0.0</spring-dotenv.version>
-			</properties>
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <spring-dotenv.version>4.0.0</spring-dotenv.version>
+      </properties>
 
-			<dependencies>
-				<dependency>
-					<groupId>me.paulschwarz</groupId>
-					<artifactId>spring-dotenv</artifactId>
-					<version>${spring-dotenv.version}</version>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
+      <dependencies>
+        <dependency>
+          <groupId>me.paulschwarz</groupId>
+          <artifactId>spring-dotenv</artifactId>
+          <version>${spring-dotenv.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
-	<properties>
-		<!-- Service -->
-		<revision>2.3.1</revision>
+  <properties>
+    <!-- Service -->
+    <revision>2.4.0</revision>
 
-		<!-- Engines -->
-		<java.version>21</java.version>
-		<maven.version>3.8.2</maven.version>
-		<maven.compiler.source>${java.version}</maven.compiler.source>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
+    <!-- Engines -->
+    <java.version>21</java.version>
+    <maven.version>3.8.2</maven.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
 
-		<!-- Spring-->
-		<spring-boot.version>3.4.4</spring-boot.version>
-		<spring-cloud.version>2024.0.1</spring-cloud.version>
+    <!-- Spring-->
+    <spring-boot.version>3.4.4</spring-boot.version>
+    <spring-cloud.version>2024.0.1</spring-cloud.version>
 
-		<!-- Annotation Processors -->
-		<lombok.version>1.18.36</lombok.version>
-		<mapstruct.version>1.5.5.Final</mapstruct.version>
-		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+    <!-- Annotation Processors -->
+    <lombok.version>1.18.36</lombok.version>
+    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
-		<!-- Discord -->
-		<JDA.version>5.5.1</JDA.version>
-		<lavaplayer.version>2.2.3</lavaplayer.version>
-		<lavalink.youtube-common.version>1.13.2</lavalink.youtube-common.version>
+    <!-- Discord -->
+    <JDA.version>5.5.1</JDA.version>
+    <lavaplayer.version>2.2.3</lavaplayer.version>
+    <lavalink.youtube-common.version>1.13.2</lavalink.youtube-common.version>
 
-		<!-- Plugins -->
-		<git-commit-id.version>9.0.0</git-commit-id.version>
-		<maven-compiler.version>3.12.1</maven-compiler.version>
-	</properties>
+    <!-- Applied -->
+    <jsoup.version>1.16.1</jsoup.version>
 
-	<repositories>
-		<repository>
-			<id>arbjergDev</id>
-			<name>Lavalink Repository</name>
-			<url>https://maven.lavalink.dev/releases</url>
-		</repository>
-	</repositories>
+    <!-- Plugins -->
+    <git-commit-id.version>9.0.0</git-commit-id.version>
+    <maven-compiler.version>3.12.1</maven-compiler.version>
+  </properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring-boot.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+  <repositories>
+    <repository>
+      <id>arbjergDev</id>
+      <name>Lavalink Repository</name>
+      <url>https://maven.lavalink.dev/releases</url>
+    </repository>
+  </repositories>
 
-	<dependencies>
-		<!-- Main -->
-		<!-- Spring Starters -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring-boot.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- Main -->
+    <!-- Spring Starters -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>${spring-boot.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -107,76 +110,76 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-oauth2-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-quartz</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-quartz</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
 
-		<!-- Database -->
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-		</dependency>
+    <!-- Database -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
 
-		<!-- Annotation Processors -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>${mapstruct.version}</version>
-		</dependency>
+    <!-- Annotation Processors -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${mapstruct.version}</version>
+    </dependency>
 
-		<!-- Discord -->
-		<dependency>
-			<groupId>net.dv8tion</groupId>
-			<artifactId>JDA</artifactId>
-			<version>${JDA.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>dev.arbjerg</groupId>
-			<artifactId>lavaplayer</artifactId>
-			<version>${lavaplayer.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+    <!-- Discord -->
+    <dependency>
+      <groupId>net.dv8tion</groupId>
+      <artifactId>JDA</artifactId>
+      <version>${JDA.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.arbjerg</groupId>
+      <artifactId>lavaplayer</artifactId>
+      <version>${lavaplayer.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>dev.lavalink.youtube</groupId>
       <artifactId>common</artifactId>
@@ -192,13 +195,22 @@
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
-		<dependency>
-			<groupId>io.github.resilience4j</groupId>
-			<artifactId>resilience4j-spring-boot3</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-spring-boot3</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.openfeign</groupId>
+      <artifactId>feign-okhttp</artifactId>
     </dependency>
 
     <!-- Test -->
@@ -209,122 +221,122 @@
     </dependency>
   </dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<!-- Spring Boot -->
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring-boot.version}</version>
-				</plugin>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Spring Boot -->
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+        </plugin>
 
-				<!-- Compiler -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${maven-compiler.version}</version>
-				</plugin>
+        <!-- Compiler -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler.version}</version>
+        </plugin>
 
-				<!-- Git -->
-				<plugin>
-					<groupId>io.github.git-commit-id</groupId>
-					<artifactId>git-commit-id-maven-plugin</artifactId>
-					<version>${git-commit-id.version}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+        <!-- Git -->
+        <plugin>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>${git-commit-id.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
-		<plugins>
-			<!-- Spring Boot -->
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>build-info</goal>
-						</goals>
-						<configuration>
-							<additionalProperties>
-								<encoding.source>UTF-8</encoding.source>
-								<encoding.reporting>UTF-8</encoding.reporting>
-								<java.source>${java.version}</java.source>
-								<java.target>${java.version}</java.target>
-							</additionalProperties>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<image>
-						<env>
-							<BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-							<BPE_JAVA_TOOL_OPTIONS>-Xmx256m</BPE_JAVA_TOOL_OPTIONS>
-						</env>
-					</image>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+    <plugins>
+      <!-- Spring Boot -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+            <configuration>
+              <additionalProperties>
+                <encoding.source>UTF-8</encoding.source>
+                <encoding.reporting>UTF-8</encoding.reporting>
+                <java.source>${java.version}</java.source>
+                <java.target>${java.version}</java.target>
+              </additionalProperties>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <image>
+            <env>
+              <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+              <BPE_JAVA_TOOL_OPTIONS>-Xmx256m</BPE_JAVA_TOOL_OPTIONS>
+            </env>
+          </image>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 
-			<!-- Compiler -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.mapstruct</groupId>
-							<artifactId>mapstruct-processor</artifactId>
-							<version>${mapstruct.version}</version>
-						</path>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
-						</path>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok-mapstruct-binding</artifactId>
-							<version>${lombok-mapstruct-binding.version}</version>
-						</path>
-					</annotationProcessorPaths>
-					<compilerArgs>
-						<arg>-parameters</arg>
-						<compilerArg>
-							-Amapstruct.defaultComponentModel=spring
-						</compilerArg>
-					</compilerArgs>
-				</configuration>
-			</plugin>
+      <!-- Compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>${lombok-mapstruct-binding.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <compilerArgs>
+            <arg>-parameters</arg>
+            <compilerArg>
+              -Amapstruct.defaultComponentModel=spring
+            </compilerArg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
 
-			<!-- Git -->
-			<plugin>
-				<groupId>io.github.git-commit-id</groupId>
-				<artifactId>git-commit-id-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>get-git-info</id>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-						<phase>initialize</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<generateGitPropertiesFile>true</generateGitPropertiesFile>
-					<generateGitPropertiesFilename>
-						${project.build.outputDirectory}/git.properties
-					</generateGitPropertiesFilename>
-					<failOnNoGitDirectory>false</failOnNoGitDirectory>
-					<commitIdGenerationMode>full</commitIdGenerationMode>
-					<abbrevLength>6</abbrevLength>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+      <!-- Git -->
+      <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>get-git-info</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>
+            ${project.build.outputDirectory}/git.properties
+          </generateGitPropertiesFilename>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <commitIdGenerationMode>full</commitIdGenerationMode>
+          <abbrevLength>6</abbrevLength>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
