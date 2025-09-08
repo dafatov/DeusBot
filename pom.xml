@@ -269,9 +269,10 @@
         </executions>
         <configuration>
           <image>
+            <builder>paketobuildpacks/builder-jammy-full</builder>
             <env>
               <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-              <BPE_JAVA_TOOL_OPTIONS>-Xmx256m</BPE_JAVA_TOOL_OPTIONS>
+              <BPE_JAVA_TOOL_OPTIONS>-Xmx256m -Djava.awt.headless=true</BPE_JAVA_TOOL_OPTIONS>
             </env>
           </image>
           <excludes>

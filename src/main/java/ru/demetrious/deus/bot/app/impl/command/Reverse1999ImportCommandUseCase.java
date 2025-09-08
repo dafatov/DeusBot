@@ -24,7 +24,6 @@ import ru.demetrious.deus.bot.domain.Pull;
 import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
-import static java.lang.Math.floorDiv;
 import static java.time.Instant.MIN;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_IMPORT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
@@ -93,7 +92,7 @@ public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommand
         if (newPullList.isEmpty()) {
             messageEmbed = new MessageEmbed()
                 .setTitle("Сохраненные крутки актуальны")
-                .setDescription("Последняя крутка: <t:%d:R>".formatted(floorDiv(lastPull.toEpochMilli(), 1000)));
+                .setDescription("Последняя крутка: <t:%d:R>".formatted(lastPull.getEpochSecond()));
         } else {
             messageEmbed = new MessageEmbed()
                 .setTitle("Импортированы новые крутки")
@@ -103,12 +102,11 @@ public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommand
                     Последняя крутка: <t:%d:R>
                     """.formatted(
                     newPullList.size(),
-                    floorDiv(lastPull.toEpochMilli(), 1000),
+                    lastPull.getEpochSecond(),
                     newPullList.stream()
                         .map(Pull::getTime)
                         .max(Instant::compareTo)
-                        .map(Instant::toEpochMilli)
-                        .map(millis -> floorDiv(millis, 1000))
+                        .map(Instant::getEpochSecond)
                         .get()
                 ));
         }
