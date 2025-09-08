@@ -2,7 +2,7 @@
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout
-              pattern="%black{%d{ISO8601}} %highlight{%-5level{5}} [%black{%-24.-24thread{24}}] %yellow{%-80logger{80}}: %msg%n%throwable"
+              pattern="%blue{%d{ISO8601}} %highlight{%-5level{5}} [%blue{%-40.-40thread{40}}] %yellow{%-80logger{80}}: %msg%n%throwable"
       />
     </Console>
 

@@ -102,6 +102,8 @@ jobs:
       DISCORD_OAUTH2_ID: ${{ secrets.DISCORD_OAUTH2_ID }}
       DISCORD_OAUTH2_SECRET: ${{ secrets.DISCORD_OAUTH2_SECRET }}
       DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      GOOGLE_OAUTH2_ID: ${{ secrets.GOOGLE_OAUTH2_ID }}
+      GOOGLE_OAUTH2_SECRET: ${{ secrets.GOOGLE_OAUTH2_SECRET }}
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       SHIKIMORI_OAUTH2_ID: ${{ secrets.SHIKIMORI_OAUTH2_ID }}
       SHIKIMORI_OAUTH2_SECRET: ${{ secrets.SHIKIMORI_OAUTH2_SECRET }}
@@ -113,11 +115,13 @@ jobs:
       ARTING_URL: ${{ vars.ARTING_URL }}
       DATABASE_MAX_POOL: ${{ vars.DATABASE_MAX_POOL }}
       DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DEUS_URL: ${{ vars.DEUS_URL }}
       DISCORD_URL: ${{ vars.DISCORD_URL }}
       FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
+      GOOGLE_URL: ${{ vars.GOOGLE_URL }}
+      REVERSE1999_WIKI_URL: ${{ vars.REVERSE1999_WIKI_URL }}
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
-      DEUS_URL: ${{ vars.DEUS_URL }}
 
     if: ${{ (contains(inputs.operation, 'deploy') || contains(inputs.operation, 'restart')) && !failure() }}
 
@@ -137,6 +141,8 @@ jobs:
               -e DISCORD_OAUTH2_ID=${{ env.DISCORD_OAUTH2_ID }} \
               -e DISCORD_OAUTH2_SECRET=${{ env.DISCORD_OAUTH2_SECRET }} \
               -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} \
+              -e GOOGLE_OAUTH2_ID=${{ env.GOOGLE_OAUTH2_ID }} \
+              -e GOOGLE_OAUTH2_SECRET=${{ env.GOOGLE_OAUTH2_SECRET }} \
               -e KEY_STORE_PASSWORD=${{ env.KEY_STORE_PASSWORD }} \
               -e SHIKIMORI_OAUTH2_ID=${{ env.SHIKIMORI_OAUTH2_ID }} \
               -e SHIKIMORI_OAUTH2_SECRET=${{ env.SHIKIMORI_OAUTH2_SECRET }} \
@@ -148,9 +154,11 @@ jobs:
               -e ARTING_URL=${{ vars.ARTING_URL }} \
               -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} \
               -e DATABASE_URL=${{ vars.DATABASE_URL }} \
+              -e DEUS_URL=${{ vars.DEUS_URL }} \
               -e DISCORD_URL=${{ vars.DISCORD_URL }} \
+              -e GOOGLE_URL=${{ vars.GOOGLE_URL }} \
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
+              -e REVERSE1999_WIKI_URL=${{ vars.REVERSE1999_WIKI_URL }} \
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
-              -e DEUS_URL=${{ vars.DEUS_URL }} \
             ghcr.io/${{ env.GITHUB_ACTOR }}/${{ env.IMAGE_NAME }}:test
