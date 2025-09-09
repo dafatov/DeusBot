@@ -123,11 +123,11 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999ShowCo
             .setDescription("""
                 ... установлено количество: %s
                 -# что значит %s
-                """.formatted(newCount, switch (newCount) {
+                """.formatted(realCount, switch (realCount) {
                 case 0 -> "**отсутствие персонажа**";
                 case 1 -> "**наличие персонажа**";
                 case 6 -> "**наличие персонажа** и **максимальная** конста";
-                default -> "**наличие персонажа** и **%s конста**".formatted(newCount - 1);
+                default -> "**наличие персонажа** и **%s конста**".formatted(realCount - 1);
             })))));
     }
 }
