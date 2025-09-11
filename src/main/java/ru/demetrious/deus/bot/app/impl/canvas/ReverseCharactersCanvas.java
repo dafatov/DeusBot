@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
 
 import static java.awt.Color.BLACK;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.Integer.compare;
 import static java.lang.Math.abs;
@@ -23,6 +24,7 @@ import static java.util.Objects.requireNonNull;
 import static javax.imageio.ImageIO.read;
 import static javax.imageio.ImageIO.write;
 
+@Slf4j
 public class ReverseCharactersCanvas implements Canvas {
     private static final int X_GAP = 10;
     private static final int Y_GAP = 10;
@@ -42,7 +44,7 @@ public class ReverseCharactersCanvas implements Canvas {
 
         this.summonPowerList = arrangeCharacters(characterList, minHeight);
         this.params = getParams(characterList, minHeight);
-        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
+        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_RGB);
         this.graphics2D = canvas.createGraphics();
     }
 
@@ -74,9 +76,9 @@ public class ReverseCharactersCanvas implements Canvas {
 
         graphics2D.dispose();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            write(canvas, "png", byteArrayOutputStream);
+            write(canvas, "jpg", byteArrayOutputStream);
             return new MessageFile()
-                .setName("reverse-characters.png")
+                .setName("reverse-characters.jpg")
                 .setData(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);

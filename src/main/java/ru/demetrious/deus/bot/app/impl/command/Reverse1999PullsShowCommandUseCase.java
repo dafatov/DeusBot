@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +21,13 @@ import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.MessageFile;
-import ru.demetrious.deus.bot.domain.Pull;
 import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.util.stream.Collectors.groupingBy;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_IMPORT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_SHOW;
+import static ru.demetrious.deus.bot.domain.Pull.COLLABORATION_POOL_TYPE;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 
 @RequiredArgsConstructor
@@ -60,7 +61,7 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999ShowComman
         List<MessageFile> messageFileList = findPullsDataOutbound.findPullsData()
             .map(PullsData::getPullList).stream()
             .flatMap(Collection::stream)
-            .collect(groupingBy(Pull::getPoolType))
+            .collect(groupingBy(pull -> Objects.equals(pull.getPoolType(), COLLABORATION_POOL_TYPE) ? pull.getPoolId() : pull.getPoolType()))
             .entrySet().stream()
             .map(entry -> new ReversePullTypeCanvas(entry.getValue(), characterMap, entry.getKey()))
             .map(ReversePullTypeCanvas::createFile)
