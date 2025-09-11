@@ -9,9 +9,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
@@ -21,7 +23,6 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.Font.BOLD;
 import static java.awt.Font.PLAIN;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
@@ -31,7 +32,11 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static javax.imageio.ImageIO.write;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Slf4j
 public class ReversePullTypeCanvas implements Canvas {
     private static final Font FONT = new Font("SansSerif", PLAIN, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", BOLD, 32);
@@ -56,7 +61,7 @@ public class ReversePullTypeCanvas implements Canvas {
         this.characterMap = characterMap;
         this.poolTypeName = getPoolTypeName(poolType);
         this.params = getParams();
-        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
+        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_RGB);
         this.graphics2D = canvas.createGraphics();
         this.fontMetrics = graphics2D.getFontMetrics(FONT);
     }
@@ -70,9 +75,11 @@ public class ReversePullTypeCanvas implements Canvas {
         graphics2D.setColor(WHITE);
 
         graphics2D.setFont(FONT_TITLE);
-        graphics2D.drawString(poolTypeName,
-            (params.width - graphics2D.getFontMetrics().stringWidth(poolTypeName)) / 2,
-            Y_GAP + graphics2D.getFontMetrics().getAscent());
+        for (int i = 0; i < params.title.size(); i++) {
+            graphics2D.drawString(params.title.get(i),
+                (params.width - graphics2D.getFontMetrics().stringWidth(params.title.get(i))) / 2,
+                Y_GAP + graphics2D.getFontMetrics().getAscent() + i * (graphics2D.getFontMetrics().getHeight() + Y_GAP));
+        }
         graphics2D.setFont(FONT);
 
         int yOffset = params.height - Y_GAP - fontMetrics.getHeight();
@@ -108,7 +115,7 @@ public class ReversePullTypeCanvas implements Canvas {
                 yOffset -= fontMetrics.getHeight() + Y_GAP;
             }
 
-            if (!"1".equalsIgnoreCase(pull.getType())) {
+            if (isNotBlank(pull.getType()) && !equalsIgnoreCase("1", pull.getType())) {
                 int midYStart = groupYOffset + fontMetrics.getHeight() / 2;
                 int midYEnd = yOffset + 3 * fontMetrics.getHeight() / 2 + Y_GAP;
 
@@ -120,9 +127,9 @@ public class ReversePullTypeCanvas implements Canvas {
 
         graphics2D.dispose();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            write(canvas, "png", byteArrayOutputStream);
+            write(canvas, "jpg", byteArrayOutputStream);
             return new MessageFile()
-                .setName("reverse-pulls-type-%s.png".formatted(poolTypeName.replaceAll("\\W", "_")))
+                .setName("reverse-pulls-type-%s.jpg".formatted(poolTypeName.replaceAll("\\W", "_")))
                 .setData(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -150,6 +157,7 @@ public class ReversePullTypeCanvas implements Canvas {
         BufferedImage test = new BufferedImage(1, 1, TYPE_INT_RGB);
         Graphics2D graphics2D = test.createGraphics();
         FontMetrics fontMetrics = graphics2D.getFontMetrics(FONT);
+        FontMetrics titleFontMetrics = graphics2D.getFontMetrics(FONT_TITLE);
         graphics2D.dispose();
 
         int fullSize = summonList.stream()
@@ -163,14 +171,40 @@ public class ReversePullTypeCanvas implements Canvas {
             .orElse(0);
         int maxInstantWidth = fontMetrics.stringWidth(now().atZone(ZONE_ID).format(DATE_TIME_FORMATTER));
         int maxSizeWidth = fontMetrics.stringWidth(valueOf(fullSize));
-        int titleHeight = graphics2D.getFontMetrics(FONT_TITLE).getAscent();
         int width = 7 * X_GAP + maxNameWidth + maxInstantWidth + 2 * maxSizeWidth;
+        List<String> title = getTitle(width - 2 * X_GAP, titleFontMetrics);
+        int titleHeight = titleFontMetrics.getAscent() + (title.size() - 1) * (titleFontMetrics.getHeight() + Y_GAP);
         int height = fullSize * (Y_GAP + fontMetrics.getHeight()) + 3 * Y_GAP + titleHeight;
 
-        return new Params(height, width, maxInstantWidth, maxNameWidth, maxSizeWidth);
+        return new Params(height, width, maxInstantWidth, maxNameWidth, maxSizeWidth, title);
     }
 
-    private record Params(int height, int width, int maxInstantWidth, int maxNameWidth, int maxSizeWidth) {
+    private List<String> getTitle(int freeWidth, FontMetrics titleFontMetrics) {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> title = new ArrayList<>();
+
+        for (String part : poolTypeName.split(SPACE)) {
+            if (stringBuilder.isEmpty()) {
+                stringBuilder.append(part);
+                continue;
+            }
+
+            if (titleFontMetrics.stringWidth(stringBuilder + SPACE + part) <= freeWidth) {
+                stringBuilder.append(SPACE).append(part);
+            } else {
+                title.add(stringBuilder.toString());
+                stringBuilder = new StringBuilder(part);
+            }
+        }
+
+        if (!stringBuilder.isEmpty()) {
+            title.add(stringBuilder.toString());
+        }
+
+        return title;
+    }
+
+    private record Params(int height, int width, int maxInstantWidth, int maxNameWidth, int maxSizeWidth, List<String> title) {
     }
 
     private enum CounterType {
@@ -196,7 +230,12 @@ public class ReversePullTypeCanvas implements Canvas {
             case 2 -> "Regular Banner";
             case 3 -> "Time-limited Banner";
             case 12 -> "Ripples on the Water";
-            case 21 -> "Collaboration Banner";
+            /*
+              Далее идут разные баннеры коллабораций.
+              poolType=={@link Pull#COLLABORATION_POOL_TYPE}
+             */
+            case 305111 -> "Collaboration Banner [Wine-Dark Reflections of the Eagle]";
+            case 305121 -> "Collaboration Banner [A Prophet Guided by Time]";
             default -> throw new IllegalStateException("Unexpected value: " + poolType);
         };
     }
