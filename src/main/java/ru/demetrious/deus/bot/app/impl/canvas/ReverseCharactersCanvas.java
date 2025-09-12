@@ -14,7 +14,7 @@ import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
 
 import static java.awt.Color.BLACK;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.Integer.compare;
 import static java.lang.Math.abs;
@@ -22,7 +22,7 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
 import static javax.imageio.ImageIO.read;
-import static javax.imageio.ImageIO.write;
+import static ru.demetrious.deus.bot.utils.ImageUtils.writeWebp;
 
 @Slf4j
 public class ReverseCharactersCanvas implements Canvas {
@@ -44,7 +44,7 @@ public class ReverseCharactersCanvas implements Canvas {
 
         this.summonPowerList = arrangeCharacters(characterList, minHeight);
         this.params = getParams(characterList, minHeight);
-        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_RGB);
+        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
         this.graphics2D = canvas.createGraphics();
     }
 
@@ -76,9 +76,9 @@ public class ReverseCharactersCanvas implements Canvas {
 
         graphics2D.dispose();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            write(canvas, "jpg", byteArrayOutputStream);
+            writeWebp(canvas, byteArrayOutputStream);
             return new MessageFile()
-                .setName("reverse-characters.jpg")
+                .setName("reverse-characters.webp")
                 .setData(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);

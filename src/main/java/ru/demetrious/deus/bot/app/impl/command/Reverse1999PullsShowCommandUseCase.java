@@ -16,6 +16,7 @@ import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.app.impl.canvas.ReversePullTypeCanvas;
+import ru.demetrious.deus.bot.app.impl.canvas.ReversePullTypeCanvas.GroupKey;
 import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
@@ -61,7 +62,9 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999ShowComman
         List<MessageFile> messageFileList = findPullsDataOutbound.findPullsData()
             .map(PullsData::getPullList).stream()
             .flatMap(Collection::stream)
-            .collect(groupingBy(pull -> Objects.equals(pull.getPoolType(), COLLABORATION_POOL_TYPE) ? pull.getPoolId() : pull.getPoolType()))
+            .collect(groupingBy(pull -> Objects.equals(pull.getPoolType(), COLLABORATION_POOL_TYPE)
+                ? new GroupKey(false, pull.getPoolId())
+                : new GroupKey(true, pull.getPoolType())))
             .entrySet().stream()
             .map(entry -> new ReversePullTypeCanvas(entry.getValue(), characterMap, entry.getKey()))
             .map(ReversePullTypeCanvas::createFile)
