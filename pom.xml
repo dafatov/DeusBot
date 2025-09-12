@@ -51,6 +51,8 @@
 
     <!-- Applied -->
     <jsoup.version>1.16.1</jsoup.version>
+    <word-wrap.version>0.1.13</word-wrap.version>
+    <webp-imageio.version>0.1.6</webp-imageio.version>
 
     <!-- Plugins -->
     <git-commit-id.version>9.0.0</git-commit-id.version>
@@ -211,6 +213,16 @@
     <dependency>
       <groupId>io.github.openfeign</groupId>
       <artifactId>feign-okhttp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.davidmoten</groupId>
+      <artifactId>word-wrap</artifactId>
+      <version>${word-wrap.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sejda.imageio</groupId>
+      <artifactId>webp-imageio</artifactId>
+      <version>${webp-imageio.version}</version>
     </dependency>
 
     <!-- Test -->
