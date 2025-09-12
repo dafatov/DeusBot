@@ -9,11 +9,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.davidmoten.text.utils.WordWrap;
 import org.jetbrains.annotations.NotNull;
 import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
@@ -23,6 +23,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.Font.BOLD;
 import static java.awt.Font.PLAIN;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
@@ -30,11 +31,10 @@ import static java.time.ZoneId.of;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
-import static javax.imageio.ImageIO.write;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static ru.demetrious.deus.bot.utils.ImageUtils.writeWebp;
 
 @Slf4j
 public class ReversePullTypeCanvas implements Canvas {
@@ -50,18 +50,18 @@ public class ReversePullTypeCanvas implements Canvas {
     @NotNull
     private final Map<Integer, Character> characterMap;
     @NotNull
-    private final String poolTypeName;
+    private final GroupKey poolKey;
     private final Params params;
     private final BufferedImage canvas;
     private final Graphics2D graphics2D;
     private final FontMetrics fontMetrics;
 
-    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, Character> characterMap, @NotNull Integer poolType) {
+    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, Character> characterMap, @NotNull GroupKey poolKey) {
         this.summonList = summonList;
         this.characterMap = characterMap;
-        this.poolTypeName = getPoolTypeName(poolType);
+        this.poolKey = poolKey;
         this.params = getParams();
-        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_RGB);
+        this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
         this.graphics2D = canvas.createGraphics();
         this.fontMetrics = graphics2D.getFontMetrics(FONT);
     }
@@ -105,8 +105,8 @@ public class ReversePullTypeCanvas implements Canvas {
                 xOffset = drawStringInline(character.getName(), xOffset, yOffset, params.maxNameWidth);
                 xOffset = drawStringInline(pull.getTime().atZone(ZONE_ID).format(DATE_TIME_FORMATTER), xOffset, yOffset, params.maxInstantWidth);
                 xOffset = switch (character.getRarity()) {
-                    case 6 -> drawCounterInline(valueOf(counter.remove(CounterType.STAR_6)), xOffset, yOffset);
                     case 5 -> drawCounterInline(valueOf(counter.remove(CounterType.STAR_5)), xOffset, yOffset);
+                    case 6 -> drawCounterInline(valueOf(counter.remove(CounterType.STAR_6)), xOffset, yOffset);
                     case null, default -> drawCounterInline(EMPTY, xOffset, yOffset);
                 };
                 drawCounterInline(valueOf(counter.get(CounterType.ALL)), xOffset, yOffset);
@@ -127,12 +127,19 @@ public class ReversePullTypeCanvas implements Canvas {
 
         graphics2D.dispose();
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            write(canvas, "jpg", byteArrayOutputStream);
+            writeWebp(canvas, byteArrayOutputStream, true);
             return new MessageFile()
-                .setName("reverse-pulls-type-%s.jpg".formatted(poolTypeName.replaceAll("\\W", "_")))
+                .setName("reverse-pulls-type-%s.webp".formatted(poolKey))
                 .setData(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public record GroupKey(boolean isType, int id) {
+        @Override
+        public @NotNull String toString() {
+            return "[%sid=%d]".formatted(isType ? "type-" : EMPTY, id);
         }
     }
 
@@ -172,36 +179,14 @@ public class ReversePullTypeCanvas implements Canvas {
         int maxInstantWidth = fontMetrics.stringWidth(now().atZone(ZONE_ID).format(DATE_TIME_FORMATTER));
         int maxSizeWidth = fontMetrics.stringWidth(valueOf(fullSize));
         int width = 7 * X_GAP + maxNameWidth + maxInstantWidth + 2 * maxSizeWidth;
-        List<String> title = getTitle(width - 2 * X_GAP, titleFontMetrics);
+        List<String> title = WordWrap.from(getName(poolKey))
+            .stringWidth(charSequence -> titleFontMetrics.stringWidth(charSequence.toString()))
+            .maxWidth(width - 2 * X_GAP)
+            .wrapToList();
         int titleHeight = titleFontMetrics.getAscent() + (title.size() - 1) * (titleFontMetrics.getHeight() + Y_GAP);
         int height = fullSize * (Y_GAP + fontMetrics.getHeight()) + 3 * Y_GAP + titleHeight;
 
         return new Params(height, width, maxInstantWidth, maxNameWidth, maxSizeWidth, title);
-    }
-
-    private List<String> getTitle(int freeWidth, FontMetrics titleFontMetrics) {
-        StringBuilder stringBuilder = new StringBuilder();
-        List<String> title = new ArrayList<>();
-
-        for (String part : poolTypeName.split(SPACE)) {
-            if (stringBuilder.isEmpty()) {
-                stringBuilder.append(part);
-                continue;
-            }
-
-            if (titleFontMetrics.stringWidth(stringBuilder + SPACE + part) <= freeWidth) {
-                stringBuilder.append(SPACE).append(part);
-            } else {
-                title.add(stringBuilder.toString());
-                stringBuilder = new StringBuilder(part);
-            }
-        }
-
-        if (!stringBuilder.isEmpty()) {
-            title.add(stringBuilder.toString());
-        }
-
-        return title;
     }
 
     private record Params(int height, int width, int maxInstantWidth, int maxNameWidth, int maxSizeWidth, List<String> title) {
@@ -224,19 +209,21 @@ public class ReversePullTypeCanvas implements Canvas {
         };
     }
 
-    private static @NotNull String getPoolTypeName(@NotNull Integer poolType) {
-        return switch (poolType) {
-            case 1 -> "Starter Banner";
-            case 2 -> "Regular Banner";
-            case 3 -> "Time-limited Banner";
-            case 12 -> "Ripples on the Water";
-            /*
-              Далее идут разные баннеры коллабораций.
-              poolType=={@link Pull#COLLABORATION_POOL_TYPE}
-             */
+    private static @NotNull String getName(@NotNull GroupKey poolKey) {
+        if (poolKey.isType) {
+            return switch (poolKey.id) {
+                case 1 -> "Starter Banner";
+                case 2 -> "Regular Banner";
+                case 3 -> "Time-limited Banner";
+                case 12 -> "Ripples on the Water";
+                default -> throw new IllegalStateException("Unexpected pool type id: " + poolKey);
+            };
+        }
+
+        return switch (poolKey.id) {
             case 305111 -> "Collaboration Banner [Wine-Dark Reflections of the Eagle]";
             case 305121 -> "Collaboration Banner [A Prophet Guided by Time]";
-            default -> throw new IllegalStateException("Unexpected value: " + poolType);
+            default -> throw new IllegalStateException("Unexpected pool id: " + poolKey);
         };
     }
 }
