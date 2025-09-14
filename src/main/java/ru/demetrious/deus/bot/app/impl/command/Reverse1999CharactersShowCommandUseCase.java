@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toList;
 import static ru.demetrious.deus.bot.domain.Character.CHARACTERS_MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SHOW;
-import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_IMPORT;
+import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 
 @RequiredArgsConstructor
@@ -74,7 +74,7 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999ShowC
             .orElseGet(() -> new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setTitle("Списка круток нет")
                 .setDescription("Используй команду `/%s` чтобы импортировать из игры или команду `/%s` для наполнения вручную"
-                    .formatted(REVERSE1999_IMPORT.stringify(), REVERSE1999_CHARACTERS_SET.stringify())))));
+                    .formatted(REVERSE1999_PULLS_IMPORT.stringify(), REVERSE1999_CHARACTERS_SET.stringify())))));
         notifyOutbound.notify(messageData);
     }
 
