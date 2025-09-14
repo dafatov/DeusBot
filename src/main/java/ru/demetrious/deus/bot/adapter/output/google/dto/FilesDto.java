@@ -5,6 +5,6 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record FilesDto(List<File> files) {
-    public record File(String id) {
+    public record File(String id, String name) {
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.character.GetReverseSummonedCharacterListOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
-import ru.demetrious.deus.bot.app.api.command.Reverse1999ImportCommandInbound;
+import ru.demetrious.deus.bot.app.api.command.Reverse1999PullsImportCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
@@ -24,15 +24,14 @@ import ru.demetrious.deus.bot.domain.Pull;
 import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
-import static java.time.Instant.MIN;
-import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_IMPORT;
+import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommandInbound {
+public class Reverse1999PullsImportCommandUseCase implements Reverse1999PullsImportCommandInbound {
     private static final String URL_OPTION = "url";
 
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
@@ -46,7 +45,7 @@ public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommand
     @Override
     public CommandData getData() {
         return new CommandData()
-            .setName(REVERSE1999_IMPORT)
+            .setName(REVERSE1999_PULLS_IMPORT)
             .setDescription("Импортирует(обновляет) историю круток в гаче")
             .setOptions(List.of(
                 new OptionData()
@@ -79,12 +78,16 @@ public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommand
         }
 
         PullsData pullsData = findPullsDataOutbound.findPullsData().orElseGet(PullsData::new);
-        Instant lastPull = pullsData.getPullList().stream().map(Pull::getTime).max(Instant::compareTo).orElse(MIN);
+        Optional<Instant> lastPullOptional = pullsData.getPullList().stream().map(Pull::getTime).max(Instant::compareTo);
         List<Pull> newPullList = importPullList.get().stream()
-            .filter(pull -> pull.getTime().isAfter(lastPull))
+            .filter(pull -> lastPullOptional.isEmpty() || pull.getTime().isAfter(lastPullOptional.get()))
             .toList();
+        String lastPull = lastPullOptional
+            .map(Instant::getEpochSecond)
+            .map("<t:%d:R>"::formatted)
+            .orElse("-");
 
-        log.debug("newPullList?={}", newPullList.size());
+        log.debug("newPullList#={}", newPullList.size());
         pullsData.getPullList().addAll(newPullList);
         updatePullsDataOutbound.updatePullsData(pullsData);
 
@@ -92,17 +95,17 @@ public class Reverse1999ImportCommandUseCase implements Reverse1999ImportCommand
         if (newPullList.isEmpty()) {
             messageEmbed = new MessageEmbed()
                 .setTitle("Сохраненные крутки актуальны")
-                .setDescription("Последняя крутка: <t:%d:R>".formatted(lastPull.getEpochSecond()));
+                .setDescription("Последняя крутка: %s".formatted(lastPull));
         } else {
             messageEmbed = new MessageEmbed()
                 .setTitle("Импортированы новые крутки")
                 .setDescription("""
                     Количество: %s
-                    Добавлены после: <t:%d:R>
+                    Добавлены после: %s
                     Последняя крутка: <t:%d:R>
                     """.formatted(
-                    newPullList.size(),
-                    lastPull.getEpochSecond(),
+                    newPullList.stream().map(Pull::getSummonIdList).mapToInt(List::size).sum(),
+                    lastPull,
                     newPullList.stream()
                         .map(Pull::getTime)
                         .max(Instant::compareTo)
