@@ -1,0 +1,25 @@
+name: Docker Cleanup
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    steps:
+      - name: Cleanup old Docker images
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            docker image prune -a -f
+            docker system prune -f

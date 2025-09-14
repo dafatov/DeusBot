@@ -26,7 +26,7 @@ import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.util.stream.Collectors.groupingBy;
-import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_IMPORT;
+import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_SHOW;
 import static ru.demetrious.deus.bot.domain.Pull.COLLABORATION_POOL_TYPE;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
@@ -74,7 +74,7 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999ShowComman
         if (messageFileList.isEmpty()) {
             messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setTitle("Списка круток нет")
-                .setDescription("Используй команду `/%s` чтобы импортировать из игры".formatted(REVERSE1999_IMPORT.stringify()))));
+                .setDescription("Используй команду `/%s` чтобы импортировать из игры".formatted(REVERSE1999_PULLS_IMPORT.stringify()))));
         } else {
             messageData = new MessageData().setFiles(messageFileList);
         }
