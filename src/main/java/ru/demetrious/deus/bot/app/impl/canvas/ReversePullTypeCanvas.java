@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
@@ -34,7 +32,7 @@ import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static ru.demetrious.deus.bot.utils.ImageUtils.writeWebp;
+import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
 
 @Slf4j
 public class ReversePullTypeCanvas implements Canvas {
@@ -126,14 +124,9 @@ public class ReversePullTypeCanvas implements Canvas {
         }
 
         graphics2D.dispose();
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            writeWebp(canvas, byteArrayOutputStream, true);
-            return new MessageFile()
-                .setName("reverse-pulls-type-%s.webp".formatted(poolKey))
-                .setData(byteArrayOutputStream.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return new MessageFile()
+            .setName("reverse-pulls-type-%s.webp".formatted(poolKey))
+            .setData(createWebp(canvas, true));
     }
 
     public record GroupKey(boolean isType, int id) {

@@ -3,7 +3,6 @@ package ru.demetrious.deus.bot.app.impl.canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
 import static javax.imageio.ImageIO.read;
-import static ru.demetrious.deus.bot.utils.ImageUtils.writeWebp;
+import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
 
 @Slf4j
 public class ReverseCharactersCanvas implements Canvas {
@@ -75,14 +74,9 @@ public class ReverseCharactersCanvas implements Canvas {
         }
 
         graphics2D.dispose();
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            writeWebp(canvas, byteArrayOutputStream);
-            return new MessageFile()
-                .setName("reverse-characters.webp")
-                .setData(byteArrayOutputStream.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return new MessageFile()
+            .setName("reverse-characters.webp")
+            .setData(createWebp(canvas));
     }
 
     @Getter
