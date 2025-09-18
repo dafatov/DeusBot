@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +32,9 @@ public class JDAConfig {
     @Value("${git.build.version:?.?.?}-${git.commit.id.abbrev:??????}")
     private String version;
 
+    /**
+     * Статус меняется на {@link net.dv8tion.jda.api.OnlineStatus#ONLINE} в {@link ru.demetrious.deus.bot.fw.config.cache.CacheWarmUpRunner#run(ApplicationArguments)}
+     */
     @Bean
     public JDA jda() throws InterruptedException {
         return createDefault(token)

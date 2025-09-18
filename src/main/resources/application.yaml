@@ -1,4 +1,5 @@
 server:
+  shutdown: graceful
   ssl:
     key-store: classpath:ssl/keystore.jks
     key-store-password: ${KEY_STORE_PASSWORD}
@@ -32,6 +33,8 @@ spring:
       org.quartz.jobStore:
         driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
         useProperties: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   security:
     oauth2:
       client:
