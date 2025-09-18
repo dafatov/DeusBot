@@ -74,7 +74,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            docker container rm -f ${{ env.IMAGE_NAME }} || true
+            docker stop -t 40 ${{ env.IMAGE_NAME }} || true
 
   deploy:
     runs-on: ubuntu-latest
