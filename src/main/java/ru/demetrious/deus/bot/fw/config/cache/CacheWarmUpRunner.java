@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +18,7 @@ import ru.demetrious.deus.bot.fw.annotation.cache.InitWarmUp;
 import static java.util.Objects.isNull;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.runAsync;
+import static net.dv8tion.jda.api.OnlineStatus.ONLINE;
 import static org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass;
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 import static org.springframework.util.ReflectionUtils.doWithMethods;
@@ -27,6 +29,7 @@ import static org.springframework.util.ReflectionUtils.doWithMethods;
 public class CacheWarmUpRunner implements ApplicationRunner {
     private final ApplicationContext applicationContext;
     private final ThreadPoolTaskExecutor cacheWarmUpExecutor;
+    private final JDA jda;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -53,6 +56,8 @@ public class CacheWarmUpRunner implements ApplicationRunner {
             });
         }
 
-        allOf(tasks.toArray(CompletableFuture[]::new)).join();
+        allOf(tasks.toArray(CompletableFuture[]::new))
+            .thenRun(() -> jda.getPresence().setStatus(ONLINE))
+            .join();
     }
 }

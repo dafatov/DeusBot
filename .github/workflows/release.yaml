@@ -167,7 +167,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            docker container rm -f ${{ env.IMAGE_NAME }} || true
+            docker stop -t 40 ${{ env.IMAGE_NAME }} && docker rm ${{ env.IMAGE_NAME }} || true
             docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
               -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
               -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
