@@ -17,7 +17,7 @@ env:
   IMAGE_NAME: deus-bot
 
 jobs:
-  bump:
+  branch:
     runs-on: ubuntu-latest
 
     permissions:
@@ -31,24 +31,27 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Bump version
-        id: bump
+      - id: bump
+        name: Bump version
         run: |
           chmod +x ./.script/bump.sh
           ./.script/bump.sh ${{ inputs.semver }}
           echo ${{ steps.bump.outputs.version }}
         shell: bash
 
-      - name: Update git
+      - name: Create branch
+        if: inputs.semver != 'debug'
         run: |
           git config user.name "$(git log -n 1 --pretty=format:%an)"
           git config user.email "$(git log -n 1 --pretty=format:%ae)"
+          git checkout -b release/${{ steps.bump.outputs.version }}
           git reset --soft HEAD~1
           git add pom.xml
           git commit --reuse-message=ORIG_HEAD
-          git push --force
+          git push origin release/${{ steps.bump.outputs.version }} --force
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   install:
     runs-on: ubuntu-latest
@@ -57,13 +60,15 @@ jobs:
       contents: read
       packages: write
 
-    needs: bump
+    needs: branch
 
     outputs:
-      url: ${{ steps.getImageUrl.outputs.url }}
+      url: ${{ steps.set-url.outputs.url }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.semver == 'debug' && 'master' || format('release/{0}', needs.branch.outputs.version) }}
 
       - name: Pull new version
         run: git pull --rebase
@@ -82,43 +87,118 @@ jobs:
       - name: Build a container image from Spring Boot app using maven
         run: mvn spring-boot:build-image
 
-      - name: Set image url output variable
-        id: getImageUrl
-        run: echo "url=ghcr.io/${GITHUB_REPOSITORY%/*}/${{ env.IMAGE_NAME }}:${{ needs.bump.outputs.version }}" >> $GITHUB_OUTPUT
+      - id: set-url
+        name: Set image url output variable
+        run: echo "url=ghcr.io/${GITHUB_REPOSITORY%/*}/${{ env.IMAGE_NAME }}:${{ needs.branch.outputs.version }}" >> $GITHUB_OUTPUT
 
       - name: Tag docker image
-        run: docker tag ${{ env.IMAGE_NAME }}:${{ needs.bump.outputs.version }} ${{ steps.getImageUrl.outputs.url }}
+        run: docker tag ${{ env.IMAGE_NAME }}:${{ needs.branch.outputs.version }} ${{ steps.set-url.outputs.url }}
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Publish to GitHub Container Registry
-        run: docker push ${{ steps.getImageUrl.outputs.url }}
+        run: docker push ${{ steps.set-url.outputs.url }}
 
-  release:
+
+  pr:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
 
     needs:
-      - bump
+      - branch
       - install
 
+    if: inputs.semver != 'debug'
+
+    outputs:
+      sha: ${{ steps.create.outputs.sha }}
+      number: ${{ steps.create.outputs.number }}
+
     steps:
-      - uses: ncipollo/release-action@v1
+      - uses: actions/checkout@v4
         with:
-          body: Docker-image можно найти по [ссылке](https://${{ needs.install.outputs.url }})
-          tag: v${{ needs.bump.outputs.version }}
-          generateReleaseNotes: true
-          allowUpdates: true
+          fetch-depth: 0
+
+      - name: Pull new version
+        run: git pull --rebase
+
+      - id: create
+        name: Create Pull Request
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          script: |
+            const result = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Release v${process.env.VERSION}`,
+              head: `release/${process.env.VERSION}`,
+              base: 'master',
+              body: `Automated release PR for version ${process.env.VERSION}`,
+            });
+            
+            core.setOutput('number', result.data.number);
+        env:
+          VERSION: ${{ needs.branch.outputs.version }}
+
+
+  wait-for-checks:
+    runs-on: ubuntu-latest
+
+    needs: pr
+
+    if: inputs.semver != 'debug'
+
+    steps:
+      - name: Wait for status checks
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const maxWaitTime = 600000; // 10 minutes
+            const waitInterval = 10000; // 10 seconds
+            const startTime = Date.now();
+            
+            console.log(process.env.PR_NUMBER);
+            
+            while (Date.now() - startTime < maxWaitTime) {
+              const {data: pr} = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: process.env.PR_NUMBER
+              });
+
+              console.log(`Waiting for status checks to complete... ${JSON.stringify({
+                mergeable_state: pr.mergeable_state, 
+                mergeable: pr.mergeable,
+                state: pr.state,
+                merged: pr.merged,
+              })}`);
+            
+              if (pr.state !== 'open' || pr.merged === true) {
+                throw new Error('Some status checks failed');
+              }
+            
+              if (pr.mergeable && (pr.mergeable_state === 'clean' || pr.mergeable_state === 'behind')) {
+                console.log('All status checks passed!');
+                return;
+              }
+
+              await new Promise(resolve => setTimeout(resolve, waitInterval));
+            }
+            
+            throw new Error('Timeout waiting for status checks');
+        env:
+          PR_NUMBER: ${{ needs.pr.outputs.number }}
+
 
   deploy:
     runs-on: ubuntu-latest
 
-    needs:
-      - install
-      - release
+    needs: install
 
     environment: 'production'
 
@@ -160,7 +240,7 @@ jobs:
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
 
     steps:
-      - name: Run multiple remote commands via SSH
+      - name: Stop and run docker container via SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ env.SSH_HOST }}
@@ -197,3 +277,53 @@ jobs:
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
             ${{ needs.install.outputs.url }}
+
+
+  merge:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    needs:
+      - pr
+      - wait-for-checks
+      - deploy
+
+    if: inputs.semver != 'debug'
+
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: process.env.PR_NUMBER,
+              merge_method: 'squash',
+            });
+        env:
+          PR_NUMBER: ${{ needs.pr.outputs.number }}
+
+
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    needs:
+      - branch
+      - install
+      - deploy
+
+    if: inputs.semver != 'debug'
+
+    steps:
+      - uses: ncipollo/release-action@v1
+        with:
+          body: Docker-image можно найти по [ссылке](https://${{ needs.install.outputs.url }})
+          tag: v${{ needs.branch.outputs.version }}
+          generateReleaseNotes: true
+          allowUpdates: true
