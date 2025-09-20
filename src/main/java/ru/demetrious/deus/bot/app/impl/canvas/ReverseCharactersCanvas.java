@@ -88,6 +88,7 @@ public class ReverseCharactersCanvas implements Canvas {
             this.setAvatar(character.getAvatar());
             this.setNameImage(character.getNameImage());
             this.setName(character.getName());
+            assert portrait <= CHARACTERS_MAX_PORTRAIT : "There are more than %d portraits for %s".formatted(CHARACTERS_MAX_PORTRAIT, character.getName());
             this.portraitImage = loadPortraitImage(portrait);
         }
     }
