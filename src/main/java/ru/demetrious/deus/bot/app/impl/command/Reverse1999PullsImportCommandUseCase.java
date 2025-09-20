@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.utils.ConstantsUtils.ZONE_ID;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -83,7 +85,8 @@ public class Reverse1999PullsImportCommandUseCase implements Reverse1999PullsImp
             .filter(pull -> lastPullOptional.isEmpty() || pull.getTime().isAfter(lastPullOptional.get()))
             .toList();
         String lastPull = lastPullOptional
-            .map(Instant::getEpochSecond)
+            .map(instant -> instant.atZone(ZONE_ID))
+            .map(ChronoZonedDateTime::toEpochSecond)
             .map("<t:%d:R>"::formatted)
             .orElse("-");
 
@@ -109,7 +112,8 @@ public class Reverse1999PullsImportCommandUseCase implements Reverse1999PullsImp
                     newPullList.stream()
                         .map(Pull::getTime)
                         .max(Instant::compareTo)
-                        .map(Instant::getEpochSecond)
+                        .map(instant -> instant.atZone(ZONE_ID))
+                        .map(ChronoZonedDateTime::toEpochSecond)
                         .get()
                 ));
         }
