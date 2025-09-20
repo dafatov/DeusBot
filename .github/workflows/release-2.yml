@@ -1,0 +1,53 @@
+name: Release 2.0
+on:
+  workflow_dispatch:
+    inputs:
+      semver:
+        required: true
+        type: choice
+        default: patch
+        description: Semver options to bump version while releasing
+        options:
+          - debug
+          - patch
+          - minor
+          - major
+
+env:
+  IMAGE_NAME: deus-bot
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: bump
+        name: Bump version
+        run: |
+          chmod +x ./.script/bump.sh
+          ./.script/bump.sh ${{ inputs.semver }}
+          echo ${{ steps.bump.outputs.version }}
+        shell: bash
+
+      - name: Create branch
+        if: inputs.semver != 'debug'
+        run: |
+          git config user.name "$(git log -n 1 --pretty=format:%an)"
+          git config user.email "$(git log -n 1 --pretty=format:%ae)"
+          git checkout -b release/${{ steps.bump.outputs.version }}
+          git reset --soft HEAD~1
+          git add pom.xml
+          git commit --reuse-message=ORIG_HEAD
+          git push origin release/${{ steps.bump.outputs.version }} --force
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
