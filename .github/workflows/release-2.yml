@@ -1,0 +1,248 @@
+name: Release 2.0
+on:
+  workflow_dispatch:
+    inputs:
+      semver:
+        required: true
+        type: choice
+        default: patch
+        description: Semver options to bump version while releasing
+        options:
+          - debug
+          - patch
+          - minor
+          - major
+
+env:
+  IMAGE_NAME: deus-bot
+
+jobs:
+  branch:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: bump
+        name: Bump version
+        run: |
+          chmod +x ./.script/bump.sh
+          ./.script/bump.sh ${{ inputs.semver }}
+          echo ${{ steps.bump.outputs.version }}
+        shell: bash
+
+      - name: Create branch
+        if: inputs.semver != 'debug'
+        run: |
+          git config user.name "$(git log -n 1 --pretty=format:%an)"
+          git config user.email "$(git log -n 1 --pretty=format:%ae)"
+          git checkout -b release/${{ steps.bump.outputs.version }}
+          git reset --soft HEAD~1
+          git add pom.xml
+          git commit --reuse-message=ORIG_HEAD
+          git push origin release/${{ steps.bump.outputs.version }} --force
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  install:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    needs: branch
+
+    outputs:
+      url: ${{ steps.set-url.outputs.url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/${{ needs.branch.outputs.version }}
+
+      - name: Check new version
+        run: |
+          echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo $(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+
+      - name: Build a container image from Spring Boot app using maven
+        run: mvn spring-boot:build-image
+
+      - name: Set image url output variable
+        id: set-url
+        run: echo "url=ghcr.io/${GITHUB_REPOSITORY%/*}/${{ env.IMAGE_NAME }}:${{ needs.branch.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Tag docker image
+        run: docker tag ${{ env.IMAGE_NAME }}:${{ needs.branch.outputs.version }} ${{ steps.set-url.outputs.url }}
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Publish to GitHub Container Registry
+        run: docker push ${{ steps.set-url.outputs.url }}
+
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs: install
+
+    environment: 'production'
+
+    env:
+      # Build secrets
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      # Build vars
+      CONTAINER_MEMORY_LIMIT: ${{ vars.CONTAINER_MEMORY_LIMIT }}
+
+      # App secrets
+      ANILIST_OAUTH2_ID: ${{ secrets.ANILIST_OAUTH2_ID }}
+      ANILIST_OAUTH2_SECRET: ${{ secrets.ANILIST_OAUTH2_SECRET }}
+      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DISCORD_OAUTH2_ID: ${{ secrets.DISCORD_OAUTH2_ID }}
+      DISCORD_OAUTH2_SECRET: ${{ secrets.DISCORD_OAUTH2_SECRET }}
+      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+      GOOGLE_OAUTH2_ID: ${{ secrets.GOOGLE_OAUTH2_ID }}
+      GOOGLE_OAUTH2_SECRET: ${{ secrets.GOOGLE_OAUTH2_SECRET }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+      SHIKIMORI_OAUTH2_ID: ${{ secrets.SHIKIMORI_OAUTH2_ID }}
+      SHIKIMORI_OAUTH2_SECRET: ${{ secrets.SHIKIMORI_OAUTH2_SECRET }}
+      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+      # App vars
+      ANILIST_GRAPHQL_URL: ${{ vars.ANILIST_GRAPHQL_URL }}
+      ANILIST_URL: ${{ vars.ANILIST_URL }}
+      APP_URL: ${{ vars.APP_URL }}
+      ARTING_URL: ${{ vars.ARTING_URL }}
+      DATABASE_MAX_POOL: ${{ vars.DATABASE_MAX_POOL }}
+      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      DEUS_URL: ${{ vars.DEUS_URL }}
+      DISCORD_URL: ${{ vars.DISCORD_URL }}
+      FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
+      GOOGLE_URL: ${{ vars.GOOGLE_URL }}
+      REVERSE1999_WIKI_URL: ${{ vars.REVERSE1999_WIKI_URL }}
+      SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
+      SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
+
+    steps:
+      - name: Stop and run docker container via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            docker stop -t 40 ${{ env.IMAGE_NAME }} && docker rm ${{ env.IMAGE_NAME }} || true
+            docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} --pull always --restart always --name ${{ env.IMAGE_NAME }} \
+              -e ANILIST_OAUTH2_ID=${{ env.ANILIST_OAUTH2_ID }} \
+              -e ANILIST_OAUTH2_SECRET=${{ env.ANILIST_OAUTH2_SECRET }} \
+              -e DATABASE_USERNAME=${{ env.DATABASE_USERNAME }} \
+              -e DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }} \
+              -e DISCORD_OAUTH2_ID=${{ env.DISCORD_OAUTH2_ID }} \
+              -e DISCORD_OAUTH2_SECRET=${{ env.DISCORD_OAUTH2_SECRET }} \
+              -e DISCORD_TOKEN=${{ env.DISCORD_TOKEN }} \
+              -e GOOGLE_OAUTH2_ID=${{ env.GOOGLE_OAUTH2_ID }} \
+              -e GOOGLE_OAUTH2_SECRET=${{ env.GOOGLE_OAUTH2_SECRET }} \
+              -e KEY_STORE_PASSWORD=${{ env.KEY_STORE_PASSWORD }} \
+              -e SHIKIMORI_OAUTH2_ID=${{ env.SHIKIMORI_OAUTH2_ID }} \
+              -e SHIKIMORI_OAUTH2_SECRET=${{ env.SHIKIMORI_OAUTH2_SECRET }} \
+              -e YOUTUBE_REFRESH_TOKEN=${{ env.YOUTUBE_REFRESH_TOKEN }} \
+              \
+              -e ANILIST_GRAPHQL_URL=${{ vars.ANILIST_GRAPHQL_URL }} \
+              -e ANILIST_URL=${{ vars.ANILIST_URL }} \
+              -e APP_URL=${{ vars.APP_URL }} \
+              -e ARTING_URL=${{ vars.ARTING_URL }} \
+              -e DATABASE_MAX_POOL=${{ vars.DATABASE_MAX_POOL }} \
+              -e DATABASE_URL=${{ vars.DATABASE_URL }} \
+              -e DEUS_URL=${{ vars.DEUS_URL }} \
+              -e DISCORD_URL=${{ vars.DISCORD_URL }} \
+              -e GOOGLE_URL=${{ vars.GOOGLE_URL }} \
+              -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
+              -e REVERSE1999_WIKI_URL=${{ vars.REVERSE1999_WIKI_URL }} \
+              -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
+              -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
+            ${{ needs.install.outputs.url }}
+
+
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    needs:
+      - branch
+      - install
+
+    if: inputs.semver != 'debug'
+
+    steps:
+      - uses: ncipollo/release-action@v1
+        with:
+          body: Docker-image можно найти по [ссылке](https://${{ needs.install.outputs.url }})
+          tag: v${{ needs.branch.outputs.version }}
+          generateReleaseNotes: true
+          allowUpdates: true
+
+
+  pr:
+    runs-on: ubuntu-latest
+
+    needs:
+      - branch
+      - release
+      - deploy
+
+    if: inputs.semver != 'debug'
+
+    outputs:
+      number: ${{ steps.create.outputs.number }}
+
+    steps:
+      - uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release/${{ needs.branch.outputs.version }}
+          base: main
+          title: Release v${{ needs.branch.outputs.version }}
+          body: Automated release PR for version v${{ needs.branch.outputs.version }}
+          labels: release
+          delete-branch: true
+
+
+  merge:
+    runs-on: ubuntu-latest
+
+    needs: pr
+
+    if: inputs.semver != 'debug'
+
+    steps:
+      - uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ needs.pr.outputs.number }},
+              merge_method: 'merge'
+            });
