@@ -88,13 +88,13 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999ShowC
             .flatMap(Collection::stream)
             .collect(groupingBy(
                 identity(),
-                collectingAndThen(counting(), c -> min(c.intValue(), CHARACTERS_MAX_PORTRAIT))
+                collectingAndThen(counting(), Math::toIntExact)
             ));
 
         pullsData.getCharacterCorrelationMap().forEach((key, count) -> pulledCharacterMap.merge(key, count, Integer::sum));
         return pulledCharacterMap
             .entrySet().stream()
-            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), entry.getValue()))
+            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), min(entry.getValue(), CHARACTERS_MAX_PORTRAIT)))
             .collect(toList());
     }
 }
