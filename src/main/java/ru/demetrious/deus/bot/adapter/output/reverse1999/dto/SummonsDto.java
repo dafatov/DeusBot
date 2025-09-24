@@ -12,7 +12,7 @@ public record SummonsDto(Data data) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         public record Summon(
             List<Integer> gainIds,
-            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC-5") Instant createTime,
+            @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT-5") Instant createTime,
             String summonType,
             Integer poolId,
             Integer poolType
