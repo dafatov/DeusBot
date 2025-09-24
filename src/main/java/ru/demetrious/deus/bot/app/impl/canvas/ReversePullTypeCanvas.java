@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.List;
@@ -25,13 +24,13 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
-import static java.time.ZoneId.of;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static ru.demetrious.deus.bot.utils.TimeUtils.ZONE_ID;
 import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
 
 @Slf4j
@@ -39,7 +38,7 @@ public class ReversePullTypeCanvas implements Canvas {
     private static final Font FONT = new Font("SansSerif", PLAIN, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", BOLD, 32);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = ofPattern("dd.MM.yyyy HH:mm:ss");
-    private static final ZoneId ZONE_ID = of("Europe/Moscow");
+    private static final String DEFAULT_NAME = "<Unknown:%d:%s>";
     private static final int X_GAP = 10;
     private static final int Y_GAP = 10;
 
@@ -208,15 +207,23 @@ public class ReversePullTypeCanvas implements Canvas {
                 case 1 -> "Starter Banner";
                 case 2 -> "Regular Banner";
                 case 3 -> "Time-limited Banner";
+                case 6 -> "Anniversary Limited Summon [The Myth at Her Fingertips]";
+                case 7 -> "Promise of the Water";
                 case 12 -> "Ripples on the Water";
-                default -> throw new IllegalStateException("Unexpected pool type id: " + poolKey);
+                default -> {
+                    log.warn("Unexpected pool type id: {}", poolKey);
+                    yield DEFAULT_NAME.formatted(poolKey.id, "t");
+                }
             };
         }
 
         return switch (poolKey.id) {
             case 305111 -> "Collaboration Banner [Wine-Dark Reflections of the Eagle]";
             case 305121 -> "Collaboration Banner [A Prophet Guided by Time]";
-            default -> throw new IllegalStateException("Unexpected pool id: " + poolKey);
+            default -> {
+                log.warn("Unexpected pool id: {}", poolKey);
+                yield DEFAULT_NAME.formatted(poolKey.id, EMPTY);
+            }
         };
     }
 }
