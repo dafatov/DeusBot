@@ -47,7 +47,7 @@
     <!-- Discord -->
     <JDA.version>5.5.1</JDA.version>
     <lavaplayer.version>2.2.3</lavaplayer.version>
-    <lavalink.youtube-common.version>1.13.2</lavalink.youtube-common.version>
+    <lavalink.youtube-common.version>1.13.5</lavalink.youtube-common.version>
 
     <!-- Applied -->
     <jsoup.version>1.16.1</jsoup.version>
