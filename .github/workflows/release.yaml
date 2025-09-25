@@ -42,13 +42,12 @@ jobs:
       - name: Create branch
         if: inputs.semver != 'debug'
         run: |
-          git config user.name "$(git log -n 1 --pretty=format:%an)"
-          git config user.email "$(git log -n 1 --pretty=format:%ae)"
+          git config user.name "release-bot"
+          git config user.email "users.noreply.github.com"
           git checkout -b release/${{ steps.bump.outputs.version }}
-          git reset --soft HEAD~1
           git add pom.xml
-          git commit --reuse-message=ORIG_HEAD
-          git push origin release/${{ steps.bump.outputs.version }} --force
+          git commit -m 'Bump version after release ${{ steps.bump.outputs.version }}'
+          git push origin release/${{ steps.bump.outputs.version }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
