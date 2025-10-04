@@ -9,9 +9,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.davidmoten.text.utils.WordWrap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
 import ru.demetrious.deus.bot.domain.Pull;
@@ -27,18 +30,19 @@ import static java.time.Instant.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static ru.demetrious.deus.bot.utils.TimeUtils.ZONE_ID;
 import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
+import static ru.demetrious.deus.bot.utils.TimeUtils.ZONE_ID;
 
 @Slf4j
 public class ReversePullTypeCanvas implements Canvas {
     private static final Font FONT = new Font("SansSerif", PLAIN, 16);
     private static final Font FONT_TITLE = new Font("SansSerif", BOLD, 32);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = ofPattern("dd.MM.yyyy HH:mm:ss");
-    private static final String DEFAULT_NAME = "<Unknown:%d:%s>";
+    private static final String DEFAULT_NAME = "<Unknown:%s>";
     private static final int X_GAP = 10;
     private static final int Y_GAP = 10;
 
@@ -48,15 +52,19 @@ public class ReversePullTypeCanvas implements Canvas {
     private final Map<Integer, Character> characterMap;
     @NotNull
     private final GroupKey poolKey;
+    @NotNull
+    private final Function<GroupKey, Optional<String>> getPoolNameFunction;
     private final Params params;
     private final BufferedImage canvas;
     private final Graphics2D graphics2D;
     private final FontMetrics fontMetrics;
 
-    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, Character> characterMap, @NotNull GroupKey poolKey) {
+    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, Character> characterMap,
+                                 @NotNull GroupKey poolKey, @NotNull Function<GroupKey, Optional<String>> getPoolNameFunction) {
         this.summonList = summonList;
         this.characterMap = characterMap;
         this.poolKey = poolKey;
+        this.getPoolNameFunction = getPoolNameFunction;
         this.params = getParams();
         this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
         this.graphics2D = canvas.createGraphics();
@@ -124,14 +132,14 @@ public class ReversePullTypeCanvas implements Canvas {
 
         graphics2D.dispose();
         return new MessageFile()
-            .setName("reverse-pulls-type-%s.webp".formatted(poolKey))
+            .setName("reverse-pulls-%s.webp".formatted(poolKey))
             .setData(createWebp(canvas, true));
     }
 
-    public record GroupKey(boolean isType, int id) {
+    public record GroupKey(int typeId, @Nullable Integer id) {
         @Override
         public @NotNull String toString() {
-            return "[%sid=%d]".formatted(isType ? "type-" : EMPTY, id);
+            return "%s%s".formatted(typeId, ofNullable(id).map(":%d"::formatted).orElse(EMPTY));
         }
     }
 
@@ -171,7 +179,7 @@ public class ReversePullTypeCanvas implements Canvas {
         int maxInstantWidth = fontMetrics.stringWidth(now().atZone(ZONE_ID).format(DATE_TIME_FORMATTER));
         int maxSizeWidth = fontMetrics.stringWidth(valueOf(fullSize));
         int width = 7 * X_GAP + maxNameWidth + maxInstantWidth + 2 * maxSizeWidth;
-        List<String> title = WordWrap.from(getName(poolKey))
+        List<String> title = WordWrap.from(getPoolNameFunction.apply(poolKey).orElse(DEFAULT_NAME.formatted(poolKey)))
             .stringWidth(charSequence -> titleFontMetrics.stringWidth(charSequence.toString()))
             .maxWidth(width - 2 * X_GAP)
             .wrapToList();
@@ -198,32 +206,6 @@ public class ReversePullTypeCanvas implements Canvas {
             case 5 -> new Color(183, 156, 92);
             case 6 -> new Color(205, 117, 32);
             default -> throw new IllegalStateException("Unexpected value: " + rarity);
-        };
-    }
-
-    private static @NotNull String getName(@NotNull GroupKey poolKey) {
-        if (poolKey.isType) {
-            return switch (poolKey.id) {
-                case 1 -> "Starter Banner";
-                case 2 -> "Regular Banner";
-                case 3 -> "Time-limited Banner";
-                case 6 -> "Anniversary Limited Summon [The Myth at Her Fingertips]";
-                case 7 -> "Promise of the Water";
-                case 12 -> "Ripples on the Water";
-                default -> {
-                    log.warn("Unexpected pool type id: {}", poolKey);
-                    yield DEFAULT_NAME.formatted(poolKey.id, "t");
-                }
-            };
-        }
-
-        return switch (poolKey.id) {
-            case 305111 -> "Collaboration Banner [Wine-Dark Reflections of the Eagle]";
-            case 305121 -> "Collaboration Banner [A Prophet Guided by Time]";
-            default -> {
-                log.warn("Unexpected pool id: {}", poolKey);
-                yield DEFAULT_NAME.formatted(poolKey.id, EMPTY);
-            }
         };
     }
 }
