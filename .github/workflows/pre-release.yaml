@@ -119,6 +119,7 @@ jobs:
       DISCORD_URL: ${{ vars.DISCORD_URL }}
       FREE_STEAM_URL: ${{ vars.FREE_STEAM_URL }}
       GOOGLE_URL: ${{ vars.GOOGLE_URL }}
+      REVERSE1999_POOLS: ${{ vars.REVERSE1999_POOLS }}
       REVERSE1999_WIKI_URL: ${{ vars.REVERSE1999_WIKI_URL }}
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
@@ -158,6 +159,7 @@ jobs:
               -e DISCORD_URL=${{ vars.DISCORD_URL }} \
               -e GOOGLE_URL=${{ vars.GOOGLE_URL }} \
               -e FREE_STEAM_URL=${{ vars.FREE_STEAM_URL }} \
+              -e REVERSE1999_POOLS='${{ vars.REVERSE1999_POOLS }}' \
               -e REVERSE1999_WIKI_URL=${{ vars.REVERSE1999_WIKI_URL }} \
               -e SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }} \
               -e SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }} \
