@@ -31,7 +31,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.toIntExact;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
-import static ru.demetrious.deus.bot.domain.Character.CHARACTERS_MAX_PORTRAIT;
+import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
@@ -72,7 +72,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999ShowCo
                     .setDescription("Реальное кол-во персонажей")
                     .setRequired(true)
                     .setMinValue(0)
-                    .setMaxValue(CHARACTERS_MAX_PORTRAIT)
+                    .setMaxValue(MAX_PORTRAIT)
             ));
     }
 
@@ -108,7 +108,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999ShowCo
         PullsData pullsData = findPullsDataOutbound.findPullsData().orElseGet(PullsData::new);
         Integer characterId = getStringOptionOutbound.getStringOption(CHARACTER_OPTION).map(Integer::valueOf).orElseThrow();
         int realCount = getIntegerOptionOutbound.getIntegerOption(COUNT_OPTION).orElseThrow();
-        int count = min(CHARACTERS_MAX_PORTRAIT, toIntExact(pullsData.getPullList().stream()
+        int count = min(MAX_PORTRAIT, toIntExact(pullsData.getPullList().stream()
             .map(Pull::getSummonIdList)
             .flatMap(List::stream)
             .filter(characterId::equals)

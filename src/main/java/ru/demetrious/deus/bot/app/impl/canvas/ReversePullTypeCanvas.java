@@ -106,7 +106,7 @@ public class ReversePullTypeCanvas implements Canvas {
                 );
                 graphics2D.setColor(WHITE);
 
-                graphics2D.setColor(getColor(character.getRarity()));
+                graphics2D.setColor(character.getRarityColor());
                 xOffset = drawStringInline(character.getName(), xOffset, yOffset, params.maxNameWidth);
                 xOffset = drawStringInline(pull.getTime().atZone(ZONE_ID).format(DATE_TIME_FORMATTER), xOffset, yOffset, params.maxInstantWidth);
                 xOffset = switch (character.getRarity()) {
@@ -196,16 +196,5 @@ public class ReversePullTypeCanvas implements Canvas {
         STAR_5,
         STAR_6,
         ALL,
-    }
-
-    private static @NotNull Color getColor(@NotNull Integer rarity) {
-        return switch (rarity) {
-            case 2 -> new Color(69, 93, 68);
-            case 3 -> new Color(84, 96, 127);
-            case 4 -> new Color(114, 91, 128);
-            case 5 -> new Color(183, 156, 92);
-            case 6 -> new Color(205, 117, 32);
-            default -> throw new IllegalStateException("Unexpected value: " + rarity);
-        };
     }
 }

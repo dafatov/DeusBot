@@ -25,13 +25,11 @@ import ru.demetrious.deus.bot.domain.Pull;
 import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
-import static java.lang.Math.min;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static ru.demetrious.deus.bot.domain.Character.CHARACTERS_MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SHOW;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
@@ -86,15 +84,12 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999ShowC
         Map<Integer, Integer> pulledCharacterMap = pullsData.getPullList().stream()
             .map(Pull::getSummonIdList)
             .flatMap(Collection::stream)
-            .collect(groupingBy(
-                identity(),
-                collectingAndThen(counting(), Math::toIntExact)
-            ));
+            .collect(groupingBy(identity(), collectingAndThen(counting(), Math::toIntExact)));
 
         pullsData.getCharacterCorrelationMap().forEach((key, count) -> pulledCharacterMap.merge(key, count, Integer::sum));
         return pulledCharacterMap
             .entrySet().stream()
-            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), min(entry.getValue(), CHARACTERS_MAX_PORTRAIT)))
+            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), entry.getValue()))
             .collect(toList());
     }
 }

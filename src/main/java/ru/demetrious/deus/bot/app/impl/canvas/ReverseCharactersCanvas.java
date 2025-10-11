@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.canvas;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -17,6 +18,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.Integer.compare;
 import static java.lang.Math.abs;
+import static java.lang.Math.divideExact;
+import static java.lang.Math.min;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
@@ -59,10 +62,13 @@ public class ReverseCharactersCanvas implements Canvas {
                 BufferedImage avatar = character.getAvatar();
                 BufferedImage nameImage = character.getNameImage();
                 BufferedImage portraitImage = character.getPortraitImage();
-                int avatarWidth = calcWidth(character.getAvatar(), params.minHeight);
+                int avatarWidth = calcWidth(avatar, params.minHeight);
                 int nameImageHeight = calcHeight(nameImage, params.minWidth);
                 int portraitImageHeight = calcHeight(portraitImage, params.minWidth);
+                GradientPaint gradientPaint = new GradientPaint(xOffset, yOffset, character.getRarityColor(), xOffset, yOffset + divideExact(params.minHeight, 3), new Color(1, 1, 1, 0));
 
+                graphics2D.setPaint(gradientPaint);
+                graphics2D.fillRect(xOffset, yOffset, avatarWidth, params.minHeight);
                 graphics2D.drawImage(avatar, xOffset, yOffset, avatarWidth, params.minHeight, new Color(1, 1, 1, 0.1f), null);
                 graphics2D.drawImage(nameImage, xOffset, yOffset + params.minHeight - nameImageHeight, params.minWidth, nameImageHeight, null);
                 graphics2D.drawImage(portraitImage, xOffset + avatarWidth - params.minWidth, yOffset + params.minHeight - portraitImageHeight, params.minWidth, portraitImageHeight, null);
@@ -88,7 +94,7 @@ public class ReverseCharactersCanvas implements Canvas {
             this.setAvatar(character.getAvatar());
             this.setNameImage(character.getNameImage());
             this.setName(character.getName());
-            this.portraitImage = loadPortraitImage(portrait);
+            this.portraitImage = loadPortraitImage(min(portrait, MAX_PORTRAIT));
         }
     }
 
