@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
-import ru.demetrious.deus.bot.app.api.command.Reverse1999ShowCommandInbound;
+import ru.demetrious.deus.bot.app.api.command.Reverse1999PullsShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
@@ -40,7 +40,7 @@ import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class Reverse1999PullsShowCommandUseCase implements Reverse1999ShowCommandInbound {
+public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
     private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;

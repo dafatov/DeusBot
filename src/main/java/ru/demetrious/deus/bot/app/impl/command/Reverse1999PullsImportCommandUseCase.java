@@ -82,12 +82,13 @@ public class Reverse1999PullsImportCommandUseCase implements Reverse1999PullsImp
         List<Pull> newPullList = importPullList.get().stream()
             .filter(pull -> lastPullOptional.isEmpty() || pull.getTime().isAfter(lastPullOptional.get()))
             .toList();
+        int pullsCount = newPullList.stream().map(Pull::getSummonIdList).mapToInt(List::size).sum();
         String lastPull = lastPullOptional
             .map(Instant::getEpochSecond)
             .map("<t:%d:R>"::formatted)
             .orElse("-");
 
-        log.debug("newPullList#={}", newPullList.size());
+        log.debug("newPullList#={}", pullsCount);
         pullsData.getPullList().addAll(newPullList);
         updatePullsDataOutbound.updatePullsData(pullsData);
 
@@ -104,7 +105,7 @@ public class Reverse1999PullsImportCommandUseCase implements Reverse1999PullsImp
                     Добавлены после: %s
                     Последняя крутка: <t:%d:R>
                     """.formatted(
-                    newPullList.stream().map(Pull::getSummonIdList).mapToInt(List::size).sum(),
+                    pullsCount,
                     lastPull,
                     newPullList.stream()
                         .map(Pull::getTime)

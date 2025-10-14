@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
-import ru.demetrious.deus.bot.app.api.command.Reverse1999ShowCommandInbound;
+import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
@@ -25,11 +25,14 @@ import ru.demetrious.deus.bot.domain.Pull;
 import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
+import static java.lang.Math.min;
+import static java.lang.Math.toIntExact;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SHOW;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
@@ -38,7 +41,7 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.G
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class Reverse1999CharactersShowCommandUseCase implements Reverse1999ShowCommandInbound {
+public class Reverse1999CharactersShowCommandUseCase implements Reverse1999CharactersShowCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
     private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
@@ -84,7 +87,7 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999ShowC
         Map<Integer, Integer> pulledCharacterMap = pullsData.getPullList().stream()
             .map(Pull::getSummonIdList)
             .flatMap(Collection::stream)
-            .collect(groupingBy(identity(), collectingAndThen(counting(), Math::toIntExact)));
+            .collect(groupingBy(identity(), collectingAndThen(counting(), value -> min(toIntExact(value), MAX_PORTRAIT))));
 
         pullsData.getCharacterCorrelationMap().forEach((key, count) -> pulledCharacterMap.merge(key, count, Integer::sum));
         return pulledCharacterMap
