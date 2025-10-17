@@ -10,7 +10,7 @@ import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
 import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
-import ru.demetrious.deus.bot.app.api.command.Reverse1999ShowCommandInbound;
+import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersSetCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.option.GetFocusedOptionOutbound;
@@ -35,11 +35,12 @@ import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.utils.DefaultUtils.defaultIfZero;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class Reverse1999CharactersSetCommandUseCase implements Reverse1999ShowCommandInbound {
+public class Reverse1999CharactersSetCommandUseCase implements Reverse1999CharactersSetCommandInbound {
     private static final String CHARACTER_OPTION = "character";
     private static final String COUNT_OPTION = "count";
 
@@ -115,7 +116,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999ShowCo
             .count()));
         int newCount = realCount - count;
 
-        pullsData.getCharacterCorrelationMap().compute(characterId, (key, oldValue) -> newCount == 0 ? null : newCount);
+        pullsData.getCharacterCorrelationMap().compute(characterId, (key, oldValue) -> defaultIfZero(newCount));
         log.debug("characterCorrelationMap={}", pullsData.getCharacterCorrelationMap());
         updatePullsDataOutbound.updatePullsData(pullsData);
         notifyOutbound.notify(new MessageData().setEmbeds(List.of(new MessageEmbed()

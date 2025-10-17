@@ -94,7 +94,7 @@ public class ReverseCharactersCanvas implements Canvas {
             this.setAvatar(character.getAvatar());
             this.setNameImage(character.getNameImage());
             this.setName(character.getName());
-            this.portraitImage = loadPortraitImage(min(portrait, MAX_PORTRAIT));
+            this.portraitImage = loadPortraitImage(portrait);
         }
     }
 
