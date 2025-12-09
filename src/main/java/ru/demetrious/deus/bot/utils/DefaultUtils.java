@@ -17,7 +17,7 @@ public class DefaultUtils {
         try {
             return supplier.get();
         } catch (Throwable e) {
-            log.warn("Can't get supplier, return defaultValue={}", defaultValue);
+            log.warn("Can't get supplier, return defaultValue={}, cause:", defaultValue, e);
             return defaultValue;
         }
     }

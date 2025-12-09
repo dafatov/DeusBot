@@ -26,3 +26,12 @@ logging:
 
 devs:
   ids: ${DEVS_DISCORD_IDS:}
+
+
+cache:
+  files-path: ./.cache-data
+  configs:
+    shikimori-franchises:
+      expire-after-write: 36500d
+    reverse1999-data:
+      expire-after-write: 36500d

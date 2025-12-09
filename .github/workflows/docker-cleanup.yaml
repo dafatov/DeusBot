@@ -14,12 +14,11 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
-      - name: Cleanup old Docker images
+      - name: Cleanup old Docker images, volumes
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            docker image prune -a -f
-            docker system prune -f
+            docker system prune -a --volumes -f

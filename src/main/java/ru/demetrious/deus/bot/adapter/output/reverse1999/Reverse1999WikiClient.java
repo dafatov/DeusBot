@@ -12,7 +12,8 @@ import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 @FeignClient(
     name = "reverse1999-wiki",
     url = "${feign.svc.reverse1999-wiki.url}",
-    path = "${feign.svc.reverse1999-wiki.path}"
+    path = "${feign.svc.reverse1999-wiki.path}",
+    dismiss404 = true
 )
 public interface Reverse1999WikiClient {
     String USER_AGENT = "User-Agent=PostmanRuntime/7.45.0";
@@ -23,8 +24,8 @@ public interface Reverse1999WikiClient {
     String getCharacterListHtml();
 
     @Retry(name = "reverse1999-wiki")
-    @GetMapping(value = "{characterUrl}", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
-    String getCharacterHtml(@PathVariable String characterUrl);
+    @GetMapping(value = "{url}", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
+    String getHtml(@PathVariable String url);
 
     @GetMapping
     @Headers({USER_AGENT, POSTMAN_TOKEN})

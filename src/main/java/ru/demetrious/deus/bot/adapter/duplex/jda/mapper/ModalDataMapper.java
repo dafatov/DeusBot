@@ -31,6 +31,7 @@ public interface ModalDataMapper {
         return TextInput.create(textInputComponent.getId(), textInputComponent.getLabel(), mapTextInputStyle(textInputComponent.getStyle()))
             .setPlaceholder(textInputComponent.getPlaceholder())
             .setRequired(textInputComponent.isRequired())
+            .setValue(textInputComponent.getValue())
             .build();
     }
 

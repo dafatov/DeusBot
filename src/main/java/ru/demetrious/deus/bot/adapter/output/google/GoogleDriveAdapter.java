@@ -9,7 +9,7 @@ import ru.demetrious.deus.bot.adapter.output.google.dto.JsonToMultipartFile;
 import ru.demetrious.deus.bot.adapter.output.google.mapper.ReverseDataMapper;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.pull.UpdatePullsDataOutbound;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 
 import static java.util.Objects.isNull;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.writeValueAsString;

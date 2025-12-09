@@ -71,7 +71,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
     }
 
     @Override
-    public boolean isDefer() {
+    public boolean isDefer(Type type) {
         String userId = getUserIdOutbound.getUserId();
 
         return getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD)

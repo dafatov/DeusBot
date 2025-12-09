@@ -9,7 +9,7 @@ import ru.demetrious.deus.bot.domain.CommandData;
 public interface CommandInbound extends SlashCommandInteractionInbound, ButtonInteractionInbound, ModalInteractionInbound, AutocompleteInteractionInbound {
     CommandData getData();
 
-    default boolean isDefer() {
+    default boolean isDefer(Type type) {
         return true;
     }
 
@@ -26,5 +26,9 @@ public interface CommandInbound extends SlashCommandInteractionInbound, ButtonIn
     @Override
     default void onAutocomplete() {
         throw new IllegalStateException("CommandInbound onAutocomplete is not implemented");
+    }
+
+    enum Type {
+        AUTO_COMPLETE, BUTTON, COMMAND, MODAL
     }
 }

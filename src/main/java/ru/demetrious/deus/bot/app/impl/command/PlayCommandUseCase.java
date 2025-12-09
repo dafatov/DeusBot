@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.command.GetAttachmentOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.PlayCommandInbound;
+import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 import ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound;
@@ -62,7 +63,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
     private final List<GetAuthorIdOutbound<?>> getAuthorIdOutbound;
     private final GetAttachmentOptionOutbound getAttachmentOptionOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
-    private final ShowModalOutbound showModalOutbound;
+    private final ShowModalOutbound<SlashCommandInteractionInbound> showModalOutbound;
     private final GetModalValuesOutbound getModalValuesOutbound;
 
     @Override
@@ -83,7 +84,7 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
     }
 
     @Override
-    public boolean isDefer() {
+    public boolean isDefer(Type type) {
         return getStringOptionOutbound.getStringOption(STRING_OPTION).isPresent()
             || getAttachmentOptionOutbound.getAttachmentOption(ATTACHMENT_OPTION).isPresent();
     }

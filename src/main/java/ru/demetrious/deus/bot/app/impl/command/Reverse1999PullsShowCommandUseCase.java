@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
+import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.app.api.command.Reverse1999PullsShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
@@ -23,12 +23,12 @@ import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.app.impl.canvas.ReversePullTypeCanvas;
 import ru.demetrious.deus.bot.app.impl.canvas.ReversePullTypeCanvas.GroupKey;
-import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.MessageFile;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.util.Optional.empty;
@@ -46,7 +46,7 @@ import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 @Component
 public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
-    private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
+    private final GetReverseDataOutbound getReverseDataOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
@@ -70,8 +70,8 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
             return;
         }
 
-        Map<Integer, Character> characterMap = new HashMap<>() {{
-            putAll(getReverseCharacterListOutbound.getReverseCharacterList());
+        Map<Integer, CharacterData> characterMap = new HashMap<>() {{
+            putAll(getReverseDataOutbound.getReverseData().getCharacters());
             putAll(dropCharacterDataComponent.getDrops());
         }};
         List<MessageFile> messageFileList = findPullsDataOutbound.findPullsData()
@@ -122,7 +122,7 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
     @Configuration
     public static class DropCharacterDataComponent {
         @Getter
-        private final Map<Integer, Character> drops;
+        private final Map<Integer, CharacterData> drops;
 
         public DropCharacterDataComponent(@Value("${REVERSE1999_DROPS:{}}") String dropsJson) throws JsonProcessingException {
             this.drops = getMapper().readValue(dropsJson, new TypeReference<>() {

@@ -43,6 +43,10 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.BUTTON;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.COMMAND;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.MODAL;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.DISCORD_REGISTRATION_ID;
@@ -121,21 +125,26 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                                                                 @NotNull A adapter) {
         adapter.setEvent(event);
 
-        if (authorizationComponent.authorize(DISCORD_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
-            unauthorizedConsumer.accept(authorizationComponent.getData(adapter.getUserId(), DISCORD_REGISTRATION_ID));
-            return;
-        }
-
-        Name commandName = adapter.getCommandName();
         try {
-            CommandInbound command = commandInboundList.stream()
-                .filter(c -> c.getData().getName() == commandName)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
+            if (authorizationComponent.authorize(DISCORD_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
+                unauthorizedConsumer.accept(authorizationComponent.getData(adapter.getUserId(), DISCORD_REGISTRATION_ID));
+                return;
+            }
 
-            executeConsumer.accept(command);
+            Name commandName = adapter.getCommandName();
+
+            try {
+                CommandInbound command = commandInboundList.stream()
+                    .filter(c -> c.getData().getName() == commandName)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
+
+                executeConsumer.accept(command);
+            } catch (Exception e) {
+                errorConsumer.accept(commandName, e);
+            }
         } catch (Exception e) {
-            errorConsumer.accept(commandName, e);
+            errorConsumer.accept(null, e);
         } finally {
             adapter.removeEvent();
         }
@@ -156,13 +165,22 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 return;
             }
 
-            if (commandInbound.isDefer()) {
+            if (commandInbound.isDefer(getEventType(adapter))) {
                 log.debug("Deferring command \"{}\"", commandInbound.getData().getName());
                 adapter.defer();
             }
 
             executeConsumer.accept(commandInbound);
         }, (commandName, e) -> notifyError(commandName, errorText, adapter, e), adapter::notifyUnauthorized, adapter);
+    }
+
+    private Type getEventType(@NotNull GenericAdapter<?, ?, ?> adapter) {
+        return switch (adapter) {
+            case SlashCommandAdapter ignored -> COMMAND;
+            case ButtonAdapter ignored -> BUTTON;
+            case ModalAdapter ignored -> MODAL;
+            default -> throw new IllegalStateException("Unexpected value: " + adapter.getClass());
+        };
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyError(Name commandName, String errorText, A adapter, Exception e) {
@@ -174,7 +192,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 commandName, "Сообщите администратору точное время возникновения проблемы для быстрой диагностики проблемы."))));
 
         adapter.notify(messageData, true);
-        log.error(format("Произошла ошибка с {0} команды \"{1}\"", errorText, commandName), e);
+        log.error("Произошла ошибка с {} команды \"{}\"", errorText, commandName, e);
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyPrivateChannel(Name commandName, A adapter) {
@@ -184,7 +202,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
             .setDescription("Из приватного канала бот не хочет выполнять команды. Увы!")));
 
         adapter.notify(messageData, true);
-        log.warn(format("Произошла попытка запуска команды \"{0}\" из приватного канала", commandName));
+        log.warn("Произошла попытка запуска команды \"{}\" из приватного канала", commandName);
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyInDev(Name commandName, A adapter) {
@@ -197,7 +215,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 .collect(joining(", "))))));
 
         adapter.notify(messageData, true);
-        log.warn(format("Произошла попытка запуска команды \"{0}\" во время тестирования", commandName));
+        log.warn("Произошла попытка запуска команды \"{}\" во время тестирования", commandName);
     }
 
     private void replyEmptyChoices(@NotNull CommandAutoCompleteInteractionEvent event) {

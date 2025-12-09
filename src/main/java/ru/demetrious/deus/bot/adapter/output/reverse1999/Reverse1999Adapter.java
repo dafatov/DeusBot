@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.output.reverse1999.dto.SummonsDto;
 import ru.demetrious.deus.bot.adapter.output.reverse1999.mapper.SummonedCharacterMapper;
 import ru.demetrious.deus.bot.app.api.character.GetReverseSummonedCharacterListOutbound;
-import ru.demetrious.deus.bot.domain.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
 
 @Slf4j
 @RequiredArgsConstructor

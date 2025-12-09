@@ -1,21 +1,43 @@
 package ru.demetrious.deus.bot.fw.config.cache;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import java.io.File;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
+import javax.cache.CacheManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import lombok.extern.slf4j.Slf4j;
+import org.ehcache.config.CacheConfiguration;
+import org.ehcache.core.config.DefaultConfiguration;
+import org.ehcache.impl.config.persistence.DefaultPersistenceConfiguration;
+import org.ehcache.jsr107.EhcacheCachingProvider;
+import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.github.benmanes.caffeine.cache.Caffeine.newBuilder;
+import static javax.cache.Caching.getCachingProvider;
+import static org.ehcache.config.builders.CacheConfigurationBuilder.newCacheConfigurationBuilder;
+import static org.ehcache.config.builders.ExpiryPolicyBuilder.timeToLiveExpiration;
+import static org.ehcache.config.builders.ResourcePoolsBuilder.newResourcePoolsBuilder;
+import static org.ehcache.config.units.EntryUnit.ENTRIES;
+import static org.ehcache.config.units.MemoryUnit.MB;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class CacheConfig {
     private final CacheProperties cacheProperties;
 
     @Bean
-    public CaffeineCacheManager caffeineCacheManager() {
+    public JCacheCacheManager jCacheCacheManager() {
+        var springCacheManager = new JCacheCacheManager();
+
+        springCacheManager.setCacheManager(ehcacheManager());
+        return springCacheManager;
+    }
+
+    @Bean(destroyMethod = "close")
+    public CacheManager ehcacheManager() {
         return buildCacheManager();
     }
 
@@ -23,18 +45,35 @@ public class CacheConfig {
     // = Implementation
     // ===================================================================================================================
 
-    private CaffeineCacheManager buildCacheManager() {
-        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+    private CacheManager buildCacheManager() {
+        Map<String, CacheConfiguration<?, ?>> caches = new HashMap<>();
 
-        cacheProperties.getConfigs().entrySet().forEach(entry -> registerEntry(caffeineCacheManager, entry));
-        return caffeineCacheManager;
+        cacheProperties.getConfigs().forEach((cacheName, cacheProperty) -> {
+            var config = newCacheConfigurationBuilder(
+                Serializable.class,
+                Serializable.class,
+                newResourcePoolsBuilder()
+                    .heap(500, ENTRIES)
+                    .disk(500, MB, true))
+                .withExpiry(timeToLiveExpiration(cacheProperty.getExpireAfterWrite()))
+                .build();
+
+            caches.put(cacheName, config);
+        });
+
+
+        return createJCacheCacheManager(caches);
     }
 
-    private void registerEntry(CaffeineCacheManager caffeineCacheManager, Map.Entry<String, CacheProperties.CacheProperty> entry) {
-        Caffeine<Object, Object> builder = newBuilder();
+    private CacheManager createJCacheCacheManager(Map<String, CacheConfiguration<?, ?>> caches) {
+        var ehcacheProvider = (EhcacheCachingProvider) getCachingProvider();
+        var persistenceConfig = new DefaultPersistenceConfiguration(new File(cacheProperties.getFilesPath()));
+        var configuration = new DefaultConfiguration(
+            caches,
+            ehcacheProvider.getDefaultClassLoader(),
+            persistenceConfig
+        );
 
-        builder.expireAfterWrite(entry.getValue().getExpireAfterWrite());
-
-        caffeineCacheManager.registerCustomCache(entry.getKey(), builder.build());
+        return ehcacheProvider.getCacheManager(ehcacheProvider.getDefaultURI(), configuration);
     }
 }
