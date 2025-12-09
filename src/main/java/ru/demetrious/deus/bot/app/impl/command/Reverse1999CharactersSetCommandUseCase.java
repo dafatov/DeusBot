@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
-import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
+import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersSetCommandInbound;
@@ -23,17 +23,17 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
-import ru.demetrious.deus.bot.domain.Pull;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Math.min;
 import static java.lang.Math.toIntExact;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.MAX_CHOICES;
-import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
+import static ru.demetrious.deus.bot.domain.reverse1999.CharacterData.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 import static ru.demetrious.deus.bot.utils.DefaultUtils.defaultIfZero;
 
@@ -45,7 +45,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
     private static final String COUNT_OPTION = "count";
 
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
-    private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
+    private final GetReverseDataOutbound getReverseDataOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
     private final UpdatePullsDataOutbound updatePullsDataOutbound;
@@ -77,6 +77,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
             ));
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public void onAutocomplete() {
         AutocompleteOption focusedOption = getFocusedOptionOutbound.getFocusedOption();
@@ -85,7 +86,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
             return;
         }
 
-        List<OptionChoice> optionChoiceList = getReverseCharacterListOutbound.getReverseCharacterList().entrySet().stream()
+        List<OptionChoice> optionChoiceList = getReverseDataOutbound.getReverseData().getCharacters().entrySet().stream()
             .filter(characterEntry -> containsIgnoreCase(characterEntry.getValue().getName(), focusedOption.getValue()))
             .map(characterEntry -> new OptionChoice()
                 .setName(characterEntry.getValue().getName())
@@ -120,7 +121,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
         log.debug("characterCorrelationMap={}", pullsData.getCharacterCorrelationMap());
         updatePullsDataOutbound.updatePullsData(pullsData);
         notifyOutbound.notify(new MessageData().setEmbeds(List.of(new MessageEmbed()
-            .setTitle("Теперь для %s...".formatted(getReverseCharacterListOutbound.getReverseCharacterList().get(characterId).getName()))
+            .setTitle("Теперь для %s...".formatted(getReverseDataOutbound.getReverseData().getCharacters().get(characterId).getName()))
             .setDescription("""
                 ... установлено количество: %s
                 -# что значит %s

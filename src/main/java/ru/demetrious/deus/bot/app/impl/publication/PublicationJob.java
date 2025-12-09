@@ -2,7 +2,6 @@ package ru.demetrious.deus.bot.app.impl.publication;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
@@ -13,6 +12,7 @@ import ru.demetrious.deus.bot.app.api.publicist.GetPublicistListOutbound;
 import ru.demetrious.deus.bot.domain.MessageData;
 
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.of;
 
 public abstract class PublicationJob extends QuartzJobBean {
     @Autowired
@@ -27,7 +27,7 @@ public abstract class PublicationJob extends QuartzJobBean {
         Map<Optional<String>, MessageData> optionalMessageDataMap = supplyMessage(context);
 
         getPublicistListOutbound.getPublisistList().stream()
-            .flatMap(publicist -> Stream.of(
+            .flatMap(publicist -> of(
                 Pair.of(publicist.getChannelId(), ofNullable(optionalMessageDataMap.get(ofNullable(publicist.getGuildId())))),
                 Pair.of(publicist.getChannelId(), ofNullable(optionalMessageDataMap.get(Optional.<String>empty())))
             )).filter(p -> p.getRight().isPresent())

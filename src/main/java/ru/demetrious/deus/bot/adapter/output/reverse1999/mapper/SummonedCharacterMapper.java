@@ -5,7 +5,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.demetrious.deus.bot.adapter.output.reverse1999.dto.SummonsDto.Data.Summon;
-import ru.demetrious.deus.bot.domain.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
 
 @Mapper
 public interface SummonedCharacterMapper {

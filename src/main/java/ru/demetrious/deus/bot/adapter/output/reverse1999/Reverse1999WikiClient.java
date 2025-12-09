@@ -23,8 +23,16 @@ public interface Reverse1999WikiClient {
     String getCharacterListHtml();
 
     @Retry(name = "reverse1999-wiki")
-    @GetMapping(value = "{characterUrl}", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
-    String getCharacterHtml(@PathVariable String characterUrl);
+    @GetMapping(value = "/wiki/%E7%AB%A0%E8%8A%82%E5%88%97%E8%A1%A8/%E4%B8%BB%E7%BA%BF%E6%95%85%E4%BA%8B", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
+    String getMainLevelListHtml();
+
+    @Retry(name = "reverse1999-wiki")
+    @GetMapping(value = "/wiki/%E7%AB%A0%E8%8A%82%E5%88%97%E8%A1%A8/%E6%9B%B4%E5%A4%9A", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
+    String getExtraLevelListHtml();
+
+    @Retry(name = "reverse1999-wiki")
+    @GetMapping(value = "{url}", produces = TEXT_HTML_VALUE, headers = {USER_AGENT, POSTMAN_TOKEN})
+    String getHtml(@PathVariable String url);
 
     @GetMapping
     @Headers({USER_AGENT, POSTMAN_TOKEN})

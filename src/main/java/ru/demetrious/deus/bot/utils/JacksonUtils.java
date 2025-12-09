@@ -1,10 +1,13 @@
 package ru.demetrious.deus.bot.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.IOException;
 import lombok.experimental.UtilityClass;
+import org.springframework.core.io.Resource;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
@@ -31,5 +34,9 @@ public class JacksonUtils {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <T> T loadResourceAs(Resource resource, TypeReference<T> typeReference) throws IOException {
+        return getMapper().readValue(resource.getContentAsByteArray(), typeReference);
     }
 }

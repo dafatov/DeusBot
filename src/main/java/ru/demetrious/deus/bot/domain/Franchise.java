@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.io.Serializable;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +14,7 @@ import static java.util.Arrays.stream;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Franchise {
+public class Franchise implements Serializable {
     @EqualsAndHashCode.Include
     private String name;
     private String firstTitle;
@@ -30,7 +31,7 @@ public class Franchise {
 
     @Getter
     @RequiredArgsConstructor
-    public enum Source {
+    public enum Source implements Serializable {
         ORIGINAL("original", "Оригинальное"),
         MANGA("manga", "Манга"),
         WEB_MANGA("web_manga", "Веб манга"),

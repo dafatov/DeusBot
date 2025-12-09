@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
+import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetAttachmentOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersImportCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
@@ -17,15 +17,15 @@ import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.pull.UpdatePullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
-import ru.demetrious.deus.bot.domain.CharactersExport;
-import ru.demetrious.deus.bot.domain.CharactersExport.CharacterExport;
 import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.OptionData;
-import ru.demetrious.deus.bot.domain.Pull;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.CharactersExport;
+import ru.demetrious.deus.bot.domain.reverse1999.CharactersExport.CharacterExport;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Math.min;
@@ -35,9 +35,9 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.function.Failable.asFunction;
-import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_IMPORT;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.ATTACHMENT;
+import static ru.demetrious.deus.bot.domain.reverse1999.CharacterData.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 import static ru.demetrious.deus.bot.utils.DefaultUtils.defaultIfZero;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
@@ -49,7 +49,7 @@ public class Reverse1999CharactersImportCommandUseCase implements Reverse1999Cha
     private static final String FILE_OPTION = "file";
 
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
-    private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
+    private final GetReverseDataOutbound getReverseDataOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
@@ -94,7 +94,7 @@ public class Reverse1999CharactersImportCommandUseCase implements Reverse1999Cha
             .flatMap(List::stream)
             .collect(groupingBy(identity(), collectingAndThen(counting(), Math::toIntExact)));
 
-        getReverseCharacterListOutbound.getReverseCharacterList().keySet().forEach(id -> pullsData.getCharacterCorrelationMap()
+        getReverseDataOutbound.getReverseData().getCharacters().keySet().forEach(id -> pullsData.getCharacterCorrelationMap()
             .compute(id, (key, value) -> defaultIfZero(getPortraitCount(characters, id) - getPortraitCount(characterPullsMap, id))));
         updatePullsDataOutbound.updatePullsData(pullsData);
         log.debug("characterCorrelationMap={}", pullsData.getCharacterCorrelationMap());

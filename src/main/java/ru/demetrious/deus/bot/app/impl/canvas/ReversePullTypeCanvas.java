@@ -15,9 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.davidmoten.text.utils.WordWrap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.MessageFile;
-import ru.demetrious.deus.bot.domain.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.RED;
@@ -50,7 +50,7 @@ public class ReversePullTypeCanvas implements Canvas {
     @NotNull
     private final List<Pull> summonList;
     @NotNull
-    private final Map<Integer, Character> dropsMap;
+    private final Map<Integer, CharacterData> dropsMap;
     @NotNull
     private final GroupKey poolKey;
     @NotNull
@@ -60,7 +60,7 @@ public class ReversePullTypeCanvas implements Canvas {
     private final Graphics2D graphics2D;
     private final FontMetrics fontMetrics;
 
-    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, Character> dropsMap,
+    public ReversePullTypeCanvas(@NotNull List<Pull> summonList, @NotNull Map<Integer, CharacterData> dropsMap,
                                  @NotNull GroupKey poolKey, @NotNull Function<GroupKey, Optional<String>> getPoolNameFunction) {
         this.summonList = summonList;
         this.dropsMap = dropsMap;
@@ -93,7 +93,7 @@ public class ReversePullTypeCanvas implements Canvas {
         for (Pull pull : summonList) {
             int groupYOffset = yOffset;
             for (Integer summonId : pull.getSummonIdList()) {
-                Optional<Character> character = ofNullable(dropsMap.get(summonId));
+                Optional<CharacterData> character = ofNullable(dropsMap.get(summonId));
                 int xOffset = 3 * X_GAP;
 
                 stream(CounterType.values()).forEach(counterType -> counter.merge(counterType, 1, Integer::sum));
@@ -173,7 +173,7 @@ public class ReversePullTypeCanvas implements Canvas {
             .mapToInt(List::size)
             .sum();
         int maxNameWidth = dropsMap.values().stream()
-            .map(Character::getName)
+            .map(CharacterData::getName)
             .map(fontMetrics::stringWidth)
             .max(Integer::compareTo)
             .orElse(0);

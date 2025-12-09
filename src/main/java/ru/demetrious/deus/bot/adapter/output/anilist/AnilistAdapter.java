@@ -30,10 +30,11 @@ import ru.demetrious.deus.bot.domain.graphql.Request;
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Stream.of;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaListStatusAnilist.COMPLETED;
 import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaTypeAnilist.ANIME;
 import static ru.demetrious.deus.bot.domain.graphql.Request.createQueries;
@@ -44,7 +45,7 @@ import static ru.demetrious.deus.bot.utils.JacksonUtils.getMapper;
 @RequiredArgsConstructor
 @Component
 public class AnilistAdapter implements ImportAnimeOutbound {
-    private static final Supplier<String> RANDOM_KEY_SUPPLIER = () -> randomAlphabetic(7);
+    private static final Supplier<String> RANDOM_KEY_SUPPLIER = () -> secure().nextAlphabetic(7);
     private static final int PER_PAGE = 50;
     private static final int PER_REQUEST = 150;
 
@@ -121,7 +122,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
         if (COMPLETED == entries.getStatus() && entries.getProgress() < entries.getMedia().getEpisodes()) {
             log.debug("Added duplicate mutation for idMal={}", entries.getMedia().getIdMal());
-            return Stream.of(saveMediaListEntryAnilist, new SaveMediaListEntryMutation(
+            return of(saveMediaListEntryAnilist, new SaveMediaListEntryMutation(
                 null,
                 entries.getMedia().getId(),
                 entries.getProgress(),
@@ -130,7 +131,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
             ));
         }
 
-        return Stream.of(saveMediaListEntryAnilist);
+        return of(saveMediaListEntryAnilist);
     }
 
     private Map<Integer, Integer> getExistingNewIdsMap(List<Entries> changedAndNewAnimes) {

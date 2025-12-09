@@ -14,11 +14,24 @@ public class DefaultUtils {
     }
 
     public static <T> T defaultIfException(FailableSupplier<T, Throwable> supplier, T defaultValue) {
+        return defaultIfException(supplier, defaultValue, false);
+    }
+
+    public static <T> T defaultIfException(FailableSupplier<T, Throwable> supplier, T defaultValue, boolean silent) {
         try {
             return supplier.get();
         } catch (Throwable e) {
-            log.warn("Can't get supplier, return defaultValue={}", defaultValue);
+            if (!silent) log.warn("Can't get supplier, return defaultValue={}, cause:", defaultValue, e);
             return defaultValue;
+        }
+    }
+
+    public static <T> T throwIfException(FailableSupplier<T, Throwable> supplier) {
+        try {
+            return supplier.get();
+        } catch (Throwable e) {
+            log.warn("Can't get supplier, cause:", e);
+            throw new IllegalStateException(e);
         }
     }
 

@@ -7,19 +7,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
+import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersExportCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
-import ru.demetrious.deus.bot.domain.CharactersExport;
-import ru.demetrious.deus.bot.domain.CharactersExport.CharacterExport;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageFile;
-import ru.demetrious.deus.bot.domain.Pull;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.CharactersExport;
+import ru.demetrious.deus.bot.domain.reverse1999.CharactersExport.CharacterExport;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Math.min;
@@ -29,8 +29,8 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
-import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_EXPORT;
+import static ru.demetrious.deus.bot.domain.reverse1999.CharacterData.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.writeValueAsString;
 
@@ -39,7 +39,7 @@ import static ru.demetrious.deus.bot.utils.JacksonUtils.writeValueAsString;
 @Component
 public class Reverse1999CharactersExportCommandUseCase implements Reverse1999CharactersExportCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
-    private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
+    private final GetReverseDataOutbound getReverseDataOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
@@ -66,7 +66,7 @@ public class Reverse1999CharactersExportCommandUseCase implements Reverse1999Cha
             .map(Pull::getSummonIdList)
             .flatMap(List::stream)
             .collect(groupingBy(identity(), collectingAndThen(counting(), Math::toIntExact)));
-        List<CharacterExport> characterExportList = getReverseCharacterListOutbound.getReverseCharacterList().values().stream()
+        List<CharacterExport> characterExportList = getReverseDataOutbound.getReverseData().getCharacters().values().stream()
             .map(character -> new CharacterExport(character.getName(), character.getId(), getCount(character.getId(), pullsData, characterPullsMap)))
             .sorted(comparing(CharacterExport::name))
             .toList();

@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
-import ru.demetrious.deus.bot.app.api.character.GetReverseCharacterListOutbound;
+import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersShowCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
@@ -17,12 +17,12 @@ import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
 import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.app.impl.canvas.ReverseCharactersCanvas;
 import ru.demetrious.deus.bot.app.impl.canvas.ReverseCharactersCanvas.CharacterDrawable;
-import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
-import ru.demetrious.deus.bot.domain.Pull;
-import ru.demetrious.deus.bot.domain.PullsData;
+import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Math.min;
@@ -31,10 +31,10 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static ru.demetrious.deus.bot.domain.Character.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SET;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_SHOW;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
+import static ru.demetrious.deus.bot.domain.reverse1999.CharacterData.MAX_PORTRAIT;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
 
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.G
 @Component
 public class Reverse1999CharactersShowCommandUseCase implements Reverse1999CharactersShowCommandInbound {
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
-    private final GetReverseCharacterListOutbound getReverseCharacterListOutbound;
+    private final GetReverseDataOutbound getReverseDataOutbound;
     private final FindPullsDataOutbound findPullsDataOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
@@ -65,7 +65,7 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999Chara
         }
 
         MessageData messageData = findPullsDataOutbound.findPullsData()
-            .map(pullsData -> getCharacterDrawableList(pullsData, getReverseCharacterListOutbound.getReverseCharacterList()))
+            .map(pullsData -> getCharacterDrawableList(pullsData, getReverseDataOutbound.getReverseData().getCharacters()))
             .filter(characterList -> !characterList.isEmpty())
             .map(ReverseCharactersCanvas::new)
             .map(ReverseCharactersCanvas::createFile)
@@ -82,7 +82,7 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999Chara
     // = Implementation
     // =================================================================================================================
 
-    private @NotNull List<CharacterDrawable> getCharacterDrawableList(@NotNull PullsData pullsData, @NotNull Map<Integer, Character> characterMap) {
+    private @NotNull List<CharacterDrawable> getCharacterDrawableList(@NotNull PullsData pullsData, @NotNull Map<Integer, CharacterData> characterMap) {
         Map<Integer, Integer> pulledCharacterMap = pullsData.getPullList().stream()
             .map(Pull::getSummonIdList)
             .flatMap(Collection::stream)

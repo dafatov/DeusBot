@@ -46,6 +46,8 @@ public class CommandData {
         PUBLICIST_SHOW("publicist", "show"),
         QUEUE("queue"),
         REMOVE("remove"),
+        REVERSE1999_CHARACTERS_CALCULATE("reverse1999", "characters", "calculate"),
+        REVERSE1999_MATERIALS_SET("reverse1999", "materials", "set"),
         REVERSE1999_CHARACTERS_EXPORT("reverse1999", "characters", "export"),
         REVERSE1999_CHARACTERS_IMPORT("reverse1999", "characters", "import"),
         REVERSE1999_CHARACTERS_SET("reverse1999", "characters", "set"),

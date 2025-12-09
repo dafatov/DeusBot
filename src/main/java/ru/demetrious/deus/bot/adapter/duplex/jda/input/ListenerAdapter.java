@@ -174,7 +174,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 commandName, "Сообщите администратору точное время возникновения проблемы для быстрой диагностики проблемы."))));
 
         adapter.notify(messageData, true);
-        log.error(format("Произошла ошибка с {0} команды \"{1}\"", errorText, commandName), e);
+        log.error("Произошла ошибка с {} команды \"{}\"", errorText, commandName, e);
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyPrivateChannel(Name commandName, A adapter) {
@@ -184,7 +184,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
             .setDescription("Из приватного канала бот не хочет выполнять команды. Увы!")));
 
         adapter.notify(messageData, true);
-        log.warn(format("Произошла попытка запуска команды \"{0}\" из приватного канала", commandName));
+        log.warn("Произошла попытка запуска команды \"{}\" из приватного канала", commandName);
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyInDev(Name commandName, A adapter) {
@@ -197,7 +197,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 .collect(joining(", "))))));
 
         adapter.notify(messageData, true);
-        log.warn(format("Произошла попытка запуска команды \"{0}\" во время тестирования", commandName));
+        log.warn("Произошла попытка запуска команды \"{}\" во время тестирования", commandName);
     }
 
     private void replyEmptyChoices(@NotNull CommandAutoCompleteInteractionEvent event) {
