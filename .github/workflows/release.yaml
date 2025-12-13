@@ -201,6 +201,14 @@ jobs:
       - install
       - wait-for-checks
 
+    if: >
+      always() &&
+      needs.install.result == 'success' &&
+      (
+        inputs.semver == 'debug' ||
+        needs.wait-for-checks.result == 'success'
+      )
+
     environment: 'production'
 
     env:
