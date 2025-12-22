@@ -107,10 +107,10 @@ public class ReversePullTypeCanvas implements Canvas {
                 );
                 graphics2D.setColor(WHITE);
 
-                graphics2D.setColor(character.map(Character::getRarityColor).orElse(RED));
-                xOffset = drawStringInline(character.map(Character::getName).orElse("<%s>".formatted(summonId)), xOffset, yOffset, params.maxNameWidth);
+                graphics2D.setColor(character.map(CharacterData::getRarityColor).orElse(RED));
+                xOffset = drawStringInline(character.map(CharacterData::getName).orElse("<%s>".formatted(summonId)), xOffset, yOffset, params.maxNameWidth);
                 xOffset = drawStringInline(pull.getTime().atZone(ZONE_ID).format(DATE_TIME_FORMATTER), xOffset, yOffset, params.maxInstantWidth);
-                xOffset = switch (character.map(Character::getRarity).orElse(null)) {
+                xOffset = switch (character.map(CharacterData::getRarity).orElse(null)) {
                     case 5 -> drawCounterInline(valueOf(counter.remove(CounterType.STAR_5)), xOffset, yOffset);
                     case 6 -> drawCounterInline(valueOf(counter.remove(CounterType.STAR_6)), xOffset, yOffset);
                     case null, default -> drawCounterInline(EMPTY, xOffset, yOffset);

@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import ru.demetrious.deus.bot.domain.Image;
-import ru.demetrious.deus.bot.domain.Image;
 import ru.demetrious.deus.bot.domain.MessageFile;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
 
