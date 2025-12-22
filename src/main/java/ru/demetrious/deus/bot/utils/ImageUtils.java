@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.utils;
 
 import com.luciad.imageio.webp.WebPWriteParam;
 import java.awt.image.RenderedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -10,10 +11,12 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import lombok.experimental.UtilityClass;
+import ru.demetrious.deus.bot.domain.Image;
 
 import static javax.imageio.ImageIO.createImageOutputStream;
 import static javax.imageio.ImageIO.getImageWritersByMIMEType;
 import static javax.imageio.ImageIO.getWriterFormatNames;
+import static javax.imageio.ImageIO.read;
 import static javax.imageio.ImageIO.scanForPlugins;
 import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
 
@@ -42,6 +45,12 @@ public class ImageUtils {
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to create WebP image", e);
+        }
+    }
+
+    public static Image loadImage(byte[] image) throws IOException {
+        try (ByteArrayInputStream input = new ByteArrayInputStream(image)) {
+            return new Image(read(input));
         }
     }
 
