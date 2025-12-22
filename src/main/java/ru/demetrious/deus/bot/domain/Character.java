@@ -1,7 +1,6 @@
 package ru.demetrious.deus.bot.domain;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.util.Map;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -23,8 +22,8 @@ public class Character {
 
     private Integer id;
     private String name;
-    private BufferedImage nameImage;
-    private BufferedImage avatar;
+    private Image nameImage;
+    private Image avatar;
     private Integer rarity;
 
     public @NotNull Color getRarityColor() {

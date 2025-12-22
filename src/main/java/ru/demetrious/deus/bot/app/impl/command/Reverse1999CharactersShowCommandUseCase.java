@@ -26,7 +26,6 @@ import ru.demetrious.deus.bot.domain.PullsData;
 import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
 import static java.lang.Math.min;
-import static java.lang.Math.toIntExact;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
@@ -87,12 +86,13 @@ public class Reverse1999CharactersShowCommandUseCase implements Reverse1999Chara
         Map<Integer, Integer> pulledCharacterMap = pullsData.getPullList().stream()
             .map(Pull::getSummonIdList)
             .flatMap(Collection::stream)
-            .collect(groupingBy(identity(), collectingAndThen(counting(), value -> min(toIntExact(value), MAX_PORTRAIT))));
+            .collect(groupingBy(identity(), collectingAndThen(counting(), Math::toIntExact)));
 
         pullsData.getCharacterCorrelationMap().forEach((key, count) -> pulledCharacterMap.merge(key, count, Integer::sum));
         return pulledCharacterMap
             .entrySet().stream()
-            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), entry.getValue()))
+            .filter(entry -> characterMap.containsKey(entry.getKey()))
+            .map(entry -> new CharacterDrawable(characterMap.get(entry.getKey()), min(entry.getValue(), MAX_PORTRAIT)))
             .collect(toList());
     }
 }

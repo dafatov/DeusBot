@@ -1,6 +1,5 @@
 package ru.demetrious.deus.bot.adapter.output.reverse1999;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +22,11 @@ import static java.net.URI.create;
 import static java.net.URLDecoder.decode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.regex.Pattern.compile;
-import static javax.imageio.ImageIO.read;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.jsoup.Jsoup.parse;
 import static ru.demetrious.deus.bot.utils.DefaultUtils.defaultIfException;
+import static ru.demetrious.deus.bot.utils.ImageUtils.loadImage;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -67,16 +66,16 @@ public class Reverse1999WikiAdapter implements GetReverseCharacterListOutbound {
                     character.setId(id)
                         .setName(defaultIfException(() -> documentCharacter.selectXpath(CHARACTER_NAME_XPATH).text()))
                         .setNameImage(defaultIfException(() -> {
-                            URI nameUri = create(documentCharacter.selectXpath(CHARACTER_NAME_IMG_XPATH).attr("src"));
+                            URI uri = create(documentCharacter.selectXpath(CHARACTER_NAME_IMG_XPATH).attr("src"));
 
-                            return read(new ByteArrayInputStream(reverse1999WikiClient.getImage(nameUri)));
+                            return loadImage(reverse1999WikiClient.getImage(uri));
                         }))
                         .setAvatar(defaultIfException(() -> {
                             String imageHtmlUrl = decode(documentCharacter.selectXpath(CHARACTER_POSTER_HTML_URL_XPATH).attr("data-tabberimglink"), UTF_8);
                             Document imageDocument = parse(reverse1999WikiClient.getCharacterHtml("/wiki/%s".formatted(imageHtmlUrl)));
-                            URI imageUri = create(imageDocument.selectXpath(CHARACTER_POSTER_URL_XPATH).attr("href"));
+                            URI uri = create(imageDocument.selectXpath(CHARACTER_POSTER_URL_XPATH).attr("href"));
 
-                            return read(new ByteArrayInputStream(reverse1999WikiClient.getImage(imageUri)));
+                            return loadImage(reverse1999WikiClient.getImage(uri));
                         }))
                         .setRarity(defaultIfException(() -> documentCharacter.selectXpath(CHARACTER_STARS_XPATH).size()));
                 } finally {

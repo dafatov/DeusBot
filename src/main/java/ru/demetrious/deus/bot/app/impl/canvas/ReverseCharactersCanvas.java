@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import ru.demetrious.deus.bot.domain.Character;
+import ru.demetrious.deus.bot.domain.Image;
 import ru.demetrious.deus.bot.domain.MessageFile;
 
 import static java.awt.Color.BLACK;
@@ -19,7 +20,6 @@ import static java.lang.Double.MAX_VALUE;
 import static java.lang.Integer.compare;
 import static java.lang.Math.abs;
 import static java.lang.Math.divideExact;
-import static java.lang.Math.min;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
@@ -40,6 +40,7 @@ public class ReverseCharactersCanvas implements Canvas {
     public ReverseCharactersCanvas(List<CharacterDrawable> characterList) {
         int minHeight = characterList.stream()
             .map(Character::getAvatar)
+            .map(Image::toBufferedImage)
             .map(BufferedImage::getHeight)
             .min(Integer::compareTo)
             .orElseThrow();
@@ -59,8 +60,8 @@ public class ReverseCharactersCanvas implements Canvas {
         int yOffset = Y_GAP;
         for (List<CharacterDrawable> characterList : summonPowerList) {
             for (CharacterDrawable character : characterList) {
-                BufferedImage avatar = character.getAvatar();
-                BufferedImage nameImage = character.getNameImage();
+                BufferedImage avatar = character.getAvatar().toBufferedImage();
+                BufferedImage nameImage = character.getNameImage().toBufferedImage();
                 BufferedImage portraitImage = character.getPortraitImage();
                 int avatarWidth = calcWidth(avatar, params.minHeight);
                 int nameImageHeight = calcHeight(nameImage, params.minWidth);
@@ -105,7 +106,7 @@ public class ReverseCharactersCanvas implements Canvas {
     private Params getParams(List<CharacterDrawable> characterList, int minHeight) {
         int minWidth = characterList.stream()
             .map(Character::getAvatar)
-            .map(image -> calcWidth(image, minHeight))
+            .map(image -> calcWidth(image.toBufferedImage(), minHeight))
             .min(Integer::compareTo)
             .orElseThrow();
         int height = summonPowerList.size() * (minHeight + Y_GAP) + Y_GAP;
@@ -116,7 +117,7 @@ public class ReverseCharactersCanvas implements Canvas {
         int width = summonPowerList.stream()
             .map(list -> list.stream()
                 .map(Character::getAvatar)
-                .mapToInt(image -> calcWidth(image, minHeight))
+                .mapToInt(image -> calcWidth(image.toBufferedImage(), minHeight))
                 .sum())
             .max(naturalOrder())
             .map(maxWidth -> maxWidth + X_GAP * (1 + maxRows))
@@ -134,7 +135,7 @@ public class ReverseCharactersCanvas implements Canvas {
         double minDiff = MAX_VALUE;
         double targetRatio = 9. / 16.;
 
-        characterList.sort((a, b) -> compare(calcWidth(b.getAvatar(), minHeight), calcWidth(a.getAvatar(), minHeight)));
+        characterList.sort((a, b) -> compare(calcWidth(b.getAvatar().toBufferedImage(), minHeight), calcWidth(a.getAvatar().toBufferedImage(), minHeight)));
 
         for (int rows = 1; rows <= characterList.size(); rows++) {
             List<List<CharacterDrawable>> rowsList = new ArrayList<>();
@@ -148,7 +149,7 @@ public class ReverseCharactersCanvas implements Canvas {
                 int shortestRow = findShortestRow(rowsWidth);
 
                 rowsList.get(shortestRow).add(character);
-                rowsWidth[shortestRow] += character.getAvatar().getWidth();
+                rowsWidth[shortestRow] += character.getAvatar().toBufferedImage().getWidth();
             });
 
             int maxRowWidth = stream(rowsWidth).max().orElseThrow();
