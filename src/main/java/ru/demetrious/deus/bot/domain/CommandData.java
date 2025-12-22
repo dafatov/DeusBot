@@ -2,7 +2,6 @@ package ru.demetrious.deus.bot.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -12,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
+import static org.apache.commons.lang3.StringUtils.SPACE;
 
 @Data
 @Accessors(chain = true)
@@ -77,9 +78,9 @@ public class CommandData {
         }
 
         public String stringify() {
-            return Stream.of(commandName, groupName, subcommandName)
+            return of(commandName, groupName, subcommandName)
                 .filter(StringUtils::isNotBlank)
-                .collect(joining(" "));
+                .collect(joining(SPACE));
         }
     }
 }

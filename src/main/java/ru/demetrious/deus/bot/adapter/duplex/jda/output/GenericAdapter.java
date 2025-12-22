@@ -87,22 +87,22 @@ public abstract class GenericAdapter<A extends Interaction, E extends IReplyCall
             if (getEvent().isAcknowledged() && isDeferred()) {
                 getEvent().getHook()
                     .editOriginal(messageDataMapper.mapToMessageEdit(messageData))
-                    .queue();
+                    .complete();
             } else if (getEvent().isAcknowledged() && !isDeferred()) {
                 getEvent().getHook()
                     .sendMessage(content)
                     .setEphemeral(isEphemeral)
-                    .queue();
+                    .complete();
             } else {
                 getEvent().reply(content)
                     .setEphemeral(isEphemeral)
-                    .queue();
+                    .complete();
             }
         } catch (Exception e) {
             log.warn("Cannot reply interaction", e);
             ((MessageChannelUnion) requireNonNull(getEvent().getChannel()))
                 .sendMessage(content)
-                .queue();
+                .complete();
         }
     }
 
