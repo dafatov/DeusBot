@@ -3,9 +3,11 @@ package ru.demetrious.deus.bot.app.impl.command;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +34,8 @@ import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
+import static org.apache.commons.collections4.ListUtils.partition;
+import static ru.demetrious.deus.bot.app.api.message.NotifyOutbound.MAX_ATTACHMENTS;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_IMPORT;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_PULLS_SHOW;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
@@ -47,6 +51,7 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
     private final AuthorizationComponent authorizationComponent;
     private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
     private final PoolNameComponent poolNameComponent;
+    private final DropCharacterDataComponent dropCharacterDataComponent;
 
     @Override
     public CommandData getData() {
@@ -65,7 +70,10 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
             return;
         }
 
-        Map<Integer, Character> characterMap = getReverseCharacterListOutbound.getReverseCharacterList();
+        Map<Integer, Character> characterMap = new HashMap<>() {{
+            putAll(getReverseCharacterListOutbound.getReverseCharacterList());
+            putAll(dropCharacterDataComponent.getDrops());
+        }};
         List<MessageFile> messageFileList = findPullsDataOutbound.findPullsData()
             .map(PullsData::getPullList).stream()
             .flatMap(Collection::stream)
@@ -74,16 +82,16 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
             .map(entry -> new ReversePullTypeCanvas(entry.getValue(), characterMap, entry.getKey(), poolNameComponent::getName))
             .map(ReversePullTypeCanvas::createFile)
             .toList();
-        MessageData messageData;
 
         if (messageFileList.isEmpty()) {
-            messageData = new MessageData().setEmbeds(List.of(new MessageEmbed()
+            notifyOutbound.notify(new MessageData().setEmbeds(List.of(new MessageEmbed()
                 .setTitle("Списка круток нет")
-                .setDescription("Используй команду `/%s` чтобы импортировать из игры".formatted(REVERSE1999_PULLS_IMPORT.stringify()))));
+                .setDescription("Используй команду `/%s` чтобы импортировать из игры".formatted(REVERSE1999_PULLS_IMPORT.stringify())))));
         } else {
-            messageData = new MessageData().setFiles(messageFileList);
+            partition(messageFileList, MAX_ATTACHMENTS).stream()
+                .map(new MessageData()::setFiles)
+                .forEach(notifyOutbound::notify);
         }
-        notifyOutbound.notify(messageData);
     }
 
     @Configuration
@@ -108,6 +116,17 @@ public class Reverse1999PullsShowCommandUseCase implements Reverse1999PullsShowC
                     .map(String::valueOf);
                 case null, default -> empty();
             };
+        }
+    }
+
+    @Configuration
+    public static class DropCharacterDataComponent {
+        @Getter
+        private final Map<Integer, Character> drops;
+
+        public DropCharacterDataComponent(@Value("${REVERSE1999_DROPS:{}}") String dropsJson) throws JsonProcessingException {
+            this.drops = getMapper().readValue(dropsJson, new TypeReference<>() {
+            });
         }
     }
 }
