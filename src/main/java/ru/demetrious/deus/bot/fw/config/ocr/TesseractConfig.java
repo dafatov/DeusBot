@@ -1,6 +1,5 @@
 package ru.demetrious.deus.bot.fw.config.ocr;
 
-import java.io.File;
 import net.sourceforge.tess4j.Tesseract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +12,8 @@ public class TesseractConfig {
     @Bean
     public Tesseract tesseract() {
         Tesseract tesseract = new Tesseract();
-        File file = extractTessResources("tesseract");
 
-        tesseract.setDatapath(file.getAbsolutePath());
+        tesseract.setDatapath(extractTessResources("tesseract").getAbsolutePath());
         tesseract.setLanguage("eng");
         tesseract.setPageSegMode(PSM_SINGLE_CHAR);
         tesseract.setVariable("tessedit_char_whitelist", "0123456789");

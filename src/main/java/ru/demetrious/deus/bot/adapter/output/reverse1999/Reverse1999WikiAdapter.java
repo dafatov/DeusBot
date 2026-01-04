@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.output.reverse1999.parser.CharacterParser;
+import ru.demetrious.deus.bot.adapter.output.reverse1999.parser.ItemParser;
 import ru.demetrious.deus.bot.adapter.output.reverse1999.parser.LevelParser;
 import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
@@ -24,19 +25,24 @@ import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
 @RequiredArgsConstructor
 @Component
 public class Reverse1999WikiAdapter implements GetReverseDataOutbound {
-    public static final Pattern ID_PATTERN = compile("ID\\D*(\\d+)");
+    public static final Pattern ID_PATTERN = compile("ID\\D*([\\d#]+)");
 
     private final CharacterParser characterParser;
     private final LevelParser levelParser;
+    private final ItemParser itemParser;
 
     @InitWarmUp
     @Cacheable(value = "reverse1999-data", sync = true)
     @Override
     public ReverseData getReverseData() {
         ConcurrentMap<Integer, ItemData> itemDataMap = new ConcurrentHashMap<>();
+
+        itemParser.initItemOrders();
+
         Map<Integer, CharacterData> characterMap = characterParser.parseCharacters(itemDataMap);
         Map<Integer, LevelData> levelMap = levelParser.parseLevels(itemDataMap);
 
+        itemParser.parseOtherItems(itemDataMap);
         return new ReverseData()
             .setCharacters(unmodifiableMap(characterMap))
             .setLevels(unmodifiableMap(levelMap))

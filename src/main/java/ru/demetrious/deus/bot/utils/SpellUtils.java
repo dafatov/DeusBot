@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.utils;
 
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.experimental.UtilityClass;
@@ -13,6 +14,8 @@ import static java.util.Objects.isNull;
 
 @UtilityClass
 public class SpellUtils {
+    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,##0.#");
+
     public static String spell(long number, String[] wordForms) {
         int[] options = new int[]{2, 0, 1, 1, 1};
         int n100 = floorMod(number, 100);
@@ -55,5 +58,15 @@ public class SpellUtils {
 
         reverse(result);
         return join(" ", result);
+    }
+
+    public static String formatWithHint(double value) {
+        String formatted = DECIMAL_FORMAT.format(value);
+
+        if (formatted.equals("0") && value > 0) {
+            return ">0";
+        }
+
+        return formatted;
     }
 }

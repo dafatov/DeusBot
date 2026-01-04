@@ -2,11 +2,9 @@ package ru.demetrious.deus.bot.app.impl.canvas;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,28 +18,28 @@ import ru.demetrious.deus.bot.domain.Image;
 import ru.demetrious.deus.bot.domain.MessageFile;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterStats;
-import ru.demetrious.deus.bot.domain.reverse1999.ItemData;
+import ru.demetrious.deus.bot.domain.reverse1999.Item;
 import ru.demetrious.deus.bot.domain.reverse1999.ReverseData;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.Font.PLAIN;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.Math.ceilDiv;
 import static java.lang.Math.divideExact;
 import static java.lang.Math.max;
-import static java.lang.Math.multiplyFull;
-import static java.util.Optional.ofNullable;
+import static java.util.Comparator.comparingDouble;
 import static lombok.AccessLevel.PRIVATE;
+import static ru.demetrious.deus.bot.utils.CanvasUtils.drawCenteredText;
+import static ru.demetrious.deus.bot.utils.CanvasUtils.drawMaterialIcon;
 import static ru.demetrious.deus.bot.utils.ImageUtils.calcWidth;
 import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
 import static ru.demetrious.deus.bot.utils.ImageUtils.loadImage;
+import static ru.demetrious.deus.bot.utils.SpellUtils.DECIMAL_FORMAT;
 import static ru.demetrious.deus.bot.utils.reverse.FarmingPlanUtils.calculateFarmingPlan;
 
 @Slf4j
-public class ReverseMaterialsCanvas implements Canvas {
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,##0.#");
+public class ReverseCharacterConsumesCanvas implements Canvas {
     private static final Font FONT = new Font("SansSerif", PLAIN, 26);
     private static final Font MINI_FONT = new Font("SansSerif", PLAIN, 13);
     private static final int X_GAP = 10;
@@ -51,7 +49,7 @@ public class ReverseMaterialsCanvas implements Canvas {
     @NotNull
     private final CharacterData character;
     @NotNull
-    private final List<Item> materialList;
+    private final ReverseMaterialsDrawer materialDrawer;
     @NotNull
     private final List<Row> rows;
     @NotNull
@@ -62,10 +60,10 @@ public class ReverseMaterialsCanvas implements Canvas {
     private final BufferedImage canvas;
     private final Graphics2D graphics2D;
 
-    public ReverseMaterialsCanvas(@NotNull CharacterData character,
-                                  @NotNull Pair<CharacterStats, CharacterStats> statsPair,
-                                  @NotNull Map<Integer, Integer> materialMap,
-                                  @NotNull ReverseData reverseData) {
+    public ReverseCharacterConsumesCanvas(@NotNull CharacterData character,
+                                          @NotNull Pair<CharacterStats, CharacterStats> statsPair,
+                                          @NotNull Map<Integer, Integer> materialMap,
+                                          @NotNull ReverseData reverseData) {
         int minAvatarHeight = reverseData.getCharacters().values().stream()
             .map(CharacterData::getAvatar)
             .map(Image::toBufferedImage)
@@ -84,17 +82,12 @@ public class ReverseMaterialsCanvas implements Canvas {
         this.currentStats = statsPair.getLeft();
         this.targetStats = statsPair.getRight();
         this.character = character;
-        this.materialList = materialMap.entrySet().stream()
-            .map(entry -> new Item(ofNullable(reverseData.getItems().get(entry.getKey()))
-                .map(ItemData::getImage)
-                .map(Image::toBufferedImage)
-                .orElseGet(() -> createWhiteSquare(entry.getKey())), entry.getValue()))
-            .sorted(Comparator.<Item>comparingDouble(a -> a.amount).reversed())
-            .toList();
         this.rows = createRows(canvasWidth, cards);
         this.params = getParams(minAvatarHeight, iconHeight, miniIconHeight, canvasWidth, maxMaterialWidth, rows.size());
         this.canvas = new BufferedImage(params.width, params.height, TYPE_INT_ARGB);
         this.graphics2D = canvas.createGraphics();
+        this.materialDrawer = new ReverseMaterialsDrawer(graphics2D, reverseData.getItems(), materialMap, MAX_ROWS - 2,
+            maxMaterialWidth, iconHeight, comparingDouble(Item::amount).reversed());
     }
 
     @Override
@@ -116,9 +109,6 @@ public class ReverseMaterialsCanvas implements Canvas {
     public record Level(String name, int cost, int count, List<Item> items) {
     }
 
-    public record Item(BufferedImage image, double amount) {
-    }
-
     // =================================================================================================================
     // = Implementation
     // =================================================================================================================
@@ -133,7 +123,7 @@ public class ReverseMaterialsCanvas implements Canvas {
         int xStart = drawCharacter();
         int yStart = drawStats(xStart);
 
-        drawMaterials(xStart, yStart);
+        materialDrawer.draw(xStart, yStart);
     }
 
     private int drawCharacter() {
@@ -197,29 +187,6 @@ public class ReverseMaterialsCanvas implements Canvas {
         return resonanceY + params.iconHeight;
     }
 
-    private void drawMaterials(int xStart, int yStart) {
-        int materialsStartX = X_GAP + xStart;
-        int materialsStartY = Y_GAP + yStart;
-        int columnWidth = params.maxMaterialWidth + X_GAP;
-
-        for (int column = 0; column * (MAX_ROWS - 2) < materialList.size(); column++) {
-            int xPos = materialsStartX + column * columnWidth;
-            List<Item> columnMaterials = materialList.stream()
-                .skip(multiplyFull(column, (MAX_ROWS - 2)))
-                .limit(MAX_ROWS - 2)
-                .toList();
-
-            int yPos = materialsStartY;
-            for (Item material : columnMaterials) {
-                int materialWidth = calcWidth(material.image, params.iconHeight);
-
-                drawMaterialIcon(material, xPos, yPos, materialWidth, params.iconHeight, graphics2D);
-
-                yPos += params.iconHeight + Y_GAP;
-            }
-        }
-    }
-
     private void drawDivider() {
         GradientPaint leftGradient = new GradientPaint(
             0, params.minAvatarHeight + 2 * Y_GAP,
@@ -267,7 +234,7 @@ public class ReverseMaterialsCanvas implements Canvas {
                 String count = getCardCount(card.level);
                 int materialsY = yPos + graphics2D.getFontMetrics(FONT).getHeight() - graphics2D.getFontMetrics(FONT).getDescent();
                 int totalIconsWidth = card.level.items.stream()
-                    .map(f -> f.image)
+                    .map(Item::image)
                     .mapToInt(f -> calcWidth(f, params.miniIconHeight))
                     .sum();
 
@@ -291,9 +258,9 @@ public class ReverseMaterialsCanvas implements Canvas {
 
                 int xMaterialPos = xPos + divideExact(card.renderWidth - totalIconsWidth, 2);
                 for (Item material : card.level.items) {
-                    drawMaterialIcon(material, xMaterialPos, materialsY, calcWidth(material.image, params.miniIconHeight), params.miniIconHeight, graphics2D);
+                    drawMaterialIcon(material, xMaterialPos, materialsY, calcWidth(material.image(), params.miniIconHeight), params.miniIconHeight, graphics2D);
 
-                    xMaterialPos += calcWidth(material.image, params.miniIconHeight);
+                    xMaterialPos += calcWidth(material.image(), params.miniIconHeight);
                 }
 
                 xPos += card.renderWidth + X_GAP;
@@ -319,8 +286,7 @@ public class ReverseMaterialsCanvas implements Canvas {
             }
 
             if (!placed) {
-                Row row = new Row().addCard(card);
-                rows.add(row);
+                rows.add(new Row().addCard(card));
             }
         }
         return rows;
@@ -360,7 +326,7 @@ public class ReverseMaterialsCanvas implements Canvas {
                 int countWidth = g2d.getFontMetrics(MINI_FONT).stringWidth(count);
                 int headerWidth = nameWidth + 2 * max(costWidth, countWidth) + 4 * X_GAP;
                 int iconsWidth = level.items.stream()
-                    .map(f -> f.image)
+                    .map(Item::image)
                     .mapToInt(f -> calcWidth(f, miniIconHeight))
                     .sum() + 2 * X_GAP;
                 int minWidth = max(iconsWidth, headerWidth);
@@ -384,68 +350,6 @@ public class ReverseMaterialsCanvas implements Canvas {
         } finally {
             g2d.dispose();
         }
-    }
-
-    private static void drawCenteredText(String text, int centerX, int centerY, int maxWidth, Graphics2D g2d) {
-        Font originalFont = g2d.getFont();
-        Font currentFont = originalFont;
-        FontMetrics fontMetrics = g2d.getFontMetrics(currentFont);
-        int textWidth = fontMetrics.stringWidth(text);
-
-        if (textWidth > maxWidth) {
-            int currentSize = currentFont.getSize();
-            int minFontSize = 10;
-
-            while (textWidth > maxWidth && currentSize > minFontSize) {
-                currentFont = new Font(currentFont.getName(), currentFont.getStyle(), --currentSize);
-                fontMetrics = g2d.getFontMetrics(currentFont);
-                textWidth = fontMetrics.stringWidth(text);
-            }
-
-            if (textWidth > maxWidth && currentSize == minFontSize) {
-                text = "...";
-                textWidth = fontMetrics.stringWidth(text);
-            }
-        }
-
-        g2d.setFont(currentFont);
-        g2d.drawString(text, centerX - divideExact(textWidth, 2), centerY - g2d.getFontMetrics(currentFont).getDescent());
-        g2d.setFont(originalFont);
-    }
-
-    private static BufferedImage createWhiteSquare(Integer id) {
-        int size = 256;
-        BufferedImage image = new BufferedImage(size, size, TYPE_INT_RGB);
-        Graphics2D g2d = image.createGraphics();
-
-        try {
-            g2d.setFont(new Font(FONT.getName(), FONT.getStyle(), 100));
-            g2d.setColor(new Color(1, 1, 1, 0.3f));
-            g2d.fillRect(0, 0, size, size);
-            drawCenteredText(String.valueOf(id), divideExact(size, 2), divideExact(size, 2), size, g2d);
-        } finally {
-            g2d.dispose();
-        }
-        return image;
-    }
-
-    private static void drawMaterialIcon(Item material, int xPos, int yPos, int materialWidth, int iconHeight, Graphics2D g2d) {
-        g2d.drawImage(material.image, xPos, yPos, materialWidth, iconHeight, null);
-        g2d.setColor(new Color(0, 0, 0, 0.5f));
-        g2d.fillRect(xPos, yPos, materialWidth, iconHeight);
-        g2d.setColor(WHITE);
-        drawCenteredText(formatWithHint(material.amount), xPos + divideExact(materialWidth, 2),
-            yPos + iconHeight, materialWidth, g2d);
-    }
-
-    private static String formatWithHint(double value) {
-        String formatted = DECIMAL_FORMAT.format(value);
-
-        if (formatted.equals("0") && value > 0) {
-            return ">0";
-        }
-
-        return formatted;
     }
 
     private static String getInsightImagePath(Integer insight) {

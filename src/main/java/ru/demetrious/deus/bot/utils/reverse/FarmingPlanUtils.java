@@ -6,13 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ru.demetrious.deus.bot.domain.Image;
+import ru.demetrious.deus.bot.domain.reverse1999.Item;
 import ru.demetrious.deus.bot.domain.reverse1999.ItemData;
 import ru.demetrious.deus.bot.domain.reverse1999.LevelData;
 import ru.demetrious.deus.bot.domain.reverse1999.ReverseData;
 
+import static java.lang.Integer.MAX_VALUE;
 import static java.util.Optional.ofNullable;
-import static ru.demetrious.deus.bot.app.impl.canvas.ReverseMaterialsCanvas.Item;
-import static ru.demetrious.deus.bot.app.impl.canvas.ReverseMaterialsCanvas.Level;
+import static ru.demetrious.deus.bot.app.impl.canvas.ReverseCharacterConsumesCanvas.Level;
 
 public class FarmingPlanUtils {
     public static List<Level> calculateFarmingPlan(Map<Integer, Integer> targetMaterials, ReverseData reverseData) {
@@ -114,7 +115,9 @@ public class FarmingPlanUtils {
                 if (expectation != null && expectation > 0) {
                     BufferedImage image = reverseData.getItems().get(dropItemId) != null ?
                         reverseData.getItems().get(dropItemId).getImage().toBufferedImage() : null;
-                    items.add(new Item(image, expectation * runs));
+                    int order = reverseData.getItems().get(dropItemId) != null ?
+                        reverseData.getItems().get(dropItemId).getOrder() : MAX_VALUE;
+                    items.add(new Item(dropItemId, order, image, expectation * runs));
                 }
             }
 
@@ -132,10 +135,15 @@ public class FarmingPlanUtils {
 
     private static List<Item> convertToItems(Map<Integer, Integer> itemsMap, ReverseData reverseData) {
         return itemsMap.entrySet().stream()
-            .map(entry -> new Item(ofNullable(reverseData.getItems().getOrDefault(entry.getKey(), null))
-                .map(ItemData::getImage)
-                .map(Image::toBufferedImage)
-                .orElse(null), entry.getValue()))
+            .map(entry -> new Item(entry.getKey(),
+                ofNullable(reverseData.getItems().getOrDefault(entry.getKey(), null))
+                    .map(ItemData::getOrder)
+                    .orElse(MAX_VALUE),
+                ofNullable(reverseData.getItems().getOrDefault(entry.getKey(), null))
+                    .map(ItemData::getImage)
+                    .map(Image::toBufferedImage)
+                    .orElse(null),
+                entry.getValue()))
             .toList();
     }
 
@@ -263,7 +271,7 @@ public class FarmingPlanUtils {
 
     // Расчет оптимального количества прогонов для уровня
     private static int calculateOptimalRuns(LevelData level, Map<Integer, Double> remainingNeeds) {
-        int minRuns = Integer.MAX_VALUE;
+        int minRuns = MAX_VALUE;
 
         for (Map.Entry<Integer, LevelData.Drop> dropEntry : level.getDropMap().entrySet()) {
             int itemId = dropEntry.getKey();

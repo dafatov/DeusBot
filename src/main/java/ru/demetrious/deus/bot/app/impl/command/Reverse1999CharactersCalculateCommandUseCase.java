@@ -22,7 +22,7 @@ import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersCalculateComm
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.option.GetFocusedOptionOutbound;
-import ru.demetrious.deus.bot.app.impl.canvas.ReverseMaterialsCanvas;
+import ru.demetrious.deus.bot.app.impl.canvas.ReverseCharacterConsumesCanvas;
 import ru.demetrious.deus.bot.domain.AutocompleteOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
@@ -179,7 +179,7 @@ public class Reverse1999CharactersCalculateCommandUseCase implements Reverse1999
             .map(Map::entrySet)
             .flatMap(Collection::stream)
             .collect(toMap(Entry::getKey, Entry::getValue, Integer::sum));
-        MessageFile messageFile = new ReverseMaterialsCanvas(
+        MessageFile messageFile = new ReverseCharacterConsumesCanvas(
             character,
             Pair.of(current, target),
             resultConsumes,

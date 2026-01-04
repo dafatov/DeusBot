@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.utils;
 
 import com.luciad.imageio.webp.WebPWriteParam;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,8 +13,11 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import lombok.experimental.UtilityClass;
+import org.opencv.core.Mat;
 import ru.demetrious.deus.bot.domain.Image;
 
+import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static javax.imageio.ImageIO.createImageOutputStream;
 import static javax.imageio.ImageIO.getImageWritersByMIMEType;
@@ -21,6 +25,7 @@ import static javax.imageio.ImageIO.getWriterFormatNames;
 import static javax.imageio.ImageIO.read;
 import static javax.imageio.ImageIO.scanForPlugins;
 import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
+import static org.opencv.core.CvType.CV_8UC3;
 
 @UtilityClass
 public class ImageUtils {
@@ -70,6 +75,24 @@ public class ImageUtils {
 
     public static int calcHeight(BufferedImage bufferedImage, int width) {
         return width * bufferedImage.getHeight() / bufferedImage.getWidth();
+    }
+
+    public static Mat toMat(BufferedImage source) {
+        if (isNull(source)) {
+            throw new NullPointerException();
+        }
+
+        Mat mat = new Mat(source.getHeight(), source.getWidth(), CV_8UC3);
+
+        if (source.getType() != TYPE_3BYTE_BGR) {
+            BufferedImage tmp = new BufferedImage(source.getWidth(), source.getHeight(), TYPE_3BYTE_BGR);
+
+            tmp.getGraphics().drawImage(source, 0, 0, null);
+            source = tmp;
+        }
+
+        mat.put(0, 0, ((DataBufferByte) source.getRaster().getDataBuffer()).getData());
+        return mat;
     }
 
     // =================================================================================================================

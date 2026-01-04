@@ -121,21 +121,26 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                                                                 @NotNull A adapter) {
         adapter.setEvent(event);
 
-        if (authorizationComponent.authorize(DISCORD_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
-            unauthorizedConsumer.accept(authorizationComponent.getData(adapter.getUserId(), DISCORD_REGISTRATION_ID));
-            return;
-        }
-
-        Name commandName = adapter.getCommandName();
         try {
-            CommandInbound command = commandInboundList.stream()
-                .filter(c -> c.getData().getName() == commandName)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
+            if (authorizationComponent.authorize(DISCORD_REGISTRATION_ID, adapter.getUserId()).isEmpty()) {
+                unauthorizedConsumer.accept(authorizationComponent.getData(adapter.getUserId(), DISCORD_REGISTRATION_ID));
+                return;
+            }
 
-            executeConsumer.accept(command);
+            Name commandName = adapter.getCommandName();
+
+            try {
+                CommandInbound command = commandInboundList.stream()
+                    .filter(c -> c.getData().getName() == commandName)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("CommandInbound with commandName=%s not found".formatted(commandName)));
+
+                executeConsumer.accept(command);
+            } catch (Exception e) {
+                errorConsumer.accept(commandName, e);
+            }
         } catch (Exception e) {
-            errorConsumer.accept(commandName, e);
+            errorConsumer.accept(null, e);
         } finally {
             adapter.removeEvent();
         }

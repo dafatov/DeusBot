@@ -81,6 +81,7 @@
     <opencsv.version>5.12.0</opencsv.version>
     <opencv.version>4.9.0-0</opencv.version>
     <tess4j.version>5.16.0</tess4j.version>
+    <guava.version>33.5.0-jre</guava.version>
 
     <!-- Plugins -->
     <git-commit-id.version>9.0.0</git-commit-id.version>
@@ -271,6 +272,11 @@
       <groupId>net.sourceforge.tess4j</groupId>
       <artifactId>tess4j</artifactId>
       <version>${tess4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
 
     <!-- Test -->

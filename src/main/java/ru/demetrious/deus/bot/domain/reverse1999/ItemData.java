@@ -10,6 +10,7 @@ import ru.demetrious.deus.bot.domain.Image;
 @Data
 @Accessors(chain = true)
 public class ItemData implements Serializable {
+    private int order;
     @JsonIgnore
     private Image image;
     private Map<Integer, Integer> craft = Map.of();
