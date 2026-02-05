@@ -8,12 +8,15 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper;
 import ru.demetrious.deus.bot.app.api.button.GetCustomIdOutbound;
 import ru.demetrious.deus.bot.app.api.embed.GetEmbedOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.ButtonInteractionInbound;
+import ru.demetrious.deus.bot.app.api.modal.ShowModalOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
+import ru.demetrious.deus.bot.domain.ModalData;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
@@ -24,7 +27,9 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, ButtonInteractionEvent, ButtonInteraction> implements
-    GetEmbedOutbound, GetCustomIdOutbound {
+    GetEmbedOutbound, GetCustomIdOutbound, ShowModalOutbound<ButtonInteractionInbound> {
+    private final ModalDataMapper modalDataMapper;
+
     @Override
     public MessageEmbed getEmbed(int index) {
         return messageDataMapper.mapEmbed(getEvent().getMessage().getEmbeds().get(index));
@@ -56,7 +61,12 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
             .map(Message.Interaction::getName)
             .map(cN -> cN.split(" "))
             .map(GenericAdapter::getName)
-            .orElseThrow();
+            .orElseThrow(() -> new IllegalStateException("No command found"));
+    }
+
+    @Override
+    public void showModal(ModalData modal) {
+        getEvent().replyModal(modalDataMapper.mapModal(modal)).queue();
     }
 
     @Override

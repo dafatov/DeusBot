@@ -13,4 +13,5 @@ import lombok.experimental.Accessors;
 public class PullsData {
     private List<Pull> pullList = new ArrayList<>();
     private Map<Integer, Integer> characterCorrelationMap = new HashMap<>();
+    private Map<Integer, Integer> materialMap = new HashMap<>();
 }

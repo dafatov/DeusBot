@@ -305,7 +305,7 @@ public class ReverseCharacterConsumesCanvas implements Canvas {
         int avatarWidth = calcWidth(character.getAvatar().toBufferedImage(), minAvatarHeight);
         int infoWidth = avatarWidth + max(materialsWidth, statsWidth) + 3 * X_GAP;
         int maxCardWidth = cards.stream()
-            .mapToInt(card -> card.renderWidth)
+            .mapToInt(card -> card.width)
             .max()
             .orElseThrow();
 

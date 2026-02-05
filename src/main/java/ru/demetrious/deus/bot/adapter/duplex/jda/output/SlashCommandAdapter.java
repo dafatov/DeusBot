@@ -32,7 +32,7 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionInbound, SlashCommandInteractionEvent, SlashCommandInteraction>
-    implements GetLatencyOutbound, GetStringOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound, GetIntegerOptionOutbound, GetChannelOptionOutbound,
+    implements GetLatencyOutbound, GetStringOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound<SlashCommandInteractionInbound>, GetIntegerOptionOutbound, GetChannelOptionOutbound,
     GetUserOptionOutbound {
     private final ModalDataMapper modalDataMapper;
 

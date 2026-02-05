@@ -14,4 +14,5 @@ import lombok.experimental.Accessors;
 public class ReverseDataDto {
     private List<PullDto> pullList;
     private Map<Integer, Integer> characterCorrelationMap = new HashMap<>();
+    private Map<Integer, Integer> materialMap = new HashMap<>();
 }

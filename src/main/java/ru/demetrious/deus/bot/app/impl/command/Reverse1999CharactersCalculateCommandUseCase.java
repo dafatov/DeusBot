@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound;
 import ru.demetrious.deus.bot.app.api.character.GetReverseDataOutbound;
@@ -22,6 +23,8 @@ import ru.demetrious.deus.bot.app.api.command.Reverse1999CharactersCalculateComm
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.option.GetFocusedOptionOutbound;
+import ru.demetrious.deus.bot.app.api.pull.FindPullsDataOutbound;
+import ru.demetrious.deus.bot.app.api.user.GetUserIdOutbound;
 import ru.demetrious.deus.bot.app.impl.canvas.ReverseCharacterConsumesCanvas;
 import ru.demetrious.deus.bot.domain.AutocompleteOption;
 import ru.demetrious.deus.bot.domain.CommandData;
@@ -31,8 +34,11 @@ import ru.demetrious.deus.bot.domain.OptionChoice;
 import ru.demetrious.deus.bot.domain.OptionData;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
 import ru.demetrious.deus.bot.domain.reverse1999.CharacterStats;
+import ru.demetrious.deus.bot.domain.reverse1999.PullsData;
 import ru.demetrious.deus.bot.domain.reverse1999.ReverseData;
+import ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent;
 
+import static java.lang.Math.*;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toMap;
@@ -42,6 +48,8 @@ import static ru.demetrious.deus.bot.app.api.autocomplete.ReplyChoicesOutbound.M
 import static ru.demetrious.deus.bot.domain.CommandData.Name.REVERSE1999_CHARACTERS_CALCULATE;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.INTEGER;
 import static ru.demetrious.deus.bot.domain.OptionData.Type.STRING;
+import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.GOOGLE_REGISTRATION_ID;
+import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.DefaultUtils.throwIfException;
 import static ru.demetrious.deus.bot.utils.JacksonUtils.loadResourceAs;
 
@@ -63,6 +71,9 @@ public class Reverse1999CharactersCalculateCommandUseCase implements Reverse1999
     private final GetFocusedOptionOutbound getFocusedOptionOutbound;
     private final ReplyChoicesOutbound replyChoicesOutbound;
     private final GetStringOptionOutbound getStringOptionOutbound;
+    private final FindPullsDataOutbound findPullsDataOutbound;
+    private final AuthorizationComponent authorizationComponent;
+    private final GetUserIdOutbound<SlashCommandInteractionInbound> getUserIdOutbound;
 
     @Value("classpath:reverse1999/consume/level.json")
     private Resource levelConsumeData;
@@ -143,6 +154,15 @@ public class Reverse1999CharactersCalculateCommandUseCase implements Reverse1999
 
     @Override
     public void execute() {
+        String userId = getUserIdOutbound.getUserId();
+        Optional<OAuth2AuthorizedClient> googleUser = authorizationComponent.authorize(GOOGLE_REGISTRATION_ID, userId);
+
+        if (googleUser.isEmpty()) {
+            notifyOutbound.notifyUnauthorized(authorizationComponent.getData(userId, GOOGLE_REGISTRATION_ID));
+            return;
+        }
+
+
         Map<Integer, Map<Integer, Map<Integer, Map<Integer, Integer>>>> levelConsumes = throwIfException(() -> loadResourceAs(levelConsumeData, new TypeReference<>() {
         }));
         ReverseData reverseData = getReverseDataOutbound.getReverseData();
@@ -167,6 +187,7 @@ public class Reverse1999CharactersCalculateCommandUseCase implements Reverse1999
             return;
         }
 
+        Map<Integer, Integer> existedConsumes = findPullsDataOutbound.findPullsData().map(PullsData::getMaterialMap).orElse(Map.of());
         Map<Integer, Integer> resultConsumes = Stream.of(
                 mapIntInRange(current.insight(), target.insight(), insight -> {
                     int startLevel = insight == current.insight() ? current.level() + 1 : 2;
@@ -179,6 +200,7 @@ public class Reverse1999CharactersCalculateCommandUseCase implements Reverse1999
             .map(Map::entrySet)
             .flatMap(Collection::stream)
             .collect(toMap(Entry::getKey, Entry::getValue, Integer::sum));
+        resultConsumes.replaceAll((key, value) -> max(value - existedConsumes.getOrDefault(key, 0), 0));
         MessageFile messageFile = new ReverseCharacterConsumesCanvas(
             character,
             Pair.of(current, target),

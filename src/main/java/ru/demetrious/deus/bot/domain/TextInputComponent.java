@@ -12,6 +12,7 @@ public class TextInputComponent {
     private String label;
     private StyleEnum style = SHORT;
     private String placeholder;
+    private String value;
     private boolean isRequired;
 
     public enum StyleEnum {

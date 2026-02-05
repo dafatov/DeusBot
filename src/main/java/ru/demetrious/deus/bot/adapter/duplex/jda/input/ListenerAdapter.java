@@ -43,6 +43,10 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.BUTTON;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.COMMAND;
+import static ru.demetrious.deus.bot.app.api.command.CommandInbound.Type.MODAL;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.ERROR;
 import static ru.demetrious.deus.bot.domain.MessageEmbed.ColorEnum.WARNING;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.DISCORD_REGISTRATION_ID;
@@ -161,13 +165,22 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
                 return;
             }
 
-            if (commandInbound.isDefer()) {
+            if (commandInbound.isDefer(getEventType(adapter))) {
                 log.debug("Deferring command \"{}\"", commandInbound.getData().getName());
                 adapter.defer();
             }
 
             executeConsumer.accept(commandInbound);
         }, (commandName, e) -> notifyError(commandName, errorText, adapter, e), adapter::notifyUnauthorized, adapter);
+    }
+
+    private Type getEventType(@NotNull GenericAdapter<?, ?, ?> adapter) {
+        return switch (adapter) {
+            case SlashCommandAdapter ignored -> COMMAND;
+            case ButtonAdapter ignored -> BUTTON;
+            case ModalAdapter ignored -> MODAL;
+            default -> throw new IllegalStateException("Unexpected value: " + adapter.getClass());
+        };
     }
 
     private <A extends GenericAdapter<?, ?, ?>> void notifyError(Name commandName, String errorText, A adapter, Exception e) {
