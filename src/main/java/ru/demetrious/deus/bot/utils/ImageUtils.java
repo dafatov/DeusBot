@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.utils;
 
 import com.luciad.imageio.webp.WebPWriteParam;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,6 +14,7 @@ import javax.imageio.stream.ImageOutputStream;
 import lombok.experimental.UtilityClass;
 import ru.demetrious.deus.bot.domain.Image;
 
+import static java.util.Objects.requireNonNull;
 import static javax.imageio.ImageIO.createImageOutputStream;
 import static javax.imageio.ImageIO.getImageWritersByMIMEType;
 import static javax.imageio.ImageIO.getWriterFormatNames;
@@ -48,10 +50,26 @@ public class ImageUtils {
         }
     }
 
+    public static BufferedImage loadImage(String imagePath) {
+        try {
+            return read(requireNonNull(ImageUtils.class.getClassLoader().getResourceAsStream(imagePath)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static Image loadImage(byte[] image) throws IOException {
         try (ByteArrayInputStream input = new ByteArrayInputStream(image)) {
             return new Image(read(input));
         }
+    }
+
+    public static int calcWidth(BufferedImage bufferedImage, int height) {
+        return height * bufferedImage.getWidth() / bufferedImage.getHeight();
+    }
+
+    public static int calcHeight(BufferedImage bufferedImage, int width) {
+        return width * bufferedImage.getHeight() / bufferedImage.getWidth();
     }
 
     // =================================================================================================================

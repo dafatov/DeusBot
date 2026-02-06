@@ -51,7 +51,7 @@ public class AiDeusCommandUseCase extends PlayerCommand implements AiDeusCommand
     }
 
     @Override
-    public boolean isDefer() {
+    public boolean isDefer(Type type) {
         return false;
     }
 

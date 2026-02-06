@@ -5,6 +5,18 @@ server:
     key-store-password: ${KEY_STORE_PASSWORD}
     keyStoreType: PKCS12
     keyAlias: deus-bot
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches
+  endpoint:
+    caches:
+      access: read_only
+    health:
+      access: read_only
+    info:
+      access: read_only
 
 spring:
   jackson:
@@ -132,17 +144,18 @@ resilience4j:
         wait-duration: 2s
         max-attempts: 3
       reverse1999-wiki:
-        wait-duration: 0s
-        max-attempts: 2
+        wait-duration: 1s
+        max-attempts: 5
         retry-exceptions:
           - feign.FeignException.Forbidden
 
 cache:
+  files-path: /cache-data
   configs:
     shikimori-franchises:
-      expire-after-write: 24h
-    reverse1999-characters:
-      expire-after-write: 48h
+      expire-after-write: 14d
+    reverse1999-data:
+      expire-after-write: 14d
 
 async:
   executor:

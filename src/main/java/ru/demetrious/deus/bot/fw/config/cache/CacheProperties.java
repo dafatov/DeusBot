@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("cache")
 public class CacheProperties {
+    private String filesPath;
     private Map<String, CacheProperty> configs;
 
     @Data

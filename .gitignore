@@ -33,3 +33,6 @@ build/
 
 ### Env ###
 /src/main/resources/*.env
+
+### Cache ###
+/.cache-data/

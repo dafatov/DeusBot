@@ -56,6 +56,8 @@
 
     <!-- Engines -->
     <java.version>21</java.version>
+    <jvm.xmx>512m</jvm.xmx>
+    <jvm.max.direct.memory>256m</jvm.max.direct.memory>
     <maven.version>3.8.2</maven.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -78,6 +80,7 @@
     <jsoup.version>1.16.1</jsoup.version>
     <word-wrap.version>0.1.13</word-wrap.version>
     <commons-collections4.version>4.5.0</commons-collections4.version>
+    <guava.version>33.5.0-jre</guava.version>
 
     <!-- Plugins -->
     <git-commit-id.version>9.0.0</git-commit-id.version>
@@ -237,8 +240,8 @@
       <artifactId>resilience4j-spring-boot3</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.ben-manes.caffeine</groupId>
-      <artifactId>caffeine</artifactId>
+      <groupId>org.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>
@@ -253,6 +256,11 @@
       <groupId>com.github.davidmoten</groupId>
       <artifactId>word-wrap</artifactId>
       <version>${word-wrap.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
 
     <!-- Test -->
@@ -314,7 +322,7 @@
             <builder>paketobuildpacks/builder-jammy-full</builder>
             <env>
               <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
-              <BPE_JAVA_TOOL_OPTIONS>-Xmx512m -Djava.awt.headless=true</BPE_JAVA_TOOL_OPTIONS>
+              <BPE_JAVA_TOOL_OPTIONS>-Xmx${jvm.xmx} -XX:MaxDirectMemorySize=${jvm.max.direct.memory} -Djava.awt.headless=true</BPE_JAVA_TOOL_OPTIONS>
             </env>
           </image>
           <excludes>

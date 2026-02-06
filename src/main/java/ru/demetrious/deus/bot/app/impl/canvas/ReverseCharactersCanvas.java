@@ -4,15 +4,14 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import ru.demetrious.deus.bot.domain.Character;
 import ru.demetrious.deus.bot.domain.Image;
 import ru.demetrious.deus.bot.domain.MessageFile;
+import ru.demetrious.deus.bot.domain.reverse1999.CharacterData;
 
 import static java.awt.Color.BLACK;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -22,9 +21,10 @@ import static java.lang.Math.abs;
 import static java.lang.Math.divideExact;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.naturalOrder;
-import static java.util.Objects.requireNonNull;
-import static javax.imageio.ImageIO.read;
+import static ru.demetrious.deus.bot.utils.ImageUtils.calcHeight;
+import static ru.demetrious.deus.bot.utils.ImageUtils.calcWidth;
 import static ru.demetrious.deus.bot.utils.ImageUtils.createWebp;
+import static ru.demetrious.deus.bot.utils.ImageUtils.loadImage;
 
 @Slf4j
 public class ReverseCharactersCanvas implements Canvas {
@@ -39,7 +39,7 @@ public class ReverseCharactersCanvas implements Canvas {
 
     public ReverseCharactersCanvas(List<CharacterDrawable> characterList) {
         int minHeight = characterList.stream()
-            .map(Character::getAvatar)
+            .map(CharacterData::getAvatar)
             .map(Image::toBufferedImage)
             .map(BufferedImage::getHeight)
             .min(Integer::compareTo)
@@ -87,15 +87,15 @@ public class ReverseCharactersCanvas implements Canvas {
     }
 
     @Getter
-    public static class CharacterDrawable extends Character {
+    public static class CharacterDrawable extends CharacterData {
         private final BufferedImage portraitImage;
 
-        public CharacterDrawable(Character character, Integer portrait) {
+        public CharacterDrawable(CharacterData character, Integer portrait) {
             this.setRarity(character.getRarity());
             this.setAvatar(character.getAvatar());
             this.setNameImage(character.getNameImage());
             this.setName(character.getName());
-            this.portraitImage = loadPortraitImage(portrait);
+            this.portraitImage = loadImage(getPortraitImagePath(portrait));
         }
     }
 
@@ -105,7 +105,7 @@ public class ReverseCharactersCanvas implements Canvas {
 
     private Params getParams(List<CharacterDrawable> characterList, int minHeight) {
         int minWidth = characterList.stream()
-            .map(Character::getAvatar)
+            .map(CharacterData::getAvatar)
             .map(image -> calcWidth(image.toBufferedImage(), minHeight))
             .min(Integer::compareTo)
             .orElseThrow();
@@ -116,7 +116,7 @@ public class ReverseCharactersCanvas implements Canvas {
             .orElseThrow();
         int width = summonPowerList.stream()
             .map(list -> list.stream()
-                .map(Character::getAvatar)
+                .map(CharacterData::getAvatar)
                 .mapToInt(image -> calcWidth(image.toBufferedImage(), minHeight))
                 .sum())
             .max(naturalOrder())
@@ -165,14 +165,6 @@ public class ReverseCharactersCanvas implements Canvas {
         return result;
     }
 
-    private static int calcWidth(BufferedImage image, int minHeight) {
-        return minHeight * image.getWidth() / image.getHeight();
-    }
-
-    private static int calcHeight(BufferedImage image, int minWidth) {
-        return minWidth * image.getHeight() / image.getWidth();
-    }
-
     private static int findShortestRow(int[] rowsWidth) {
         int minIndex = 0;
         for (int i = 1; i < rowsWidth.length; i++) {
@@ -181,14 +173,6 @@ public class ReverseCharactersCanvas implements Canvas {
             }
         }
         return minIndex;
-    }
-
-    private static BufferedImage loadPortraitImage(Integer count) {
-        try {
-            return read(requireNonNull(ReverseCharactersCanvas.class.getClassLoader().getResourceAsStream(getPortraitImagePath(count))));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static String getPortraitImagePath(Integer count) {

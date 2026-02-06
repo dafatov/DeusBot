@@ -12,6 +12,7 @@ import ru.demetrious.deus.bot.app.api.command.AiImageCommandInbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.image.CreateAiImageOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.DeferOutbound;
+import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalIdOutbound;
 import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
@@ -48,7 +49,7 @@ public class AiImageCommandUseCase implements AiImageCommandInbound {
     private static final String COUNT_OPTION = "count";
     private static final int DEFAULT_COUNT = 1;
 
-    private final ShowModalOutbound showModalOutbound;
+    private final ShowModalOutbound<SlashCommandInteractionInbound> showModalOutbound;
     private final GetModalValuesOutbound getModalValuesOutbound;
     private final GetIntegerOptionOutbound getIntegerOptionOutbound;
     private final List<NotifyOutbound<?>> notifyOutbound;
@@ -72,7 +73,7 @@ public class AiImageCommandUseCase implements AiImageCommandInbound {
     }
 
     @Override
-    public boolean isDefer() {
+    public boolean isDefer(Type type) {
         return false;
     }
 

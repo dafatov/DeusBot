@@ -1,16 +1,18 @@
-package ru.demetrious.deus.bot.domain;
+package ru.demetrious.deus.bot.domain.reverse1999;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.Map;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
+import ru.demetrious.deus.bot.domain.Image;
 
 import static java.util.Optional.ofNullable;
 
 @Data
 @Accessors(chain = true)
-public class Character {
+public class CharacterData implements Serializable {
     private static final Map<Integer, Color> RARITY_COLORS = Map.of(
         2, new Color(69, 93, 68),
         3, new Color(84, 96, 127),

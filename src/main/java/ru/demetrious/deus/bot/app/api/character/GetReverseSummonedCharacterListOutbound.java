@@ -3,7 +3,7 @@ package ru.demetrious.deus.bot.app.api.character;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import ru.demetrious.deus.bot.domain.Pull;
+import ru.demetrious.deus.bot.domain.reverse1999.Pull;
 
 @FunctionalInterface
 public interface GetReverseSummonedCharacterListOutbound {

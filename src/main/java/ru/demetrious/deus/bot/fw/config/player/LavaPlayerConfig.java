@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import dev.lavalink.youtube.clients.Android;
 import dev.lavalink.youtube.clients.AndroidMusic;
 import dev.lavalink.youtube.clients.AndroidVr;
 import dev.lavalink.youtube.clients.Ios;
@@ -48,7 +47,6 @@ public class LavaPlayerConfig {
     private AudioSourceManager[] getAudioSourceManagers() {
         YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(
             new Web(),
-            new Android(),
             new AndroidMusic(),
             new AndroidVr(),
             new Ios(),

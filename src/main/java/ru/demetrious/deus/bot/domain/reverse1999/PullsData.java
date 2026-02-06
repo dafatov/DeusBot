@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.domain;
+package ru.demetrious.deus.bot.domain.reverse1999;
 
 
 import java.util.ArrayList;
