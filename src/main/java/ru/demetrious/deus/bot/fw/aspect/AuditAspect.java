@@ -57,9 +57,9 @@ public class AuditAspect {
             .setName(EMPTY));
     }
 
-    @After(value = "within(ru.demetrious.deus.bot.app.api.session.GuildVoiceSessionUpdateInbound+) && execution(* execute(..)) && args(guildId, userId, isJoined)", argNames = "guildId,userId,isJoined")
-    public void durationVoiceSessionAudit(String guildId, String userId, boolean isJoined) {
-        if (isJoined) {
+    @After(value = "within(ru.demetrious.deus.bot.app.api.session.GuildVoiceSessionUpdateInbound+) && execution(* execute(..)) && args(guildId, userId, isJoined, isForced)", argNames = "guildId,userId,isJoined,isForced")
+    public void durationVoiceSessionAudit(String guildId, String userId, boolean isJoined, boolean isForced) {
+        if (isJoined || isForced) {
             return;
         }
 

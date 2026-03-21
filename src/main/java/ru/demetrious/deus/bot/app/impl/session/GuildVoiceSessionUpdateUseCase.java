@@ -9,7 +9,7 @@ import ru.demetrious.deus.bot.app.api.session.SaveSessionOutbound;
 import ru.demetrious.deus.bot.domain.Session;
 
 import static java.time.Instant.now;
-import static java.util.Optional.ofNullable;
+import static ru.demetrious.deus.bot.domain.Session.SessionId;
 
 @RequiredArgsConstructor
 @Component
@@ -19,7 +19,12 @@ public class GuildVoiceSessionUpdateUseCase implements GuildVoiceSessionUpdateIn
 
     @Override
     public void execute(String guildId, String userId, boolean isJoined) {
-        Session.SessionId sessionId = new Session.SessionId()
+        execute(guildId, userId, isJoined, false);
+    }
+
+    @Override
+    public void execute(String guildId, String userId, boolean isJoined, boolean isForced) {
+        SessionId sessionId = new SessionId()
             .setGuildId(guildId)
             .setUserId(userId);
         Session session = getSessionOutbound.getSession(sessionId)
@@ -27,9 +32,9 @@ public class GuildVoiceSessionUpdateUseCase implements GuildVoiceSessionUpdateIn
         Instant now = now();
 
         if (isJoined) {
-            session.setStart(now).setFinish(null);
+            session.start(now, isForced);
         } else {
-            session.setStart(ofNullable(session.getStart()).orElse(now)).setFinish(now);
+            session.finish(now, isForced);
         }
 
         saveSessionOutbound.saveSession(session);

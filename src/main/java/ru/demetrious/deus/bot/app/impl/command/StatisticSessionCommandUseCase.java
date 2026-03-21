@@ -24,7 +24,10 @@ import static java.time.Duration.between;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.STATISTIC_SESSION;
+import static ru.demetrious.deus.bot.domain.Session.State.UNRELIABLE_FINISH;
+import static ru.demetrious.deus.bot.domain.Session.State.UNRELIABLE_START;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 
@@ -32,6 +35,7 @@ import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
 @Slf4j
 @Component
 public class StatisticSessionCommandUseCase implements StatisticSessionCommandInbound {
+    private static final String APPROXIMATELY = " *примерно*";
     private static final Comparator<Session> SESSION_COMPARATOR = (a, b) -> {
         if (nonNull(a.getFinish()) && nonNull(b.getFinish())) {
             return b.getFinish().compareTo(a.getFinish());
@@ -119,9 +123,10 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     }
 
     private String mapSession(Session session) {
-        return "<@%s>\n<t:%d:R>\n%s".formatted(
+        return "<@%s>\n<t:%d:R>%s\n%s".formatted(
             session.getId().getUserId(),
             floorDiv(session.getStart().toEpochMilli(), 1000),
+            session.inState(UNRELIABLE_START) ? APPROXIMATELY : EMPTY,
             ofNullable(session.getFinish())
                 .map(finish -> mapSessionFinish(session, finish))
                 .orElse("`Сейчас`")
@@ -129,9 +134,11 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     }
 
     private String mapSessionFinish(Session session, Instant finish) {
-        return "<t:%d:R>\n%s".formatted(
+        return "<t:%d:R>%s\n%s%s".formatted(
             floorDiv(finish.toEpochMilli(), 1000),
-            prettifySeconds(between(session.getStart(), finish).getSeconds())
+            session.inState(UNRELIABLE_FINISH) ? APPROXIMATELY : EMPTY,
+            prettifySeconds(between(session.getStart(), finish).getSeconds()),
+            session.inState(UNRELIABLE_START) || session.inState(UNRELIABLE_FINISH) ? APPROXIMATELY : EMPTY
         );
     }
 }

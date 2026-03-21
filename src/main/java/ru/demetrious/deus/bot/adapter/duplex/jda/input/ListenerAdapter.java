@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -94,7 +93,6 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
         messageReceivedInbound.execute(event.getGuild().getId(), event.getAuthor().getId());
     }
 
-    @SneakyThrows
     @Override
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
         Guild guild = event.getGuild();
