@@ -3,6 +3,7 @@ package ru.demetrious.deus.bot.app.impl.command;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,10 +16,12 @@ import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
 import ru.demetrious.deus.bot.app.impl.component.PaginationComponent;
 import ru.demetrious.deus.bot.domain.Audit;
 import ru.demetrious.deus.bot.domain.CommandData;
+import ru.demetrious.deus.bot.domain.CommandData.Name;
 import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
+import static com.google.common.base.Enums.getIfPresent;
 import static java.lang.Math.floorDiv;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
@@ -47,8 +50,8 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
     public void onButton() {
         String guildId = b(getGuildIdOutbound).getGuildId();
         MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
-        Map<CommandData.Name, Long> commandCountMap = getGuildCommandAuditListOutbound.getGuildCommandAuditList(guildId).stream()
-            .collect(toMap(audit -> CommandData.Name.valueOf(audit.getAuditId().getName()), Audit::getCount, Long::sum));
+        Map<String, Long> commandCountMap = getGuildCommandAuditListOutbound.getGuildCommandAuditList(guildId).stream()
+            .collect(toMap(audit -> audit.getAuditId().getName(), Audit::getCount, Long::sum));
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), commandCountMap.size());
 
         MessageData messageData = updateMessage(
@@ -66,8 +69,8 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
     public void execute() {
         String guildId = b(getGuildIdOutbound).getGuildId();
         List<Audit> guildCommandAuditList = getGuildCommandAuditListOutbound.getGuildCommandAuditList(guildId);
-        Map<CommandData.Name, Long> commandCountMap = guildCommandAuditList.stream()
-            .collect(toMap(audit -> CommandData.Name.valueOf(audit.getAuditId().getName()), Audit::getCount, Long::sum));
+        Map<String, Long> commandCountMap = guildCommandAuditList.stream()
+            .collect(toMap(audit -> audit.getAuditId().getName(), Audit::getCount, Long::sum));
         MessageEmbed messageEmbed = new MessageEmbed()
             .setTitle("Количество выполненных команд с " + guildCommandAuditList.stream()
                 .min(comparing(Audit::getCreated))
@@ -93,7 +96,7 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
     // = Implementation
     // ===================================================================================================================
 
-    private MessageData updateMessage(MessageEmbed messageEmbed, Map<CommandData.Name, Long> commandCountMap, PaginationComponent paginationComponent,
+    private MessageData updateMessage(MessageEmbed messageEmbed, Map<String, Long> commandCountMap, PaginationComponent paginationComponent,
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
             .setDescription(commandCountMap.entrySet().stream()
@@ -109,9 +112,13 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
             .setComponents(List.of(paginationMessageComponent));
     }
 
-    private String mapCommandAudit(Map.Entry<CommandData.Name, Long> commandCountEntry) {
+    private String mapCommandAudit(Entry<String, Long> commandCountEntry) {
+        String commandName = getIfPresent(Name.class, commandCountEntry.getKey())
+            .transform(Name::stringify)
+            .or("~~%s~~".formatted(commandCountEntry.getKey()));
+
         return "%s\n%d".formatted(
-            commandCountEntry.getKey().stringify(),
+            commandName,
             commandCountEntry.getValue()
         );
     }
