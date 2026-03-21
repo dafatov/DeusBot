@@ -1,2 +1,2 @@
-alter table session
-    add states varchar(255)[] not null default [];
+ALTER TABLE session
+    ADD states VARCHAR(255)[] NOT NULL default '{}';
