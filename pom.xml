@@ -52,7 +52,7 @@
 
   <properties>
     <!-- Service -->
-    <revision>2.4.15</revision>
+    <revision>2.4.16</revision>
 
     <!-- Engines -->
     <java.version>21</java.version>
