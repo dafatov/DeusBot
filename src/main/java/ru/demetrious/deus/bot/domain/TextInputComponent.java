@@ -9,7 +9,6 @@ import static ru.demetrious.deus.bot.domain.TextInputComponent.StyleEnum.SHORT;
 @Accessors(chain = true)
 public class TextInputComponent {
     private String id;
-    private String label;
     private StyleEnum style = SHORT;
     private String placeholder;
     private String value;

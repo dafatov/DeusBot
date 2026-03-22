@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -18,8 +17,8 @@ import ru.demetrious.deus.bot.app.api.modal.GetModalValuesOutbound;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.MessageData;
 
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
@@ -29,14 +28,6 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Component
 public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalInteractionEvent, ModalInteraction> implements
     GetModalValuesOutbound, GetModalIdOutbound {
-    @Override
-    public List<Pair<String, String>> getPairs() {
-        return getInteraction().getValues().stream()
-            .map(modalMapping -> Pair.of(modalMapping.getId(), modalMapping.getAsString()))
-            .filter(cs -> isNoneBlank(cs.getKey(), cs.getValue()))
-            .toList();
-    }
-
     @Override
     public List<String> getValues() {
         return getInteraction().getValues().stream()
@@ -60,7 +51,9 @@ public class ModalAdapter extends GenericAdapter<ModalInteractionInbound, ModalI
 
     @Override
     public void notify(MessageData messageData, boolean isEphemeral) {
-        if (getEvent().isAcknowledged()) {
+        if (isNull(getEvent().getMessage())) {
+            super.notify(messageData, isEphemeral);
+        } else if (getEvent().isAcknowledged()) {
             getEvent().getHook().editOriginal(messageDataMapper.mapToMessageEdit(messageData)).queue();
         } else {
             getEvent().editMessage(messageDataMapper.mapToMessageEdit(messageData)).queue();

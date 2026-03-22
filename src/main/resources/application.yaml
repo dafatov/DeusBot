@@ -157,6 +157,11 @@ cache:
     reverse1999-data:
       expire-after-write: 14d
 
+logging:
+  level:
+    club.minnced.discord.jdave.DaveDecryptor: error
+    net.dv8tion.jda.internal.audio.AudioPacket: error
+
 async:
   executor:
     cache-warm-up:
