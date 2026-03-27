@@ -12,7 +12,7 @@ import dev.lavalink.youtube.clients.Ios;
 import dev.lavalink.youtube.clients.MWeb;
 import dev.lavalink.youtube.clients.Music;
 import dev.lavalink.youtube.clients.Tv;
-import dev.lavalink.youtube.clients.TvHtml5Embedded;
+import dev.lavalink.youtube.clients.TvHtml5Simply;
 import dev.lavalink.youtube.clients.WebEmbedded;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +53,7 @@ public class LavaPlayerConfig {
             new MWeb(),
             new Music(),
             new Tv(),
-            new TvHtml5Embedded(),
+            new TvHtml5Simply(),
             new WebEmbedded()
         );
 

@@ -2,13 +2,14 @@ package ru.demetrious.deus.bot.adapter.duplex.jda.mapper;
 
 import java.util.List;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.MessageTopLevelComponent;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.LayoutComponent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -49,15 +50,15 @@ public abstract class MessageDataMapper {
         return FileUpload.fromData(messageFile.getData(), messageFile.getName());
     }
 
-    public abstract List<LayoutComponent> mapComponent(List<MessageComponent> components);
+    public abstract List<MessageTopLevelComponent> mapComponent(List<MessageComponent> components);
 
-    public LayoutComponent mapComponent(MessageComponent messageComponent) {
+    public MessageTopLevelComponent mapComponent(MessageComponent messageComponent) {
         return ActionRow.of(mapButton(messageComponent.getButtons()));
     }
 
-    public abstract List<net.dv8tion.jda.api.interactions.components.ItemComponent> mapButton(List<ButtonComponent> items);
+    public abstract List<ActionRowChildComponent> mapButton(List<ButtonComponent> items);
 
-    public net.dv8tion.jda.api.interactions.components.ItemComponent mapButton(ButtonComponent buttonComponent) {
+    public ActionRowChildComponent mapButton(ButtonComponent buttonComponent) {
         return Button.of(mapButtonStyle(buttonComponent.getStyle()), buttonComponent.getId(), buttonComponent.getLabel(), mapEmoji(buttonComponent.getEmoji()))
             .withDisabled(buttonComponent.isDisabled());
     }

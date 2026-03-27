@@ -11,7 +11,7 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -23,6 +23,7 @@ logging:
     org.hibernate.orm.jdbc.bind: info
     com.sedmelluq.discord.lavaplayer: info
     dev.lavalink.youtube: info
+    net.dv8tion.jda: info
 
 devs:
   ids: ${DEVS_DISCORD_IDS:}

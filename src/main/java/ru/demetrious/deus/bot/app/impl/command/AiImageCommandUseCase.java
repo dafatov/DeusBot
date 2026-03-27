@@ -87,7 +87,7 @@ public class AiImageCommandUseCase implements AiImageCommandInbound {
 
         try (ExecutorService executorService = newCachedThreadPool()) {
             List<CompletableFuture<Optional<String>>> futureList = rangeClosed(1, count)
-                .mapToObj(i -> supplyAsync(() -> createAiImageOutbound.createAiImage(prompt), executorService))
+                .mapToObj(_ -> supplyAsync(() -> createAiImageOutbound.createAiImage(prompt), executorService))
                 .toList();
 
             log.debug("Creating {} images...", futureList.size());
@@ -127,13 +127,12 @@ public class AiImageCommandUseCase implements AiImageCommandInbound {
         ModalData modalData = new ModalData()
             .setCustomId(("%s%s%d").formatted(AI_IMAGE.stringify(), DATA_DIVIDER, count))
             .setTitle("Создать изображение")
-            .setComponents(List.of(
-                new ModalComponent().setTextInputs(List.of(new TextInputComponent()
+            .setComponents(List.of(new ModalComponent()
+                .setLabel("Prompt")
+                .setTextInput(new TextInputComponent()
                     .setId(PROMPT_FIELD)
                     .setStyle(PARAGRAPH)
-                    .setLabel("Prompt")
-                    .setRequired(true)))
-            ));
+                    .setRequired(true))));
 
         showModalOutbound.showModal(modalData);
         log.info("Модальное окно для создания изображения успешно выведено");

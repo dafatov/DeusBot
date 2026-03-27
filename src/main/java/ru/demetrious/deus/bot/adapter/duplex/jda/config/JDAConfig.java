@@ -1,7 +1,9 @@
 package ru.demetrious.deus.bot.adapter.duplex.jda.config;
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -38,6 +40,8 @@ public class JDAConfig {
     @Bean
     public JDA jda() throws InterruptedException {
         return createDefault(token)
+            .setAudioModuleConfig(new AudioModuleConfig()
+                .withDaveSessionFactory(new JDaveSessionFactory()))
             .setEventPool(newCachedThreadPool(), true)
             .disableCache(ACTIVITY, EMOJI, SCHEDULED_EVENTS, STICKER)
             .setEnabledIntents(GUILD_MEMBERS, GUILD_MESSAGES, GUILD_VOICE_STATES, MESSAGE_CONTENT)

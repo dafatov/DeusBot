@@ -1,6 +1,6 @@
 package ru.demetrious.deus.bot.app.api.modal;
 
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.modals.Modal;
 import ru.demetrious.deus.bot.app.api.event.HasEventOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.Interaction;
 import ru.demetrious.deus.bot.domain.ModalData;

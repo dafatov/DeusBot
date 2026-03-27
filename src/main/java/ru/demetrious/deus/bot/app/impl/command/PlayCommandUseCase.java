@@ -130,12 +130,12 @@ public class PlayCommandUseCase extends PlayerCommand implements PlayCommandInbo
                 .setTitle("Добавление в очередь плеера")
                 .setComponents(rangeClosed(1, MAX_COMPONENTS)
                     .mapToObj(index -> new ModalComponent()
-                        .setTextInputs(List.of(new TextInputComponent()
+                        .setLabel("#" + index)
+                        .setTextInput(new TextInputComponent()
                             .setId(String.valueOf(index))
-                            .setLabel("#" + index)
                             .setStyle(SHORT)
                             .setPlaceholder(STRING_OPTION_DESCRIPTION)
-                            .setRequired(index == 1))))
+                            .setRequired(index == 1)))
                     .toList());
 
             showModalConsumer.accept(modalData);
