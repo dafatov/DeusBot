@@ -62,7 +62,7 @@
 
   <properties>
     <!-- Service -->
-    <revision>2.4.18</revision>
+    <revision>2.4.19</revision>
 
     <!-- Engines -->
     <java.version>25</java.version>
