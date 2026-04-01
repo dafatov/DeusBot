@@ -18,11 +18,6 @@ public class GuildVoiceSessionUpdateUseCase implements GuildVoiceSessionUpdateIn
     private final SaveSessionOutbound saveSessionOutbound;
 
     @Override
-    public void execute(String guildId, String userId, boolean isJoined) {
-        execute(guildId, userId, isJoined, false);
-    }
-
-    @Override
     public void execute(String guildId, String userId, boolean isJoined, boolean isForced) {
         SessionId sessionId = new SessionId()
             .setGuildId(guildId)
