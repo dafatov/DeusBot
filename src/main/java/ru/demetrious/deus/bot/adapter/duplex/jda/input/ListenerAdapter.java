@@ -80,7 +80,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
 
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        onInteraction(event, CommandInbound::onAutocomplete, (n, e) -> replyEmptyChoices(event), p -> replyEmptyChoices(event), autocompleteAdapter);
+        onInteraction(event, CommandInbound::onAutocomplete, (_, _) -> replyEmptyChoices(event), _ -> replyEmptyChoices(event), autocompleteAdapter);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ListenerAdapter extends net.dv8tion.jda.api.hooks.ListenerAdapter {
         String userId = event.getMember().getUser().getId();
 
         if (isNull(event.getOldValue()) || isNull(event.getNewValue())) {
-            guildVoiceSessionUpdateInbound.execute(guildId, userId, nonNull(event.getNewValue()));
+            guildVoiceSessionUpdateInbound.execute(guildId, userId, nonNull(event.getNewValue()), false);
         }
 
         if (event.getJDA().getSelfUser().getId().equals(userId) && isNull(event.getNewValue())) {
