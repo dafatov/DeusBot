@@ -3,6 +3,8 @@ spring:
     openfeign:
       client:
         config:
+          anilist:
+            logger-level: basic
           default:
             logger-level: basic
   datasource:

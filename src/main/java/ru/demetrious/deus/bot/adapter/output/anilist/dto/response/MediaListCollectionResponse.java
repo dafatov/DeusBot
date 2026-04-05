@@ -38,6 +38,8 @@ public class MediaListCollectionResponse implements ResponseSerialize {
                 private Integer idMal;
                 @EqualsAndHashCode.Exclude
                 private Integer episodes;
+                @EqualsAndHashCode.Exclude
+                private String title;
             }
         }
     }

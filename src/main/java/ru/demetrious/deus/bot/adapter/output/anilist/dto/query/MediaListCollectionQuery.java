@@ -10,12 +10,14 @@ import static ru.demetrious.deus.bot.adapter.output.anilist.dto.enums.MediaTypeA
  */
 @RequiredArgsConstructor
 public class MediaListCollectionQuery implements Query {
+    public static final int PER_CHUNK = 500;
+
     private final Integer userId;
     private final Integer chunk;
 
     @Override
     public String serialize() {
-        return "MediaListCollection(userId:%d,type:%s,chunk:%s,perChunk:%s){lists{entries{id,media{idMal},progress,repeat,score,status}}}"
-            .formatted(userId, ANIME, chunk, 500);
+        return "MediaListCollection(userId:%d,type:%s,chunk:%s,perChunk:%s){lists{entries{id,media{idMal,episodes},progress,repeat,score,status}}}"
+            .formatted(userId, ANIME, chunk, PER_CHUNK);
     }
 }
