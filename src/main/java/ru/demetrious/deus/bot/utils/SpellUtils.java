@@ -13,14 +13,24 @@ import static java.util.Objects.isNull;
 
 @UtilityClass
 public class SpellUtils {
+    private static final int[] DECLENSION_INDICES = new int[]{2, 0, 1, 1, 1};
+    private static final List<Pair<String[], Integer>> DURATION_UNITS = List.of(
+        Pair.of(new String[]{"секунда", "секунды", "секунд"}, 60),
+        Pair.of(new String[]{"минута", "минуты", "минут"}, 60),
+        Pair.of(new String[]{"час", "часа", "часов"}, 24),
+        Pair.of(new String[]{"день", "дня", "дней"}, 7),
+        Pair.of(new String[]{"неделя", "недели", "недель"}, 4),
+        Pair.of(new String[]{"месяц", "месяца", "месяцев"}, 12),
+        Pair.of(new String[]{"год", "года", "лет"}, null)
+    );
+
     public static String spell(long number, String[] wordForms) {
-        int[] options = new int[]{2, 0, 1, 1, 1};
         int n100 = floorMod(number, 100);
         int n10 = floorMod(number, 10);
         int index = 2;
 
         if (n10 < 5 && (n100 < 5 || n100 > 19)) {
-            index = options[n10];
+            index = DECLENSION_INDICES[n10];
         }
 
         return "%d %s".formatted(number, wordForms[index]);
@@ -28,17 +38,8 @@ public class SpellUtils {
 
     public static String prettifySeconds(Long seconds) {
         List<String> result = new LinkedList<>();
-        List<Pair<String[], Integer>> words = List.of(
-            Pair.of(new String[]{"секунда", "секунды", "секунд"}, 60),
-            Pair.of(new String[]{"минута", "минуты", "минут"}, 60),
-            Pair.of(new String[]{"час", "часа", "часов"}, 24),
-            Pair.of(new String[]{"день", "дня", "дней"}, 7),
-            Pair.of(new String[]{"неделя", "недели", "недель"}, 4),
-            Pair.of(new String[]{"месяц", "месяца", "месяцев"}, 12),
-            Pair.of(new String[]{"год", "года", "лет"}, null)
-        );
 
-        for (Pair<String[], Integer> word : words) {
+        for (Pair<String[], Integer> word : DURATION_UNITS) {
             long number;
 
             if (isNull(word.getRight())) {

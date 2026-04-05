@@ -31,8 +31,8 @@ public class ButtonAdapter extends GenericAdapter<ButtonInteractionInbound, Butt
     private final ModalDataMapper modalDataMapper;
 
     @Override
-    public MessageEmbed getEmbed(int index) {
-        return messageDataMapper.mapEmbed(getEvent().getMessage().getEmbeds().get(index));
+    public MessageEmbed getFirstEmbed() {
+        return messageDataMapper.mapEmbed(getEvent().getMessage().getEmbeds().getFirst());
     }
 
     @Override

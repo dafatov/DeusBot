@@ -53,7 +53,7 @@ public class QueueCommandUseCase extends PlayerCommand implements QueueCommandIn
     public void onButton() {
         final Player player = getPlayer();
         Result<List<AudioTrack>> result = player.getQueue();
-        MessageEmbed paginationEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed paginationEmbed = getEmbedOutbound.getFirstEmbed();
         MessageComponent controlMessageComponent = new ControlComponent(player, b(getAuthorIdOutbound).getAuthorId()).update(getCustomIdOutbound.getCustomId());
         PaginationComponent paginationComponent = PaginationComponent.from(paginationEmbed.getFooter(), emptyIfNull(result.getData()).size());
 
