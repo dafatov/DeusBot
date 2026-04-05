@@ -19,7 +19,6 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 import ru.demetrious.deus.bot.domain.Session;
 
-import static java.lang.Math.floorDiv;
 import static java.time.Duration.between;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -68,7 +67,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     @Override
     public void onButton() {
         String guildId = b(getGuildIdOutbound).getGuildId();
-        MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed messageEmbed = getEmbedOutbound.getFirstEmbed();
         List<Session> guildSessionList = getGuildSessionListOutbound.getGuildSessionList(guildId);
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), guildSessionList.size());
 
@@ -125,7 +124,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
     private String mapSession(Session session) {
         return "<@%s>\n<t:%d:R>%s\n%s".formatted(
             session.getId().getUserId(),
-            floorDiv(session.getStart().toEpochMilli(), 1000),
+            session.getStart().getEpochSecond(),
             session.inState(UNRELIABLE_START) ? APPROXIMATELY : EMPTY,
             ofNullable(session.getFinish())
                 .map(finish -> mapSessionFinish(session, finish))
@@ -135,7 +134,7 @@ public class StatisticSessionCommandUseCase implements StatisticSessionCommandIn
 
     private String mapSessionFinish(Session session, Instant finish) {
         return "<t:%d:R>%s\n%s%s".formatted(
-            floorDiv(finish.toEpochMilli(), 1000),
+            finish.getEpochSecond(),
             session.inState(UNRELIABLE_FINISH) ? APPROXIMATELY : EMPTY,
             prettifySeconds(between(session.getStart(), finish).getSeconds()),
             session.inState(UNRELIABLE_START) || session.inState(UNRELIABLE_FINISH) ? APPROXIMATELY : EMPTY

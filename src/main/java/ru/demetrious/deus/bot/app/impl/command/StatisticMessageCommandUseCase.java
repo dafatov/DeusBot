@@ -18,7 +18,6 @@ import ru.demetrious.deus.bot.domain.MessageComponent;
 import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
-import static java.lang.Math.floorDiv;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.STATISTIC_MESSAGE;
@@ -44,7 +43,7 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
     @Override
     public void onButton() {
         String guildId = b(getGuildIdOutbound).getGuildId();
-        MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed messageEmbed = getEmbedOutbound.getFirstEmbed();
         List<Audit> guildMessageAuditList = getGuildMessageAuditListOutbound.getGuildMessageAuditList(guildId);
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), guildMessageAuditList.size());
 
@@ -63,14 +62,7 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
     public void execute() {
         String guildId = b(getGuildIdOutbound).getGuildId();
         List<Audit> guildMessageAuditList = getGuildMessageAuditListOutbound.getGuildMessageAuditList(guildId);
-        MessageEmbed messageEmbed = new MessageEmbed()
-            .setTitle("Количество сообщений с " + guildMessageAuditList.stream()
-                .min(comparing(Audit::getCreated))
-                .map(Audit::getCreated)
-                .map(Instant::toEpochMilli)
-                .map(millis -> floorDiv(millis, 1000))
-                .map("<t:%d>"::formatted)
-                .orElse("`начала времен`"));
+        MessageEmbed messageEmbed = new MessageEmbed();
         PaginationComponent paginationComponent = new PaginationComponent(guildMessageAuditList.size());
 
         MessageData messageData = updateMessage(
@@ -91,6 +83,12 @@ public class StatisticMessageCommandUseCase implements StatisticMessageCommandIn
     private MessageData updateMessage(MessageEmbed messageEmbed, List<Audit> guildMessageAuditList, PaginationComponent paginationComponent,
                                       MessageComponent paginationMessageComponent) {
         messageEmbed
+            .setTitle("Количество сообщений с " + guildMessageAuditList.stream()
+                .min(comparing(Audit::getCreated))
+                .map(Audit::getCreated)
+                .map(Instant::getEpochSecond)
+                .map("<t:%d>"::formatted)
+                .orElse("`начала времен`"))
             .setDescription(guildMessageAuditList.stream()
                 .sorted((a, b) -> b.getCount().compareTo(a.getCount()))
                 .skip(paginationComponent.getStart())

@@ -19,11 +19,10 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.floorDiv;
+import static java.lang.Math.round;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.averagingLong;
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static ru.demetrious.deus.bot.domain.CommandData.Name.STATISTIC_VOICE;
 import static ru.demetrious.deus.bot.utils.BeanUtils.b;
 import static ru.demetrious.deus.bot.utils.SpellUtils.prettifySeconds;
@@ -48,7 +47,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
     @Override
     public void onButton() {
         String guildId = b(getGuildIdOutbound).getGuildId();
-        MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed messageEmbed = getEmbedOutbound.getFirstEmbed();
         List<Audit> guildVoiceAuditList = getGuildVoiceAuditListOutbound.getGuildVoiceAuditList(guildId);
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), guildVoiceAuditList.size());
 
@@ -67,14 +66,7 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
     public void execute() {
         String guildId = b(getGuildIdOutbound).getGuildId();
         List<Audit> guildVoiceAuditList = getGuildVoiceAuditListOutbound.getGuildVoiceAuditList(guildId);
-        MessageEmbed messageEmbed = new MessageEmbed()
-            .setTitle("Время в голосовых каналах с " + guildVoiceAuditList.stream()
-                .min(comparing(Audit::getCreated))
-                .map(Audit::getCreated)
-                .map(Instant::toEpochMilli)
-                .map(millis -> floorDiv(millis, 1000))
-                .map("<t:%d>"::formatted)
-                .orElse("`начала времен`"));
+        MessageEmbed messageEmbed = new MessageEmbed();
         PaginationComponent paginationComponent = new PaginationComponent(guildVoiceAuditList.size());
 
         MessageData messageData = updateMessage(
@@ -94,9 +86,18 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
 
     private MessageData updateMessage(MessageEmbed messageEmbed, List<Audit> guildVoiceAuditList, PaginationComponent paginationComponent,
                                       MessageComponent paginationMessageComponent) {
-        Long averageSeconds = guildVoiceAuditList.stream().collect(collectingAndThen(averagingLong(Audit::getCount), Math::round));
+        double averageSeconds = guildVoiceAuditList.stream()
+            .mapToLong(Audit::getCount)
+            .average()
+            .orElse(0);
 
         messageEmbed
+            .setTitle("Время в голосовых каналах с " + guildVoiceAuditList.stream()
+                .min(comparing(Audit::getCreated))
+                .map(Audit::getCreated)
+                .map(Instant::getEpochSecond)
+                .map("<t:%d>"::formatted)
+                .orElse("`начала времен`"))
             .setDescription(guildVoiceAuditList.stream()
                 .sorted((a, b) -> b.getCount().compareTo(a.getCount()))
                 .skip(paginationComponent.getStart())
@@ -110,19 +111,19 @@ public class StatisticVoiceCommandUseCase implements StatisticVoiceCommandInboun
             .setComponents(List.of(paginationMessageComponent));
     }
 
-    private String mapVoiceAudit(Audit audit, Long averageSeconds) {
+    private String mapVoiceAudit(Audit audit, double averageSeconds) {
         return "<@%s>\n%s\n%s".formatted(
             audit.getAuditId().getUserId(),
             prettifySeconds(audit.getCount()),
-            averageSeconds == 0 ? "" : mapDeviation(floorDiv(100 * audit.getCount(), averageSeconds) - 100)
+            averageSeconds == 0 ? EMPTY : mapDeviation(round(100 * (audit.getCount() / averageSeconds - 1)))
         );
     }
 
-    private String mapDeviation(long deviation) {
-        if (deviation == 0) {
+    private String mapDeviation(long deviationPercent) {
+        if (deviationPercent == 0) {
             return "-# __точно равно__ среднему по больнице";
         }
 
-        return "-# на %d%% __%s__ среднего по больнице".formatted(abs(deviation), deviation > 0 ? "выше" : "ниже");
+        return "-# на %d%% __%s__ среднего по больнице".formatted(abs(deviationPercent), deviationPercent > 0 ? "выше" : "ниже");
     }
 }

@@ -48,7 +48,7 @@ public class EventShowCommandUseCase implements EventShowCommandInbound {
     @SneakyThrows
     @Override
     public void onButton() {
-        MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed messageEmbed = getEmbedOutbound.getFirstEmbed();
         List<Trigger> triggerList = eventComponent.getTriggerList();
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), triggerList.size());
 

@@ -22,7 +22,6 @@ import ru.demetrious.deus.bot.domain.MessageData;
 import ru.demetrious.deus.bot.domain.MessageEmbed;
 
 import static com.google.common.base.Enums.getIfPresent;
-import static java.lang.Math.floorDiv;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -49,7 +48,7 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
     @Override
     public void onButton() {
         String guildId = b(getGuildIdOutbound).getGuildId();
-        MessageEmbed messageEmbed = getEmbedOutbound.getEmbed(0);
+        MessageEmbed messageEmbed = getEmbedOutbound.getFirstEmbed();
         Map<String, Long> commandCountMap = getGuildCommandAuditListOutbound.getGuildCommandAuditList(guildId).stream()
             .collect(toMap(audit -> audit.getAuditId().getName(), Audit::getCount, Long::sum));
         PaginationComponent paginationComponent = PaginationComponent.from(messageEmbed.getFooter(), commandCountMap.size());
@@ -75,8 +74,7 @@ public class StatisticCommandCommandUseCase implements StatisticCommandCommandIn
             .setTitle("Количество выполненных команд с " + guildCommandAuditList.stream()
                 .min(comparing(Audit::getCreated))
                 .map(Audit::getCreated)
-                .map(Instant::toEpochMilli)
-                .map(millis -> floorDiv(millis, 1000))
+                .map(Instant::getEpochSecond)
                 .map("<t:%d>"::formatted)
                 .orElse("`начала времен`"));
         PaginationComponent paginationComponent = new PaginationComponent(commandCountMap.size());

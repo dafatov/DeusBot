@@ -19,7 +19,6 @@ import org.quartz.utils.Key;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.impl.publication.EventPublicationJob;
 
-import static java.lang.Math.floorDiv;
 import static java.util.Optional.ofNullable;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
@@ -43,8 +42,7 @@ public class EventComponent {
 
         return ofNullable(trigger.getNextFireTime())
             .map(Date::toInstant)
-            .map(Instant::toEpochMilli)
-            .map(milli -> floorDiv(milli, 1000));
+            .map(Instant::getEpochSecond);
     }
 
     @SneakyThrows
