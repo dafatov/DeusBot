@@ -1,14 +1,17 @@
 package ru.demetrious.deus.bot.fw.config.security;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -27,9 +30,10 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED;
 import static org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder.builder;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.ANILIST_REGISTRATION_ID;
@@ -37,6 +41,7 @@ import static ru.demetrious.deus.bot.fw.config.security.LinkAuthorizationCompone
 import static ru.demetrious.deus.bot.fw.config.security.LinkAuthorizationComponent.updateRequest;
 
 @RequiredArgsConstructor
+@Slf4j
 @Configuration
 public class SecurityConfig {
     private final LinkAuthorizationComponent linkAuthorizationComponent;
@@ -73,7 +78,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
             .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-                .sessionCreationPolicy(STATELESS))
+                .sessionCreationPolicy(IF_REQUIRED))
             .csrf(AbstractHttpConfigurer::disable)
             .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer
                 .authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
@@ -81,8 +86,7 @@ public class SecurityConfig {
                 .withObjectPostProcessor(new ObjectPostProcessor<OAuth2LoginAuthenticationFilter>() {
                     @Override
                     public <O extends OAuth2LoginAuthenticationFilter> O postProcess(O oAuth2LoginAuthenticationFilter) {
-                        oAuth2LoginAuthenticationFilter.setAuthenticationResultConverter(
-                            authenticationResult -> linkAuthorizationComponent.convert(authenticationResult));
+                        oAuth2LoginAuthenticationFilter.setAuthenticationResultConverter(linkAuthorizationComponent::convert);
                         return oAuth2LoginAuthenticationFilter;
                     }
                 })
@@ -90,9 +94,21 @@ public class SecurityConfig {
                     SavedRequestAwareAuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler =
                         new SavedRequestAwareAuthenticationSuccessHandler();
 
+                    savedRequestAwareAuthenticationSuccessHandler.setDefaultTargetUrl("/ui/login/success");
                     linkAuthorizationComponent.handleSuccess((OAuth2AuthenticationToken) authentication);
+                    response.addCookie(createCookie(request, authentication));
                     savedRequestAwareAuthenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication);
+                })
+                .failureHandler((_, response, exception) -> {
+                    log.error("OAuth2 login failed", exception);
+                    response.sendRedirect("/ui/login/failure");
                 }))
+
+            .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry
+                .requestMatchers("/index.html", "/favicon.png", "/assets/**", "/ui/login/failure").permitAll()
+                .anyRequest().authenticated())
+            .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/oauth2/authorization/discord")))
             .build();
     }
 
@@ -130,5 +146,14 @@ public class SecurityConfig {
 
             return defaultOAuth2UserService.loadUser(userRequest);
         }
+    }
+
+    private static Cookie createCookie(HttpServletRequest request, Authentication authentication) {
+        Cookie cookie = new Cookie("user_id", authentication.getName());
+
+        cookie.setSecure(request.isSecure());
+        cookie.setPath("/");
+        cookie.setHttpOnly(false);
+        return cookie;
     }
 }

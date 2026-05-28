@@ -1,3 +1,7 @@
+server:
+  ssl:
+    enabled: false
+
 spring:
   cloud:
     openfeign:
@@ -26,6 +30,11 @@ logging:
     com.sedmelluq.discord.lavaplayer: info
     dev.lavalink.youtube: info
     net.dv8tion.jda: info
+    org.springframework.web.socket: info
+    org.springframework.messaging: info
+    org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler: info
+    org.springframework.messaging.simp.user: info
+    org.springframework.messaging.simp.broker: info
 
 devs:
   ids: ${DEVS_DISCORD_IDS:}

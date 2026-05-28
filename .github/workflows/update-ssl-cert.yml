@@ -1,0 +1,30 @@
+name: update-ssl-cert.yml
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+
+    steps:
+      - name: Try update ssl cert. If updated then covert new cert then restart containers
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            certbot renew --quiet --deploy-hook '
+              echo "$(date): Certificate renewed"
+              openssl pkcs12 -export -in /etc/letsencrypt/live/deus.bot.nu/fullchain.pem -inkey /etc/letsencrypt/live/deus.bot.nu/privkey.pem -out /opt/deus-ssl/keystore.p12 -name deus-bot -passin pass:${{ env.KEY_STORE_PASSWORD }} -passout pass:${{ env.KEY_STORE_PASSWORD }}
+              docker restart deus-bot
+              docker restart deus-bot-test
+            '

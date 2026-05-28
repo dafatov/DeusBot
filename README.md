@@ -41,6 +41,7 @@ REVERSE1999_POOLS=
 REVERSE1999_WIKI_URL=
 SHIKIMORI_GRAPHQL_PATH=
 SHIKIMORI_URL=
+VITE_DISCORD_CDN_URL=
 ```
 
 ### Настройка инфраструктуры
@@ -634,6 +635,17 @@ docker run -it --restart always --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE=fal
 }
 ```
 </details> 
+
+###### Установка сертификата
+
+```bash
+sudo apt install certbot openssl -y
+sudo certbot certonly --standalone -d <your.domain> --non-interactive --agree-tos -m <your@email.com>
+sudo mkdir -p /opt/ssl/<your.domain>
+sudo chown 10000:10000 /opt/ssl/<your.domain>
+sudo openssl pkcs12 -export -in /etc/letsencrypt/live/<your.domain>/fullchain.pem -inkey /etc/letsencrypt/live/<your.domain>/privkey.pem -out /opt/ssl/<your.domain>/keystore.p12 -name deus-bot -password pass:<password>
+sudo chown 10000:10000 /opt/ssl/deus.bot.nu/keystore.p12
+```
 
 #### Production
 
