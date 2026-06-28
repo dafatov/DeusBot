@@ -45,7 +45,7 @@ jobs:
           git config user.name "release-bot"
           git config user.email "users.noreply.github.com"
           git checkout -b release/${{ steps.bump.outputs.version }}
-          git add pom.xml
+          git add pom.xml frontend/package.json
           git commit -m 'Bump version after release ${{ steps.bump.outputs.version }}'
           git push origin release/${{ steps.bump.outputs.version }} --force
         env:
