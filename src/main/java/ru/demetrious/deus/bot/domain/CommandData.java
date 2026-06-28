@@ -36,6 +36,7 @@ public class CommandData {
         EVENT_REMOVE("event", "remove"),
         EVENT_SHOW("event", "show"),
         FIRST("first"),
+        GAME("game"),
         LOOP("loop"),
         MOVE("move"),
         PAUSE("pause"),

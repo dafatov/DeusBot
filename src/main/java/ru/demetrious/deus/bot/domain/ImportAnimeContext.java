@@ -15,7 +15,7 @@ public class ImportAnimeContext {
     private List<AnimeProjection> another;
 
     @Data
-    @Accessors
+    @Accessors(chain = true)
     public static class AnimeProjection {
         private String title;
         private URI url;

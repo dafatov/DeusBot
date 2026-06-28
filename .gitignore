@@ -36,3 +36,6 @@ build/
 
 ### Cache ###
 /.cache-data/
+
+### FrontEnd ###
+/src/main/resources/static/

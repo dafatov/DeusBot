@@ -53,6 +53,7 @@ function pull_values {
 #
 function update_pom {
   mvn versions:set-property -DgenerateBackupPoms=false -Dproperty=revision -DnewVersion="${new_version}"
+  npm version "${new_version}" --prefix ./frontend --no-git-tag-version
 }
 
 # Set up the defaults for the script

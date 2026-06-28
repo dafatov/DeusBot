@@ -64,6 +64,9 @@ jobs:
     outputs:
       url: ${{ steps.set-url.outputs.url }}
 
+    env:
+      VITE_DISCORD_CDN_URL: ${{ vars.VITE_DISCORD_CDN_URL }}
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -300,7 +303,7 @@ jobs:
             SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }}
             ENV_EOF
             
-            docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} -v ${{ env.IMAGE_NAME }}-cache:/cache-data \
+            docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} -v ${{ env.IMAGE_NAME }}-cache:/cache-data -v /opt/ssl/deus.bot.nu:/ssl/deus.bot.nu:ro \
               --tmpfs /tmp:rw,exec,uid=10000,gid=10000,mode=0755\
               --pull always \
               --restart always \

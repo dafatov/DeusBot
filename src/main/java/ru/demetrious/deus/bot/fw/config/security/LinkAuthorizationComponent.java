@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.user.FindLinkUserOutbound;
 import ru.demetrious.deus.bot.app.api.user.SaveLinkUserOutbound;
 import ru.demetrious.deus.bot.domain.LinkUser;
+import ru.demetrious.deus.bot.domain.LinkUser.LinkUserKey;
 
 import static java.util.Base64.getDecoder;
 import static java.util.Objects.requireNonNull;
@@ -51,6 +52,8 @@ public class LinkAuthorizationComponent {
                     .additionalParameters(additionalParameters)
                     .build();
             })
+            .or(() -> Optional.ofNullable(authorizationRequest)
+                .filter(f -> DISCORD_REGISTRATION_ID.equals(f.getAttributes().get("registration_id"))))
             .orElseThrow(() -> new IllegalArgumentException("Main registration user id can't be null"));
     }
 
@@ -80,20 +83,20 @@ public class LinkAuthorizationComponent {
     }
 
     protected void handleSuccess(OAuth2AuthenticationToken authentication) {
-        requireNonNull(authentication.getCredentials(), "Main registration user id can't be null");
-        LinkUser.LinkUserKey linkUserKey = new LinkUser.LinkUserKey()
-            .setDiscordPrincipalName(String.valueOf(authentication.getCredentials()))
-            .setLinkedRegistrationId(authentication.getAuthorizedClientRegistrationId());
+        String registrationId = authentication.getAuthorizedClientRegistrationId();
 
-        if (!equalsIgnoreCase(DISCORD_REGISTRATION_ID, linkUserKey.getLinkedRegistrationId())) {
+        if (!equalsIgnoreCase(DISCORD_REGISTRATION_ID, registrationId)) {
+            requireNonNull(authentication.getCredentials(), "Main registration user id can't be null");
             saveLinkUserOutbound.save(new LinkUser()
-                .setLinkUserKey(linkUserKey)
+                .setLinkUserKey(new LinkUserKey()
+                    .setDiscordPrincipalName(String.valueOf(authentication.getCredentials()))
+                    .setLinkedRegistrationId(registrationId))
                 .setLinkedPrincipalName(authentication.getPrincipal().getName()));
         }
     }
 
     protected Optional<String> getLinkedPrincipalName(String shikimoriRegistrationId, String userId) {
-        return findLinkUserOutbound.findById(new LinkUser.LinkUserKey()
+        return findLinkUserOutbound.findById(new LinkUserKey()
                 .setLinkedRegistrationId(shikimoriRegistrationId)
                 .setDiscordPrincipalName(userId))
             .map(LinkUser::getLinkedPrincipalName);
@@ -103,7 +106,7 @@ public class LinkAuthorizationComponent {
     // = Implementation
     // ===================================================================================================================
 
-    private static class CustomOAuth2AuthenticationToken extends OAuth2AuthenticationToken {
+    protected static class CustomOAuth2AuthenticationToken extends OAuth2AuthenticationToken {
         @Setter
         private Object credentials;
 

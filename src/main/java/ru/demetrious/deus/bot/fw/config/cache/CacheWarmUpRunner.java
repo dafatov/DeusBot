@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -11,7 +12,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.fw.annotation.cache.InitWarmUp;
 
@@ -28,7 +28,7 @@ import static org.springframework.util.ReflectionUtils.doWithMethods;
 @Component
 public class CacheWarmUpRunner implements ApplicationRunner {
     private final ApplicationContext applicationContext;
-    private final ThreadPoolTaskExecutor cacheWarmUpExecutor;
+    private final ExecutorService virtualThreadPerTaskExecutor;
     private final JDA jda;
 
     @Override
@@ -52,7 +52,7 @@ public class CacheWarmUpRunner implements ApplicationRunner {
                     } catch (Exception e) {
                         log.error("Can't init warm up for {}", Arrays.toString(cacheable.cacheNames()), e);
                     }
-                }, cacheWarmUpExecutor));
+                }, virtualThreadPerTaskExecutor));
             });
         }
 
