@@ -1,5 +1,7 @@
 # DeusBot
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/dafatov/DeusBot)
+
 ### Настройка рабочего места
 
 1. Создать в [ресурсах](./src/main/resources) файл `.env`, добавить и заполнить следующими переменными окружения:
