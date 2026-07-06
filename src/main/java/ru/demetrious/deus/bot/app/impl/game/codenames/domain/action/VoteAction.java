@@ -1,11 +1,13 @@
 package ru.demetrious.deus.bot.app.impl.game.codenames.domain.action;
 
 import java.util.Map;
+import java.util.Objects;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Player.Team;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word.Reveal;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.Context.Timer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.vote.Vote;
 
@@ -82,8 +84,14 @@ public record VoteAction(Vote vote) implements Action {
             .filter(w -> StringUtils.equals(w.getText(), vote.word()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("Can't find word that voted"));
+        Integer previousOrder = gameSession.getWordList().stream()
+            .map(Word::getRevealed)
+            .filter(Objects::nonNull)
+            .map(Reveal::order)
+            .max(Integer::compareTo)
+            .orElse(0);
 
-        word.setRevealed(true);
+        word.setRevealed(new Reveal(previousOrder + 1, gameSession.getState().getTeam(), gameSession.getState().getRound()));
         return switch (word.getColor()) {
             case BLACK -> {
                 finishGame(gameSession, gameSession.getPlayerList().stream()

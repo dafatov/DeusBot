@@ -61,6 +61,7 @@ public interface Action {
     static void endGuessingPhase(GameSession gameSession, Context ctx) {
         gameSession.getState().setPhase(HINTING);
         gameSession.getState().setTeam(gameSession.getState().getTeam() == Team.BLUE ? Team.RED : Team.BLUE);
+        gameSession.getState().setRound(gameSession.getState().getRound() + 1);
         ctx.timerSetter.accept(new Timer(gameSession, ofMinutes(1), () -> endHintingPhaseTimeout(gameSession, ctx)));
     }
 

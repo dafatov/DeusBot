@@ -19,7 +19,6 @@ export const WordTile = ({word}) => {
           background: t => t.palette.primary.dark,
         },
       })}>
-
         <Typography variant="body1" color="primary" sx={t => ({
           padding: t.spacing(1),
           textTransform: 'uppercase',

@@ -39,6 +39,7 @@ public record StartGameAction() implements Action {
         gameSession.getVoteMap().clear();
         gameSession.getHintList().clear();
         gameSession.getState().setPhase(HINTING);
+        gameSession.getState().setRound(1);
         gameSession.getState().setLocked(true);
         gameSession.getState().getScore().clear();
         gameSession.getState().getScore().add(wordList.getLeft() == Color.RED ? Team.RED : Team.BLUE, 9);
