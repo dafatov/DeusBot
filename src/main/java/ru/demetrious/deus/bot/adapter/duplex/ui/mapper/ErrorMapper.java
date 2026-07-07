@@ -8,6 +8,6 @@ import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION)
 public interface ErrorMapper {
-    @Mapping(target = "message", source = "message")
+    @Mapping(target = "message", expression = "java(exception.toString())")
     ErrorDto map(Exception exception);
 }

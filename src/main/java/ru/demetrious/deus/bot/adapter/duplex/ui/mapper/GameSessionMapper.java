@@ -19,6 +19,7 @@ import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.vote.Vote;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toMap;
 import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.GameSessionDto.StateDto;
@@ -64,6 +65,6 @@ public interface GameSessionMapper {
     @Named("needMapColor")
     @Condition
     default boolean needMapColor(Word word, @Context Player player, @Context Phase phase) {
-        return word.isRevealed() || player.isCaptain() || player.getTeam() == SPECTATOR || phase == FINISHED;
+        return nonNull(word.getRevealed()) || player.isCaptain() || player.getTeam() == SPECTATOR || phase == FINISHED;
     }
 }

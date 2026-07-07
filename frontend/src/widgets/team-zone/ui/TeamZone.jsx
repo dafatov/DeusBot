@@ -14,7 +14,7 @@ export const TeamZone = ({currentTeam}) => {
   const {gameId, team, phase, locked, paused, timer, findCaptain, filterPlayers, filterHints, me, playersBySkip} = useGame();
   const {minutes, seconds, restart, isRunning} = useTimer({expiryTimestamp: new Date(), autoStart: false});
   // noinspection JSCheckFunctionSignatures
-  const [play] = useSound(beepSound);
+  const [play] = useSound(beepSound, {volume: 0.1});
   const prevPhaseRef = useRef(phase);
 
   useEffect(() => {

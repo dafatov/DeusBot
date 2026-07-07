@@ -35,6 +35,7 @@ public class GameSession {
     @Data
     public static class State {
         private final Multiset<Team> score = create(Team.class);
+        private int round = 0;
         private Phase phase = WAITING;
         private Team team;
         private Instant timer;
