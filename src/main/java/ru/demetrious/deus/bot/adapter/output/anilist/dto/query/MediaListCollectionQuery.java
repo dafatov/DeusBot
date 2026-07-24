@@ -17,7 +17,7 @@ public class MediaListCollectionQuery implements Query {
 
     @Override
     public String serialize() {
-        return "MediaListCollection(userId:%d,type:%s,chunk:%s,perChunk:%s){lists{entries{id,media{idMal,episodes},progress,repeat,score,status}}}"
+        return "MediaListCollection(userId:%d,type:%s,chunk:%s,perChunk:%s){lists{entries{id,media{id,idMal,episodes,title{romaji}},progress,repeat,score,status}}}"
             .formatted(userId, ANIME, chunk, PER_CHUNK);
     }
 }
