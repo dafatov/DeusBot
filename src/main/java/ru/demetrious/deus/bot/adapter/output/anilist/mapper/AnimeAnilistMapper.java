@@ -18,6 +18,7 @@ public interface AnimeAnilistMapper {
     Entries map(Anime anime);
 
     @Mapping(target = "idMal", source = "animedbId")
+    @Mapping(target = "title.romaji", source = "title")
     @Mapping(target = "id", ignore = true)
     Media mapMedia(Anime anime);
 

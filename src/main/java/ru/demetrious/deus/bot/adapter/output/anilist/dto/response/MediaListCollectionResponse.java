@@ -23,6 +23,7 @@ public class MediaListCollectionResponse implements ResponseSerialize {
         public static class Entries {
             @EqualsAndHashCode.Exclude
             private Integer id;
+            @EqualsAndHashCode.Exclude
             private Media media;
             private Integer progress;
             private Integer repeat;
@@ -36,10 +37,16 @@ public class MediaListCollectionResponse implements ResponseSerialize {
             public static class Media {
                 private Integer id;
                 private Integer idMal;
-                @EqualsAndHashCode.Exclude
                 private Integer episodes;
-                @EqualsAndHashCode.Exclude
-                private String title;
+                private Title title;
+
+                @NoArgsConstructor
+                @EqualsAndHashCode
+                @AllArgsConstructor
+                @Data
+                public static class Title {
+                    private String romaji;
+                }
             }
         }
     }

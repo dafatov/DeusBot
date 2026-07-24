@@ -131,6 +131,11 @@ public class AnilistAdapter implements ImportAnimeOutbound {
         Iterator<Entries> iterator = toUpdate.iterator();
         while (iterator.hasNext()) {
             Entries entry = iterator.next();
+
+            if (nonNull(entry.getMedia().getId())) {
+                continue;
+            }
+
             Integer id = existingNewIdsMap.get(entry.getMedia().getIdMal());
 
             if (isNull(id)) {
@@ -217,7 +222,7 @@ public class AnilistAdapter implements ImportAnimeOutbound {
 
     private AnimeProjection mapAnimeProjection(Entries entries) {
         return new AnimeProjection()
-            .setTitle(entries.getMedia().getTitle())
+            .setTitle(entries.getMedia().getTitle().getRomaji())
             .setUrl(create("%s/animes/%d".formatted(shikimoriUrl, entries.getMedia().getIdMal())));
     }
 
