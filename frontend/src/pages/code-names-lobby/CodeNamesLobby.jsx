@@ -6,7 +6,7 @@ import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 export const CodeNamesLobby = () => {
-  const [setting, setSetting] = useState({});
+  const [setting, setSetting] = useState({game: 'code_names'});
   const [gameId, setGameId] = useState(null);
   const [createLoading, setCreateLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);

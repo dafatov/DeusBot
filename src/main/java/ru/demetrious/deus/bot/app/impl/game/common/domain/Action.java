@@ -1,0 +1,19 @@
+package ru.demetrious.deus.bot.app.impl.game.common.domain;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
+
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
+
+@JsonTypeInfo(use = NAME, include = PROPERTY, property = "type")
+@JsonSubTypes({
+    @Type(value = CodeNamesAction.class)
+})
+public interface Action<S extends Setting, P extends Player, G extends Instance<S, P>, C extends ActionContext<S, P, G>> {
+    String getGame();
+
+    void perform(G gameSession, String userId, C ctx) throws ActionException;
+}

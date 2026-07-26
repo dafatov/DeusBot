@@ -16,52 +16,52 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.PackDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.SettingDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.PackMapper;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.SettingMapper;
-import ru.demetrious.deus.bot.app.api.game.codenames.CreateCodeNamesGameInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.DeleteCodeNamesGamePackInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.GetCodeNamesGamePacksInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.JoinCodeNamesGameInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.SaveCodeNamesGamePacksInbound;
+import ru.demetrious.deus.bot.app.api.game.CreateGameInbound;
+import ru.demetrious.deus.bot.app.api.game.DeleteGamePackInbound;
+import ru.demetrious.deus.bot.app.api.game.GetGamePacksInbound;
+import ru.demetrious.deus.bot.app.api.game.JoinGameInbound;
+import ru.demetrious.deus.bot.app.api.game.SaveGamePacksInbound;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/game/code-names")
+@RequestMapping("/api/game")
 public class CodeNamesAdapter {
-    private final CreateCodeNamesGameInbound createCodeNamesGameInbound;
-    private final JoinCodeNamesGameInbound joinCodeNamesGameInbound;
-    private final SaveCodeNamesGamePacksInbound saveCodeNamesGamePacksInbound;
-    private final GetCodeNamesGamePacksInbound getCodeNamesGamePacksInbound;
-    private final DeleteCodeNamesGamePackInbound deleteCodeNamesGamePackInbound;
+    private final CreateGameInbound createGameInbound;
+    private final JoinGameInbound joinGameInbound;
+    private final SaveGamePacksInbound saveGamePacksInbound;
+    private final GetGamePacksInbound getGamePacksInbound;
+    private final DeleteGamePackInbound deleteGamePackInbound;
     private final PackMapper packMapper;
     private final SettingMapper settingMapper;
 
     @PostMapping("/create")
     public String create(@RequestBody SettingDto settingDto) {
-        return createCodeNamesGameInbound.execute(settingMapper.map(settingDto));
+        return createGameInbound.execute(settingMapper.map(settingDto));
     }
 
     @PostMapping("/{gameId}/join")
     public void join(@PathVariable String gameId) {
-        joinCodeNamesGameInbound.execute(gameId);
+        joinGameInbound.execute(gameId);
     }
 
     @PostMapping(value = "/packs", consumes = MULTIPART_FORM_DATA_VALUE)
     public List<PackDto> uploadPacks(@RequestParam("files") MultipartFile[] files) {
         log.debug("uploadPacks");
-        saveCodeNamesGamePacksInbound.savePacks(files);
-        return packMapper.map(getCodeNamesGamePacksInbound.execute());
+        saveGamePacksInbound.savePacks(files);
+        return packMapper.map(getGamePacksInbound.execute());
     }
 
     @GetMapping("/packs")
     public List<PackDto> getPacks() {
-        return packMapper.map(getCodeNamesGamePacksInbound.execute());
+        return packMapper.map(getGamePacksInbound.execute());
     }
 
     @DeleteMapping("/packs")
     public List<PackDto> deletePack(@RequestParam Long id) {
-        deleteCodeNamesGamePackInbound.execute(id);
-        return packMapper.map(getCodeNamesGamePacksInbound.execute());
+        deleteGamePackInbound.execute(id);
+        return packMapper.map(getGamePacksInbound.execute());
     }
 }

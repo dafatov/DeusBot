@@ -4,31 +4,31 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Player.Team;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word.Reveal;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.Context.Timer;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.vote.Vote;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word.Reveal;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
-import static java.time.Duration.between;
 import static java.time.Duration.ofSeconds;
-import static java.time.Instant.now;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession.State.Phase.FINISHED;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession.State.Phase.GUESSING;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkPaused;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkPhase;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkTeamMate;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.endGuessingPhase;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.vote.Vote.SkipVote;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.vote.Vote.WordVote;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkPaused;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkPhase;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkTeamMate;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.endGuessingPhase;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.State.Phase.FINISHED;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.State.Phase.GUESSING;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote.SkipVote;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote.WordVote;
 
 @Builder
-public record VoteAction(Vote vote) implements Action {
+public record VoteAction(Vote vote) implements CodeNamesAction {
     @Override
-    public void perform(GameSession gameSession, String userId, Context ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, GUESSING);
         checkTeamMate(gameSession, userId, gameSession.getState().getTeam());
@@ -56,7 +56,7 @@ public record VoteAction(Vote vote) implements Action {
         });
     }
 
-    private static boolean isAllVotesCompatible(GameSession gameSession) {
+    private static boolean isAllVotesCompatible(CodeNamesInstance gameSession) {
         return gameSession.getPlayerList().stream()
             .filter(p1 -> !p1.isCaptain() && p1.getTeam() == gameSession.getState().getTeam())
             .allMatch(p -> gameSession.getVoteMap().containsKey(p.getId()))
@@ -65,7 +65,7 @@ public record VoteAction(Vote vote) implements Action {
             && gameSession.getVoteMap().values().stream().map(WordVote.class::cast).map(WordVote::word).distinct().count() == 1);
     }
 
-    private static void resolveVoting(GameSession gameSession, String userId, Context ctx) {
+    private static void resolveVoting(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
         Vote vote = gameSession.getVoteMap().values().iterator().next();
         Boolean needSkipPhase = switch (vote) {
             case SkipVote _ -> true;
@@ -79,7 +79,7 @@ public record VoteAction(Vote vote) implements Action {
         }
     }
 
-    private static Boolean resolveWordVoting(GameSession gameSession, String userId, Context ctx, WordVote vote) {
+    private static Boolean resolveWordVoting(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx, WordVote vote) throws ActionException {
         Word word = gameSession.getWordList().stream()
             .filter(w -> StringUtils.equals(w.getText(), vote.word()))
             .findFirst()
@@ -94,7 +94,7 @@ public record VoteAction(Vote vote) implements Action {
         word.setRevealed(new Reveal(previousOrder + 1, gameSession.getState().getTeam(), gameSession.getState().getRound()));
         return switch (word.getColor()) {
             case BLACK -> {
-                finishGame(gameSession, gameSession.getPlayerList().stream()
+                finishGame(gameSession, ctx, gameSession.getPlayerList().stream()
                     .filter(p -> p.getId().equals(userId))
                     .findFirst()
                     .orElseThrow()
@@ -107,30 +107,25 @@ public record VoteAction(Vote vote) implements Action {
         };
     }
 
-    private static Boolean handleColoredWord(GameSession gameSession, Context ctx, Team team) {
+    private static Boolean handleColoredWord(CodeNamesInstance gameSession, CodeNamesActionContext ctx, Team team) throws ActionException {
         gameSession.getState().getScore().remove(team);
         if (!gameSession.getState().getScore().contains(team)) {
-            finishGame(gameSession, team);
+            finishGame(gameSession, ctx, team);
             return null;
         }
 
         boolean isSameTeam = gameSession.getState().getTeam() == team;
 
         if (isSameTeam) {
-            ctx.timerSetter().accept(new Timer(gameSession,
-                between(now(), gameSession.getState().getTimer()).plus(ofSeconds(10)),
-                gameSession.getState().getTimerTask()));
+            ctx.extendTimer(gameSession, ofSeconds(10));
         }
 
         return !isSameTeam;
     }
 
-    private static void finishGame(GameSession gameSession, Team team) {
+    private static void finishGame(CodeNamesInstance gameSession, CodeNamesActionContext ctx, Team team) {
         gameSession.getState().setTeam(team);
         gameSession.getState().setPhase(FINISHED);
-        gameSession.getState().getTimerCompletableFuture().cancel(true);
-        gameSession.getState().setTimerTask(null);
-        gameSession.getState().setTimer(null);
-        gameSession.getState().setTimerCompletableFuture(null);
+        ctx.cancelTimer(gameSession.getTimer());
     }
 }

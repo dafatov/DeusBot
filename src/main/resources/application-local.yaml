@@ -25,7 +25,7 @@ spring:
 
 logging:
   level:
-    ru.demetrious.deus.bot: debug
+    ru.demetrious.deus.bot: trace
     org.hibernate.orm.jdbc.bind: info
     com.sedmelluq.discord.lavaplayer: info
     dev.lavalink.youtube: info

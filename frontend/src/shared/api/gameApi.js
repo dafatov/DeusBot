@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api/game/code-names',
+  baseURL: '/api/game',
   headers: {'Content-Type': 'application/json'},
 });
 
