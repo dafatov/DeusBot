@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.demetrious.deus.bot.app.api.game.GetGamePackWordsOutbound;
 import ru.demetrious.deus.bot.app.api.game.NotifyGameStateOutbound;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
@@ -22,11 +23,13 @@ import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static ru.demetrious.deus.bot.domain.game.GameType.CODE_NAMES;
+import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @Slf4j
 @JsonTypeInfo(use = NAME, include = PROPERTY, property = "game")
 @JsonSubTypes({
-    @Type(value = CodeNamesActionContext.class, name = CODE_NAMES)
+    @Type(value = CodeNamesActionContext.class, name = CODE_NAMES),
+    @Type(value = CrossWardActionContext.class, name = CROSS_WARD),
 })
 @RequiredArgsConstructor
 public abstract class ActionContext<S extends Setting, P extends Player, G extends Instance<S, P>> {

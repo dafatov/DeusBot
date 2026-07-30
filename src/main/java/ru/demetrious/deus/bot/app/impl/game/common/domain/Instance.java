@@ -8,14 +8,17 @@ import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 import static ru.demetrious.deus.bot.domain.game.GameType.CODE_NAMES;
+import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @JsonTypeInfo(use = NAME, include = PROPERTY, property = "game")
 @JsonSubTypes({
-    @Type(value = CodeNamesInstance.class, name = CODE_NAMES)
+    @Type(value = CodeNamesInstance.class, name = CODE_NAMES),
+    @Type(value = CrossWardInstance.class, name = CROSS_WARD),
 })
 @EqualsAndHashCode(of = "key")
 @Data

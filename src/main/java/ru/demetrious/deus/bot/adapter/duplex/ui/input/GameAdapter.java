@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/game")
-public class CodeNamesAdapter {
+public class GameAdapter {
     private final CreateGameInbound createGameInbound;
     private final JoinGameInbound joinGameInbound;
     private final SaveGamePacksInbound saveGamePacksInbound;

@@ -20,6 +20,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+import static ru.demetrious.deus.bot.utils.JacksonUtils.writeValueAsString;
 
 @Slf4j
 public abstract class Processor<G extends Instance<S, P>, S extends Setting, P extends Player, C extends ActionContext<S, P, G>, A extends Action<S, P, G, C>> {
@@ -57,7 +58,7 @@ public abstract class Processor<G extends Instance<S, P>, S extends Setting, P e
 
         log.debug("Joined with id={}", newPlayer.getId());
         boolean added = game.getPlayerList().add(newPlayer);
-        log.debug("playerList={}", game.getPlayerList());
+        log.trace("playerList={}", writeValueAsString(game.getPlayerList()));
 
         if (!added) {
             throw new RuntimeException("Player is already in game");
