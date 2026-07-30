@@ -23,7 +23,7 @@ export const GameProvider = ({children, gameId}) => {
 
   useEffect(() => {
     if (connected && gameId) {
-      send(`/app/game/${gameId}`, JSON.stringify({type: 'get_state'}));
+      send(`/app/game/${gameId}`, JSON.stringify({type: 'code_names.get_state'}));
     }
   }, [connected, gameId, send]);
 
@@ -34,8 +34,8 @@ export const GameProvider = ({children, gameId}) => {
     team: game?.state?.team,
     phase: game?.state?.phase,
     locked: game?.state?.locked,
-    paused: !!game?.state?.remaining,
-    timer: game?.state?.timer ?? game?.state?.remaining,
+    paused: !!game?.timer?.remaining,
+    timer: game?.timer?.timer ?? game?.timer?.remaining,
     spectators: (game?.playerList ?? []).filter(p => p.team === 'SPECTATOR'),
     playersBySkip: (game?.playerList ?? []).filter(p => game?.voteMap?.[p.id]?.type === 'skip'),
     words: game?.wordList ?? [],

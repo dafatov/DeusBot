@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.Builder;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Word.Color;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.Context.Timer;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word.Color;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Lists.newArrayList;
@@ -18,16 +20,16 @@ import static java.util.Collections.nCopies;
 import static java.util.Collections.shuffle;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.ThreadLocalRandom.current;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession.State.Phase.HINTING;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.Player.Team;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkHost;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkLocked;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.endHintingPhaseTimeout;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkHost;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkLocked;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.endHintingPhaseTimeout;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.State.Phase.HINTING;
 
 @Builder
-public record StartGameAction() implements Action {
+public record StartGameAction() implements CodeNamesAction {
     @Override
-    public void perform(GameSession gameSession, String userId, Context ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
         checkLocked(gameSession);
         checkHost(gameSession, userId);
 
@@ -44,15 +46,15 @@ public record StartGameAction() implements Action {
         gameSession.getState().getScore().clear();
         gameSession.getState().getScore().add(wordList.getLeft() == Color.RED ? Team.RED : Team.BLUE, 9);
         gameSession.getState().getScore().add(wordList.getLeft() != Color.RED ? Team.RED : Team.BLUE, 8);
-        ctx.timerSetter().accept(new Timer(gameSession, ofMinutes(2), () -> endHintingPhaseTimeout(gameSession, ctx)));
+        ctx.startTimer(gameSession, ofMinutes(2), () -> endHintingPhaseTimeout(gameSession, ctx));
     }
 
     // =========================================================================================================================================================
     // = Implementation
     // =========================================================================================================================================================
 
-    private Pair<Color, List<Word>> createWordList(Long packId, Context ctx) {
-        List<String> wordList = new ArrayList<>(ctx.dictionary().getWords(packId));
+    private Pair<Color, List<Word>> createWordList(Long packId, CodeNamesActionContext ctx) {
+        List<String> wordList = new ArrayList<>(ctx.getDictionary().getWords(packId));
         ThreadLocalRandom random = current();
         Color color = random.nextBoolean() ? Color.RED : Color.BLUE;
         List<Color> colors = newArrayList(concat(

@@ -12,9 +12,9 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.ActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.ActionMapper;
-import ru.demetrious.deus.bot.app.api.game.codenames.ConnectWebSocketInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.DisconnectWebSocketInbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.FireGameActionInbound;
+import ru.demetrious.deus.bot.app.api.game.ConnectWebSocketInbound;
+import ru.demetrious.deus.bot.app.api.game.DisconnectWebSocketInbound;
+import ru.demetrious.deus.bot.app.api.game.FireGameActionInbound;
 
 import static java.util.Optional.ofNullable;
 

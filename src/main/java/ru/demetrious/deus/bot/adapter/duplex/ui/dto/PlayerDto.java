@@ -1,10 +1,13 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.dto;
 
-import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
-public record PlayerDto(String id, TeamDto team, boolean captain, String name, String avatar, boolean disconnected) {
-    public enum TeamDto {
-        SPECTATOR, RED, BLUE
-    }
+@Getter
+@SuperBuilder
+public abstract class PlayerDto {
+    private final String id;
+    private final String name;
+    private final String avatar;
+    private final boolean disconnected;
 }

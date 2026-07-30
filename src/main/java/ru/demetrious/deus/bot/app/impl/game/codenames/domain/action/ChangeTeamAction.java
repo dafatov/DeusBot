@@ -1,15 +1,18 @@
 package ru.demetrious.deus.bot.app.impl.game.codenames.domain.action;
 
 import lombok.Builder;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.GameSession;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.Player.Team;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.Action.checkLocked;
+import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkLocked;
 
 @Builder
-public record ChangeTeamAction(Team team, boolean captain) implements Action {
+public record ChangeTeamAction(Team team, boolean captain) implements CodeNamesAction {
     @Override
-    public void perform(GameSession gameSession, String userId, Context ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
         checkLocked(gameSession);
 
         if (captain && gameSession.getPlayerList().stream().anyMatch(p -> p.getTeam().equals(team) && p.isCaptain())) {

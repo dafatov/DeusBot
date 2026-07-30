@@ -24,8 +24,8 @@ public class CommandsConfig {
         List<CommandData> commandDataList = commandDataMapper.mapCommand(commandList.stream().map(CommandInbound::getData).toList());
 
         jda.retrieveCommands()
-            .flatMap(CollectionUtils::isNotEmpty, c -> jda.updateCommands())
-            .onSuccess(c -> log.info("Global commands are removed"))
+            .flatMap(CollectionUtils::isNotEmpty, _ -> jda.updateCommands())
+            .onSuccess(_ -> log.info("Global commands are removed"))
             .queue();
         jda.getGuilds().forEach(guild -> guild.updateCommands()
             .addCommands(commandDataList)

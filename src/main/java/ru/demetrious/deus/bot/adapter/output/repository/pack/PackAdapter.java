@@ -6,10 +6,10 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.demetrious.deus.bot.app.api.game.codenames.DeleteCodeNamesGamePackOutbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.GetCodeNamesGamePackWordsOutbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.GetCodeNamesGamePacksOutbound;
-import ru.demetrious.deus.bot.app.api.game.codenames.SaveCodeNamesGamePacksOutbound;
+import ru.demetrious.deus.bot.app.api.game.DeleteGamePackOutbound;
+import ru.demetrious.deus.bot.app.api.game.GetGamePackWordsOutbound;
+import ru.demetrious.deus.bot.app.api.game.GetGamePacksOutbound;
+import ru.demetrious.deus.bot.app.api.game.SaveGamePacksOutbound;
 import ru.demetrious.deus.bot.domain.game.Pack;
 import ru.demetrious.deus.bot.domain.game.Word;
 
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 @Transactional
 @RequiredArgsConstructor
 @Component
-public class PackAdapter implements GetCodeNamesGamePacksOutbound, SaveCodeNamesGamePacksOutbound, DeleteCodeNamesGamePackOutbound, GetCodeNamesGamePackWordsOutbound {
+public class PackAdapter implements GetGamePacksOutbound, SaveGamePacksOutbound, DeleteGamePackOutbound, GetGamePackWordsOutbound {
     private final PackRepository packRepository;
     private final WordRepository wordRepository;
 
