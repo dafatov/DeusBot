@@ -21,7 +21,7 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-public class CodeNamesWebSocketController {
+public class GameWebSocketController {
     private final FireGameActionInbound fireGameActionInbound;
     private final DisconnectWebSocketInbound disconnectWebSocketInbound;
     private final ConnectWebSocketInbound connectWebSocketInbound;

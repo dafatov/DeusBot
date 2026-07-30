@@ -1,29 +1,14 @@
 import {Background} from '@entities/game';
 import {GameControl} from '@features/game-control';
 import {Box, CircularProgress, Stack} from '@mui/material';
-import {GameProvider} from '@shared/lib/game/GameProvider';
 import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
-import {SocketProvider} from '@shared/lib/socket/SocketProvider';
 import {SpectatorPlayers} from '@widgets/spectators';
 import {TeamZone} from '@widgets/team-zone';
 import {WordsGrid} from '@widgets/words-grid';
 import {useEffect} from 'react';
-import {useParams} from 'react-router-dom';
 
-export const CodeNames = () => {
-  const {gameId} = useParams();
-
-  return (
-    <SocketProvider>
-      <GameProvider gameId={gameId}>
-        <CodeNamesContent/>
-      </GameProvider>
-    </SocketProvider>
-  );
-};
-
-const CodeNamesContent = () => {
+export const CodeNamesContent = () => {
   const {connected} = useSocket();
   const {gameId, me: {isHost}} = useGame();
 

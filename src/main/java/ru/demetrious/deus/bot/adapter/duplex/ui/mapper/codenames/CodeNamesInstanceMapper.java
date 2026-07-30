@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.duplex.ui.mapper;
+package ru.demetrious.deus.bot.adapter.duplex.ui.mapper.codenames;
 
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multiset.Entry;
@@ -13,6 +13,7 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesInstanceD
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesPlayerDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.VoteDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.WordDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote;

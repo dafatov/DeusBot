@@ -1,10 +1,9 @@
-import {getUserId} from '@shared/lib/cookies';
 import {GameContext} from '@shared/lib/game/GameContext';
 import {useSocket, useSocketSubscription} from '@shared/lib/socket/hooks';
 import {useCallback, useEffect, useState} from 'react';
 import {useSnackbar} from '../snackbar/hooks';
 
-export const GameProvider = ({children, gameId}) => {
+export const GameProvider = ({children, gameId, gameType, transform}) => {
   const {connected, send} = useSocket();
   const [game, setGame] = useState(null);
   const {showError} = useSnackbar();
@@ -23,33 +22,11 @@ export const GameProvider = ({children, gameId}) => {
 
   useEffect(() => {
     if (connected && gameId) {
-      send(`/app/game/${gameId}`, JSON.stringify({type: 'code_names.get_state'}));
+      send(`/app/game/${gameId}`, JSON.stringify({type: `${gameType}.get_state`}));
     }
   }, [connected, gameId, send]);
 
-  const me = (game?.playerList ?? []).find(p => getUserId() === p?.id);
-  const value = {
-    gameId: game?.key,
-    score: game?.state?.score,
-    team: game?.state?.team,
-    phase: game?.state?.phase,
-    locked: game?.state?.locked,
-    paused: !!game?.timer?.remaining,
-    timer: game?.timer?.timer ?? game?.timer?.remaining,
-    spectators: (game?.playerList ?? []).filter(p => p.team === 'SPECTATOR'),
-    playersBySkip: (game?.playerList ?? []).filter(p => game?.voteMap?.[p.id]?.type === 'skip'),
-    words: game?.wordList ?? [],
-    me: {
-      isSpectator: me?.team === 'SPECTATOR',
-      team: me?.team,
-      isCaptain: me?.captain,
-      isHost: game?.hostId === getUserId(),
-    },
-    findCaptain: team => (game?.playerList ?? []).find(p => p.team === team && p.captain),
-    filterPlayers: team => (game?.playerList ?? []).filter(p => p.team === team && !p.captain),
-    filterHints: team => (game?.hintList ?? []).filter(h => h.team === team),
-    filterPlayersByWord: word => (game?.playerList ?? []).filter(p => game?.voteMap?.[p.id]?.word === word?.text),
-  };
+  const value = transform?.(game);
 
   return (
     <GameContext.Provider value={value}>

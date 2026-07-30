@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.adapter.duplex.ui.mapper;
+package ru.demetrious.deus.bot.adapter.duplex.ui.mapper.codenames;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.SubclassMapping;

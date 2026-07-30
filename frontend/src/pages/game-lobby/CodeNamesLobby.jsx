@@ -5,8 +5,8 @@ import {useSnackbar} from '@shared/lib/snackbar/hooks';
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-export const CodeNamesLobby = () => {
-  const [setting, setSetting] = useState({game: 'code_names'});
+export const GameLobby = ({gameType, gameUrlPart, gameName}) => {
+  const [setting, setSetting] = useState({game: gameType});
   const [gameId, setGameId] = useState(null);
   const [createLoading, setCreateLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
@@ -15,18 +15,18 @@ export const CodeNamesLobby = () => {
 
   const handleCreate = () => {
     setCreateLoading(true);
-    gameApi.createGame(setting).then(id => navigate(`/game/code-names/${id}`)).catch(e => showError(e.message)).finally(() => setCreateLoading(false));
+    gameApi.createGame(setting).then(id => navigate(`/game/${gameUrlPart}/${id}`)).catch(e => showError(e.message)).finally(() => setCreateLoading(false));
   };
 
   const handleJoin = () => {
     setJoinLoading(true);
-    gameApi.joinGame(gameId).then(() => navigate(`/game/code-names/${gameId}`)).catch(e => showError(e.message)).finally(() => setJoinLoading(false));
+    gameApi.joinGame(gameId).then(() => navigate(`/game/${gameUrlPart}/${gameId}`)).catch(e => showError(e.message)).finally(() => setJoinLoading(false));
   };
 
   useEffect(() => {
     const oldTitle = document.title;
 
-    document.title = 'Codenames';
+    document.title = gameName;
     return () => {
       document.title = oldTitle;
     };
