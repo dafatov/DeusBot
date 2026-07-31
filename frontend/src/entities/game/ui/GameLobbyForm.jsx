@@ -5,7 +5,7 @@ import {useSnackbar} from '@shared/lib/snackbar/hooks';
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-export const GameLobby = ({gameType, gameUrlPart, gameName}) => {
+export const GameLobbyForm = ({gameType, gameUrlPart, gameName}) => {
   const [setting, setSetting] = useState({game: gameType});
   const [gameId, setGameId] = useState(null);
   const [createLoading, setCreateLoading] = useState(false);

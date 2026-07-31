@@ -1,8 +1,8 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {Box, CircularProgress} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {useEffect} from 'react';
-import {CrosswordCanvas2} from './trash/CrosswordCanvas2';
+import {CrosswordCanvas} from '../../../trash/CrosswordCanvas';
 
 export const CrossWardContent = () => {
   const {connected} = useSocket();
@@ -40,21 +40,7 @@ export const CrossWardContent = () => {
     ['С', 'Л', 'О', 'Н', 'К', 'А', null, null],
   ];
 
-  const words = [
-    {word: 'КОТ', row: 0, col: 0, direction: 'across'},
-    {word: 'МОРЕ', row: 0, col: 4, direction: 'across'},
-    {word: 'КАР', row: 1, col: 0, direction: 'down'},
-    {word: 'РАК', row: 2, col: 0, direction: 'across'},
-    {word: 'РЕКА', row: 2, col: 4, direction: 'across'},
-    {word: 'ЛЕС', row: 4, col: 0, direction: 'across'},
-    {word: 'НОС', row: 4, col: 4, direction: 'across'},
-    {word: 'СЛОН', row: 4, col: 0, direction: 'down'},
-    {word: 'ОТ', row: 5, col: 0, direction: 'across'},
-    {word: 'СЛОН', row: 6, col: 0, direction: 'across'}, // обратите внимание на пересечения
-  ];
-
-
   return (
-    <CrosswordCanvas2 matrix={matrix} words={words}/>
+    <CrosswordCanvas matrix={matrix}/>
   );
 };

@@ -1,7 +1,7 @@
-import {GameContext} from '@shared/lib/game/GameContext';
 import {useSocket, useSocketSubscription} from '@shared/lib/socket/hooks';
+import {useSnackbar} from 'notistack';
 import {useCallback, useEffect, useState} from 'react';
-import {useSnackbar} from '../snackbar/hooks';
+import {GameContext} from './GameContext';
 
 export const GameProvider = ({children, gameId, gameType, transform}) => {
   const {connected, send} = useSocket();

@@ -1,7 +1,7 @@
 import {Background} from '@entities/game';
+import {useGame} from '@entities/game/lib/hooks';
 import {GameControl} from '@features/game-control';
 import {Box, CircularProgress, Stack} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {SpectatorPlayers} from '@widgets/spectators';
 import {TeamZone} from '@widgets/team-zone';
