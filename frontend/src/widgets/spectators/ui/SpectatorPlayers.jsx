@@ -1,6 +1,6 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {BecomeSpectatorButton} from '@features/change-team';
 import {AvatarGroup, Paper, Stack, Tooltip} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {CopyText} from '@shared/ui/CopyText';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 

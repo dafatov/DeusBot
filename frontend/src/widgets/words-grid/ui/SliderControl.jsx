@@ -1,5 +1,5 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {alpha, Box, Slider} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useWordsStats} from '../model/hooks/useWordsStats';
 
 const CustomMark = ({'data-index': index, style, ownerState: {marks}}) =>

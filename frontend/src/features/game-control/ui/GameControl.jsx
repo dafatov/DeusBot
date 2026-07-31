@@ -1,6 +1,6 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {LockOpenOutlined, LockOutlined, PauseOutlined, PlayArrowOutlined, RestartAlt, Shuffle} from '@mui/icons-material';
 import {Box, Fab} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {shufflePlayers, startGame, toggleLocked, togglePause} from '../model/gameControlService.js';
 

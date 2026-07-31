@@ -1,5 +1,5 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {alpha, AvatarGroup, Box, Divider, Tooltip} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 import {sendVote} from '../model/voteService';
