@@ -2,11 +2,11 @@ import {useGame} from '@entities/game/lib/hooks';
 import {Box, CircularProgress} from '@mui/material';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {useEffect} from 'react';
-import {CrosswordCanvas} from '../../../trash/CrosswordCanvas';
+import {CrosswordCanvas3} from '../../../trash/CrosswordCanvas3';
 
 export const CrossWardContent = () => {
   const {connected} = useSocket();
-  const {gameId} = useGame();
+  const {gameId, grid} = useGame();
 
   useEffect(() => {
     const oldTitle = document.title;
@@ -41,6 +41,7 @@ export const CrossWardContent = () => {
   ];
 
   return (
-    <CrosswordCanvas matrix={matrix}/>
+    // <CrosswordCanvas matrix={grid.reduce((acc, f) => {const rr = acc[f.y]; if (!rr) {acc[f.y] = []} acc[f.y][f.x] = f.letter; return acc}, [])}/>
+    <CrosswordCanvas3 matrix={grid}/>
   );
 };

@@ -14,5 +14,5 @@ public class Cell {
     private final Character letter;
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private final List<?> words = new ArrayList<>();
+    private final List<Word> words = new ArrayList<>();
 }

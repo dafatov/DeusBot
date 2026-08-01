@@ -11,7 +11,6 @@ public class Word {
     private final String text;
     private final Orientation orientation;
     private final Position start;
-    private final int length;
     private final List<Cell> cells = new ArrayList<>();
 
     public enum Orientation {
