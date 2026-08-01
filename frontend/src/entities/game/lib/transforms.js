@@ -32,5 +32,6 @@ export const transformCrossWard = game => {
 
   return {
     gameId: game?.key,
+    grid: game?.grid ?? [],
   };
 };

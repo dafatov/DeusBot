@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 //TODO отрефачить этот нейрослоп
-export const CrosswordCanvas = ({matrix, cellSize = 40}, enableZoom = true) => {
+export const CrosswordCanvas = ({matrix, cellSize = 40, enableZoom = true}) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -77,7 +77,7 @@ export const CrosswordCanvas = ({matrix, cellSize = 40}, enableZoom = true) => {
           ctx.font = `bold ${fontSize}px Arial, sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(value, x + cellSize / 2, y + cellSize / 2);
+          ctx.fillText(value.toUpperCase(), x + cellSize / 2, y + cellSize / 2);
         }
       }
     }
