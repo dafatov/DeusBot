@@ -7,8 +7,8 @@ export const AppView = () => (
   <Routes>
     <Route path="/login/success" element={<>Успех</>}/>
     <Route path="/login/failure" element={<>Провал</>}/>
-      <Route path="/game/:gameType" element={<GameLobby/>}/>
-      <Route path="/game/:gameType/:gameId" element={<Game/>}/>
+    <Route path="/game/:gameType" element={<GameLobby/>}/>
+    <Route path="/game/:gameType/:gameId" element={<Game/>}/>
     <Route path="*" element={<NotFound/>}/>
   </Routes>
 );
