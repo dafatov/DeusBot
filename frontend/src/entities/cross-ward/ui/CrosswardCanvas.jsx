@@ -13,16 +13,32 @@ export const CrosswordCanvas = ({matrix, cellSize = DEFAULT_CELL_SIZE}) => {
       return {cellsMap: new Map(), rows: 0, cols: 0};
     }
 
-    const map = new Map();
-    let maxX = 0, maxY = 0;
-
-    matrix.forEach(({x, y, letter}) => {
-      map.set(`${x},${y}`, letter);
+    // Находим минимумы и максимумы
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    matrix.forEach(({x, y}) => {
+      if (x < minX) minX = x;
       if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
       if (y > maxY) maxY = y;
     });
 
-    return {cellsMap: map, rows: maxY + 1, cols: maxX + 1};
+    // Сдвиг так, чтобы минимальная координата стала 0
+    const shiftX = minX; // или minX - 1, если нужны строго положительные
+    const shiftY = minY;
+
+    const map = new Map();
+    matrix.forEach(({x, y, letter}) => {
+      const newX = x - shiftX; // теперь newX >= 0
+      const newY = y - shiftY; // теперь newY >= 0
+      map.set(`${newX},${newY}`, letter);
+    });
+
+    // Размеры сетки (количество строк и столбцов)
+    const rows = maxY - minY + 1;
+    const cols = maxX - minX + 1;
+
+    return {cellsMap: map, rows, cols};
   }, [matrix]);
 
   const drawCanvas = useCallback((ctx, canvasWidth, canvasHeight) => {
