@@ -68,7 +68,7 @@ export const useCrosswordRenderer = (
     ctx.font = `bold ${Math.max(10, cellSize * 0.6)}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(current.letter.toUpperCase(), x + cellSize / 2, y + cellSize / 2);
+    ctx.fillText(current.letter?.toUpperCase() ?? '', x + cellSize / 2, y + cellSize / 2);
   }, [cellSize]);
 
   const createEdges = useCallback((x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom) => [

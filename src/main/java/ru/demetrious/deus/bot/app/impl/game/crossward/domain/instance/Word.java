@@ -14,6 +14,8 @@ public class Word {
     private final Position start;
     private final List<Cell> cells = new ArrayList<>();
     private CrossWardPlayer owner;
+    private int order;
+    private boolean revealed = false;
 
     public enum Orientation {
         HORIZONTAL, VERTICAL
