@@ -6,5 +6,6 @@ export const useGame = () => {
   if (!context) {
     throw new Error('useGame must be used within GameProvider');
   }
+
   return context;
 };

@@ -1,5 +1,5 @@
+import {useSnackbar} from '@shared/lib/snackbar/hooks';
 import {useSocket, useSocketSubscription} from '@shared/lib/socket/hooks';
-import {useSnackbar} from 'notistack';
 import {useCallback, useEffect, useState} from 'react';
 import {GameContext} from './GameContext';
 

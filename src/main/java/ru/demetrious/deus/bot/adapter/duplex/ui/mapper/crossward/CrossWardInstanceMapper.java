@@ -1,11 +1,17 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.mapper.crossward;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.CellDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.OrientationDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.PositionCellDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.WordDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardPlayerDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
@@ -13,7 +19,11 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Cell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Position;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
 
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION, uses = {
@@ -24,7 +34,7 @@ public interface CrossWardInstanceMapper {
 
     CrossWardPlayerDto map(CrossWardPlayer player);
 
-    default List<CrossWardInstanceDto.PositionCellDto> map(Map<Position, Cell> value) {
+    default List<PositionCellDto> map(Map<Position, Cell> value) {
         return value.entrySet().stream()
             .map(positionCellEntry -> map(positionCellEntry.getKey(), positionCellEntry.getValue()))
             .toList();
@@ -33,5 +43,36 @@ public interface CrossWardInstanceMapper {
     @Mapping(target = "x", source = "position.x")
     @Mapping(target = "y", source = "position.y")
     @Mapping(target = "letter", source = "cell.letter")
-    CrossWardInstanceDto.PositionCellDto map(Position position, Cell cell);
+    @Mapping(target = "words", source = "cell.words")
+    PositionCellDto map(Position position, Cell cell);
+
+    OrientationDto map(Word.Orientation orientation);
+
+    default Map<OrientationDto, String> mapText(List<Word> value) {
+        return value.stream().collect(toMap(f -> map(f.getOrientation()), Word::getText));
+    }
+
+    default Map<String, WordDto> map(List<Word> value) {
+        return value.stream().collect(toMap(Word::getText, this::map));
+    }
+
+    @Mapping(target = "background", ignore = true)
+    @Mapping(target = "border", source = "owner.color")
+    WordDto map(Word word);
+
+    @Mapping(target = "x", source = "position.x")
+    @Mapping(target = "y", source = "position.y")
+    CellDto map(Cell cell);
+
+    // =========================================================================================================================================================
+    // = Implementation
+    // =========================================================================================================================================================
+
+    default String mapColor(@Nullable Color color) {
+        return ofNullable(color)
+            .map(Color::getRGB)
+            .map(g -> g & 0x00FFFFFF)
+            .map(g -> format("#%06x", g))
+            .orElse(null);
+    }
 }

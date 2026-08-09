@@ -1,51 +1,74 @@
-import {PanZoomProvider} from '@entities/cross-ward/lib/PanZoomProvider';
-import {CrosswordCanvas} from '@entities/cross-ward/ui/CrosswardCanvas';
 import {useGame} from '@entities/game/lib/hooks';
-import {Box, Button, CircularProgress} from '@mui/material';
+import {CrossWardControl} from '@features/game-control';
+import {setSpectator} from '@features/set-spectator/model/setSpectatorService';
+import {ArrowRightAlt, LoginRounded} from '@mui/icons-material';
+import {alpha, IconButton, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Paper, Stack} from '@mui/material';
+import {PanZoomProvider} from '@shared/lib/pan-zoom/PanZoomProvider';
 import {useSocket} from '@shared/lib/socket/hooks';
+import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 import {useEffect} from 'react';
+import {useTimer} from 'react-timer-hook';
+import {CrosswordCanvas} from '../cross-ward-canvas';
+import {CrossWardSpectatorPlayers} from '../spectators';
 
 export const CrossWardContent = () => {
-  const {connected, send} = useSocket();
-  const {gameId, grid} = useGame();
+  const {send} = useSocket();
+  const {gameId, me: {isHost, isSpectator}, phase, players, locked, currentPlayer, timer, paused} = useGame();
+  const {minutes, seconds, restart, isRunning} = useTimer({expiryTimestamp: new Date(), autoStart: false});
+
+  const handleClick = () => setSpectator(send, gameId, false);
 
   useEffect(() => {
-    const oldTitle = document.title;
+    if (phase === 'PLAYING') {
+      restart(new Date(Date.now() + (timer * 1000)), !paused);
+    } else {
+      restart(new Date(Date.now()), false);
+    }
+  }, [phase, timer, paused, restart]);
 
-    document.title = `Crossward - ${gameId}`;
-    return () => {
-      document.title = oldTitle;
-    };
-  }, [gameId]);
-
-  if (!connected || !gameId) {
-    return (
-      <Box sx={{
-        height: '100%',
-        display: 'flex',
-        'justify-content': 'center',
-        'align-items': 'center',
-      }}>
-        <CircularProgress color="secondary" size={100}/>
-      </Box>
-    );
-  }
-
-  //const stepIcon = (letter) => ({active, completed, className}) => <Avatar className={className}>{letter}</Avatar>;
   return (
-    <>
-      {/*<Card>
-        <Stepper activeStep={2}>
-          <Step><StepLabel slots={{stepIcon: stepIcon('A')}}>1</StepLabel></Step>
-          <Step><StepLabel slots={{stepIcon: stepIcon('B')}}>2</StepLabel></Step>
-          <Step><StepLabel slots={{stepIcon: stepIcon('C')}}>3</StepLabel></Step>
-          <Step><StepLabel slots={{stepIcon: stepIcon('D')}}>4</StepLabel></Step>
-        </Stepper>
-      </Card>*/}
+    <Stack container direction="column" sx={{height: '100vh'}}>
+      <CrossWardSpectatorPlayers/>
+      <Paper sx={{
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        right: 16,
+        zIndex: 2,
+        minWidth: '100px',
+        opacity: 0.8,
+      }}>
+        <List>
+          <ListItem>
+            <ListItemText>
+              {(isRunning || paused) && `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`}
+            </ListItemText>
+          </ListItem>
+          {players.map((player, index) => (
+            <ListItem key={player.id} sx={{backgroundColor: alpha(player.color, 0.5)}}>
+              <ListItemIcon>{index === currentPlayer && phase === 'PLAYING' && <ArrowRightAlt/>}</ListItemIcon>
+              <ListItemAvatar>
+                <DiscordAvatar
+                  id={player.id}
+                  name={player.name}
+                  avatar={player.avatar}
+                  disconnected={player.disconnected}
+                />
+              </ListItemAvatar>
+              <ListItemText>{player.score}</ListItemText>
+            </ListItem>
+          ))}
+          {isSpectator && !locked && <ListItem>
+            <IconButton onClick={handleClick}><LoginRounded/></IconButton>
+          </ListItem>}
+        </List>
+      </Paper>
       <PanZoomProvider>
-        <CrosswordCanvas matrix={grid}/>
+        <CrosswordCanvas/>
       </PanZoomProvider>
-      <Button variant="outlined" onClick={() => send(`/app/game/${gameId}`, JSON.stringify({type: 'cross_ward.start_game'}))}>Создать игру</Button>
-    </>
+      {isHost
+        ? <CrossWardControl/>
+        : <></>}
+    </Stack>
   );
 };

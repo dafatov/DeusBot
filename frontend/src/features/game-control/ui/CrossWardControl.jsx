@@ -1,21 +1,22 @@
 import {useGame} from '@entities/game/lib/hooks';
 import {LockOpenOutlined, LockOutlined, PauseOutlined, PlayArrowOutlined, RestartAlt, Shuffle} from '@mui/icons-material';
-import {Box, Fab} from '@mui/material';
+import {Fab, Paper} from '@mui/material';
 import {useSocket} from '@shared/lib/socket/hooks';
-import {shufflePlayers, startGame, toggleLocked, togglePause} from '../model/gameControlService.js';
+import {shufflePlayers, startGame, toggleLocked, togglePause} from '../model/crossWardControlService';
 
-export const GameControl = () => {
+export const CrossWardControl = () => {
   const {gameId, phase, locked, paused} = useGame();
   const {send} = useSocket();
 
   return (
-    <Box sx={t => ({
+    <Paper sx={t => ({
       position: 'absolute',
       bottom: 16,
       right: 16,
       display: 'flex',
       flexDirection: 'row-reverse',
       gap: t.spacing(),
+      padding: t.spacing(),
     })}>
       <Fab color="primary" disabled={locked} onClick={() => startGame(send, gameId)}>
         {phase === 'WAITING' || phase === 'FINISHED' ? <PlayArrowOutlined/> : <RestartAlt/>}
@@ -26,10 +27,10 @@ export const GameControl = () => {
       <Fab color="primary" onClick={() => toggleLocked(send, gameId)}>
         {locked ? <LockOpenOutlined/> : <LockOutlined/>}
       </Fab>
-      {(phase === 'HINTING' || phase === 'GUESSING') &&
+      {(phase === 'PLAYING') &&
         <Fab color="primary" disabled={locked} onClick={() => togglePause(send, gameId)}>
           {paused ? <PlayArrowOutlined/> : <PauseOutlined/>}
         </Fab>}
-    </Box>
+    </Paper>
   );
 };

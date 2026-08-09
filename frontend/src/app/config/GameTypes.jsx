@@ -4,15 +4,17 @@ import {transformCodeNames, transformCrossWard} from '@entities/game/lib/transfo
 import {CodeNamesContent} from '@widgets/code-names/CodeNamesContent';
 import {CrossWardContent} from '@widgets/cross-ward/CrossWardContent';
 
-export const GameTypes = ({
+export const GameTypes = {
   'code-names': {
+    gameName: 'Codenames',
     lobby: () => <GameLobbyForm gameType="code_names" gameUrlPart="code-names" gameName="Codenames"/>,
     component: CodeNamesContent,
     provider: props => <GameProvider {...props} gameType="code_names" transform={transformCodeNames}/>,
   },
   'cross-ward': {
+    gameName: 'Crossward',
     lobby: () => <GameLobbyForm gameType="cross_ward" gameUrlPart="cross-ward" gameName="Crossward"/>,
     component: CrossWardContent,
     provider: props => <GameProvider {...props} gameType="cross_ward" transform={transformCrossWard}/>,
   },
-});
+};

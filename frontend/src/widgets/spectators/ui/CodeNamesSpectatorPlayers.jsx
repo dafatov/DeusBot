@@ -4,7 +4,7 @@ import {AvatarGroup, Paper, Stack, Tooltip} from '@mui/material';
 import {CopyText} from '@shared/ui/CopyText';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 
-export const SpectatorPlayers = () => {
+export const CodeNamesSpectatorPlayers = () => {
   const {gameId, locked, spectators, me: {isSpectator}} = useGame();
 
   return (

@@ -1,43 +1,18 @@
 import {Background} from '@entities/game';
 import {useGame} from '@entities/game/lib/hooks';
-import {GameControl} from '@features/game-control';
-import {Box, CircularProgress, Stack} from '@mui/material';
-import {useSocket} from '@shared/lib/socket/hooks';
-import {SpectatorPlayers} from '@widgets/spectators';
+import {CodeNamesControl} from '@features/game-control';
+import {Stack} from '@mui/material';
+import {CodeNamesSpectatorPlayers} from '@widgets/spectators';
 import {TeamZone} from '@widgets/team-zone';
 import {WordsGrid} from '@widgets/words-grid';
-import {useEffect} from 'react';
 
 export const CodeNamesContent = () => {
-  const {connected} = useSocket();
-  const {gameId, me: {isHost}} = useGame();
-
-  useEffect(() => {
-    const oldTitle = document.title;
-
-    document.title = `Codenames - ${gameId}`;
-    return () => {
-      document.title = oldTitle;
-    };
-  }, [gameId]);
-
-  if (!connected || !gameId) {
-    return (
-      <Box sx={{
-        height: '100%',
-        display: 'flex',
-        'justify-content': 'center',
-        'align-items': 'center',
-      }}>
-        <CircularProgress color="secondary" size={100}/>
-      </Box>
-    );
-  }
+  const {me: {isHost}} = useGame();
 
   return (
     <Background>
       <Stack container direction="column" spacing={2} sx={{height: '100vh'}}>
-        <SpectatorPlayers/>
+        <CodeNamesSpectatorPlayers/>
         <Stack
           direction="row"
           spacing={2}
@@ -48,7 +23,7 @@ export const CodeNamesContent = () => {
           <TeamZone currentTeam="BLUE"/>
         </Stack>
         {isHost
-          ? <GameControl/>
+          ? <CodeNamesControl/>
           : <></>}
       </Stack>
     </Background>

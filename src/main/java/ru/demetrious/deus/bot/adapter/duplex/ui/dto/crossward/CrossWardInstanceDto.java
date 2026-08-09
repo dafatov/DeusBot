@@ -1,17 +1,35 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.InstanceDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
 
 @Getter
 @SuperBuilder
 public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
+    private final StateDto state;
     private final List<PositionCellDto> grid;
+    private final Map<String, WordDto> words;
 
     @Builder
-    public record PositionCellDto(int x, int y, Character letter) {
+    public record PositionCellDto(int x, int y, Character letter, Map<OrientationDto, String> words) {
+    }
+
+    @Builder
+    public record WordDto(String background, String border, Set<CellDto> cells) {
+    }
+
+    @Builder
+    public record CellDto(int x, int y) {
+    }
+
+    public enum OrientationDto {
+        HORIZONTAL,
+        VERTICAL
     }
 }

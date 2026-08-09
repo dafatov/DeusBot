@@ -2,6 +2,7 @@ import {GameTypes} from '@app/config/GameTypes';
 import {NotFound} from '@pages/not-found/NotFound';
 import {SocketProvider} from '@shared/lib/socket/SocketProvider';
 import {useParams} from 'react-router-dom';
+import {GameWrapper} from './ui/GameWrapper';
 
 export const Game = () => {
   const {gameType, gameId} = useParams();
@@ -14,7 +15,9 @@ export const Game = () => {
   return (
     <SocketProvider>
       <Provider gameId={gameId}>
-        <Component/>
+        <GameWrapper gameName={Game?.gameName ?? '<Unknown>'}>
+          <Component/>
+        </GameWrapper>
       </Provider>
     </SocketProvider>
   );

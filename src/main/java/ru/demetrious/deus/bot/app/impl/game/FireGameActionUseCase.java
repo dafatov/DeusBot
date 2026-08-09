@@ -25,6 +25,7 @@ public class FireGameActionUseCase implements FireGameActionInbound {
             gamebox.performAction(gameId, userId, action);
         } catch (Exception e) {
             log.warn(e.toString());
+            log.trace(e.getMessage(), e);
             notifyGameErrorOutbound.notifyGameError(userId, e);
         }
     }
