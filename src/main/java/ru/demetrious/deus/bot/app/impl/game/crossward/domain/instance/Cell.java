@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 public class Cell {
     private final Position position;
     private final Character letter;
+    private boolean revealed = false;
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private final List<Word> words = new ArrayList<>();

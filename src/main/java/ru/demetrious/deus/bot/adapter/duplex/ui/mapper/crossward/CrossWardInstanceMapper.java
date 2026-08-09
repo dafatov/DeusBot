@@ -4,9 +4,11 @@ import java.awt.Color;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
+import org.mapstruct.Condition;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.CellDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.OrientationDto;
@@ -34,27 +36,13 @@ public interface CrossWardInstanceMapper {
 
     CrossWardPlayerDto map(CrossWardPlayer player);
 
-    default List<PositionCellDto> map(Map<Position, Cell> value) {
-        return value.entrySet().stream()
-            .map(positionCellEntry -> map(positionCellEntry.getKey(), positionCellEntry.getValue()))
-            .toList();
-    }
-
     @Mapping(target = "x", source = "position.x")
     @Mapping(target = "y", source = "position.y")
-    @Mapping(target = "letter", source = "cell.letter")
+    @Mapping(target = "letter", source = "cell.letter", conditionQualifiedByName = "needMapLetter")
     @Mapping(target = "words", source = "cell.words")
-    PositionCellDto map(Position position, Cell cell);
+    PositionCellDto map(Position position, Cell cell, @Context boolean isFinished);
 
     OrientationDto map(Word.Orientation orientation);
-
-    default Map<OrientationDto, String> mapText(List<Word> value) {
-        return value.stream().collect(toMap(f -> map(f.getOrientation()), Word::getText));
-    }
-
-    default Map<String, WordDto> map(List<Word> value) {
-        return value.stream().collect(toMap(Word::getText, this::map));
-    }
 
     @Mapping(target = "background", ignore = true)
     @Mapping(target = "border", source = "owner.color")
@@ -67,6 +55,26 @@ public interface CrossWardInstanceMapper {
     // =========================================================================================================================================================
     // = Implementation
     // =========================================================================================================================================================
+
+    @Named("needMapLetter")
+    @Condition
+    default boolean needMapLetter(Cell cell, @Context boolean isFinished) {
+        return cell.isRevealed() || isFinished;
+    }
+
+    default List<PositionCellDto> map(Map<Position, Cell> value, @Context boolean isFinished) {
+        return value.entrySet().stream()
+            .map(positionCellEntry -> map(positionCellEntry.getKey(), positionCellEntry.getValue(), isFinished))
+            .toList();
+    }
+
+    default Map<OrientationDto, Integer> mapId(List<Word> value) {
+        return value.stream().collect(toMap(w -> map(w.getOrientation()), Word::getOrder));
+    }
+
+    default Map<Integer, WordDto> map(List<Word> value) {
+        return value.stream().collect(toMap(Word::getOrder, this::map));
+    }
 
     default String mapColor(@Nullable Color color) {
         return ofNullable(color)

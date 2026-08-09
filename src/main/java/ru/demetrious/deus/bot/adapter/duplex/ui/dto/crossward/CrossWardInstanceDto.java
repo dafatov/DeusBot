@@ -14,10 +14,10 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
 public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     private final StateDto state;
     private final List<PositionCellDto> grid;
-    private final Map<String, WordDto> words;
+    private final Map<Integer, WordDto> words;
 
     @Builder
-    public record PositionCellDto(int x, int y, Character letter, Map<OrientationDto, String> words) {
+    public record PositionCellDto(int x, int y, boolean revealed, Character letter, Map<OrientationDto, Integer> words) {
     }
 
     @Builder
