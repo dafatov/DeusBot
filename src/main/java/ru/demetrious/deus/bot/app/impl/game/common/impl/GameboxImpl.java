@@ -41,6 +41,7 @@ public class GameboxImpl implements Gamebox {
     public Optional<Pair<? extends Instance<?, ?>, ? extends Player>> findByPlayer(String userId) {
         return processors.values().stream()
             .map(f -> f.findPlayer(userId))
+            .filter(Optional::isPresent)
             .findFirst()
             .flatMap(identity());
     }

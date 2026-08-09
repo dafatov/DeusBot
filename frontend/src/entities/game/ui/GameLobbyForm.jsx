@@ -1,8 +1,9 @@
 import {PackSelector} from '@features/pack-management';
 import {Box, Button, Card, Divider, FormControl, Stack, TextField} from '@mui/material';
 import {gameApi} from '@shared/api/gameApi';
+import {usePageTitle} from '@shared/lib/page-title/hooks';
 import {useSnackbar} from '@shared/lib/snackbar/hooks';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 export const GameLobbyForm = ({gameType, gameUrlPart, gameName}) => {
@@ -13,6 +14,8 @@ export const GameLobbyForm = ({gameType, gameUrlPart, gameName}) => {
   const navigate = useNavigate();
   const {showError} = useSnackbar();
 
+  usePageTitle(gameName);
+
   const handleCreate = () => {
     setCreateLoading(true);
     gameApi.createGame(setting).then(id => navigate(`/game/${gameUrlPart}/${id}`)).catch(e => showError(e.message)).finally(() => setCreateLoading(false));
@@ -22,15 +25,6 @@ export const GameLobbyForm = ({gameType, gameUrlPart, gameName}) => {
     setJoinLoading(true);
     gameApi.joinGame(gameId).then(() => navigate(`/game/${gameUrlPart}/${gameId}`)).catch(e => showError(e.message)).finally(() => setJoinLoading(false));
   };
-
-  useEffect(() => {
-    const oldTitle = document.title;
-
-    document.title = gameName;
-    return () => {
-      document.title = oldTitle;
-    };
-  }, []);
 
   return (
     <Box sx={{

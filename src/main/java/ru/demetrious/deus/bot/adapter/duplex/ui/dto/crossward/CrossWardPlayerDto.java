@@ -7,4 +7,7 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.PlayerDto;
 @Getter
 @SuperBuilder
 public class CrossWardPlayerDto extends PlayerDto {
+    private final boolean spectator;
+    private final String color;
+    private int score;
 }

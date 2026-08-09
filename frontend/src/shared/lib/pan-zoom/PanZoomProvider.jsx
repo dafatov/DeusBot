@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {PanZoomContext} from './PanZoomContext';
 
 const MIN_SCALE = 0.2;
@@ -68,8 +68,20 @@ export const PanZoomProvider = ({children, initialScale = 1, initialOffsetX = 0,
     setOffsetY((rect.height - gridHeight) / 2);
   }, []);
 
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener('wheel', handleWheel, {passive: false});
+
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
   return (
-    <PanZoomContext.Provider value={{containerRef, scale, offsetX, offsetY, resetView}}>
+    <PanZoomContext.Provider value={{containerRef, scale, offsetX, offsetY, resetView, isDragging}}>
       <div
         ref={containerRef}
         style={{
@@ -84,7 +96,6 @@ export const PanZoomProvider = ({children, initialScale = 1, initialOffsetX = 0,
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
       >
         {children}
       </div>
