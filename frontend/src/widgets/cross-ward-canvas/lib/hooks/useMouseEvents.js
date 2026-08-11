@@ -1,7 +1,7 @@
 import {useCallback} from 'react';
 import {getGridIndices} from '../utils/getGridIndices';
 
-export const useCrosswordMouseEvents = (onCellClick, onCellHover, canvasRef, offset, scale, cellSize, size, cells) => {
+export const useMouseEvents = (onCellClick, onCellHover, canvasRef, offset, scale, cellSize, size, cells) => {
   const onEvent = useCallback((e, callback) => {
     if (!callback) return;
 

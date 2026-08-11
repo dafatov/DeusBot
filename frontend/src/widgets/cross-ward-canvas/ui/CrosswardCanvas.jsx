@@ -2,8 +2,8 @@ import {useGame} from '@entities/game/lib/hooks';
 import {usePanZoom} from '@shared/lib/pan-zoom/hooks';
 import React, {useEffect, useRef} from 'react';
 import {useCellHover} from '../lib/hooks/useCellHover';
-import {useCrosswordMouseEvents} from '../lib/hooks/useCrosswordMouseEvents';
-import {useCrosswordRenderer} from '../lib/hooks/useCrosswordRenderer';
+import {useMouseEvents} from '../lib/hooks/useMouseEvents';
+import {useRenderer} from '../lib/hooks/useRenderer';
 import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {Canvas} from './Canvas';
 
@@ -16,7 +16,7 @@ export const CrosswordCanvas = ({cellSize = 40}) => {
 
   const {hoveredCell, onHover} = useCellHover();
 
-  const {onClick, onMouseMove, onMouseLeave} = useCrosswordMouseEvents(
+  const {onClick, onMouseMove, onMouseLeave} = useMouseEvents(
     onCellClick,
     onHover,
     canvasRef,
@@ -27,7 +27,7 @@ export const CrosswordCanvas = ({cellSize = 40}) => {
     cellsMap
   );
 
-  useCrosswordRenderer(
+  useRenderer(
     canvasRef,
     containerRef,
     {x: offsetX, y: offsetY},
