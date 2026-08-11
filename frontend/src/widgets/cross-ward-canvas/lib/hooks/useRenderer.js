@@ -13,7 +13,7 @@ const drawLine = (ctx, x1, y1, x2, y2, color) => {
   ctx.stroke();
 };
 
-export const useCrosswordRenderer = (
+export const useRenderer = (
   canvasRef,
   containerRef,
   offset,
