@@ -1,0 +1,51 @@
+package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
+
+import lombok.Builder;
+import org.apache.commons.lang3.StringUtils;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
+
+import static java.time.Duration.ofSeconds;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPaused;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPhase;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkTurn;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.endPlayerPhase;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.tryFinishGame;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
+
+
+@Builder
+public record SubmitWordAction(int wordId, String word) implements CrossWardAction {
+
+    @Override
+    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+        checkPaused(gameSession);
+        checkPhase(gameSession, PLAYING);
+        checkTurn(gameSession, userId);
+
+        Word word = gameSession.getWords().stream()
+            .filter(g -> g.getOrder() == wordId)
+            .findFirst()
+            .orElseThrow(() -> new ActionException("Word not found"));
+        CrossWardPlayer player = gameSession.getPlayerList().stream()
+            .filter(g -> StringUtils.equals(g.getId(), userId))
+            .findFirst()
+            .orElseThrow(() -> new ActionException("Player not found"));
+
+        if (!equalsIgnoreCase(word.getText(), this.word)) {
+            endPlayerPhase(gameSession, ctx);
+            return;
+        }
+
+        player.setScore(player.getScore() + word.reveal(w -> player.equals(w.getOwner()) ? 2 : 1));
+        if (tryFinishGame(gameSession, ctx, player)) {
+            return;
+        }
+        ctx.extendTimer(gameSession, ofSeconds(10));
+    }
+}

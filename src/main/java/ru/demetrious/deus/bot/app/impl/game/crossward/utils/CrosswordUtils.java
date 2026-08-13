@@ -1,4 +1,4 @@
-package ru.demetrious.deus.bot.app.impl.game.codenames.utils;
+package ru.demetrious.deus.bot.app.impl.game.crossward.utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -93,14 +93,14 @@ public class CrosswordUtils {
     private static boolean canPlaceWord(String text, PlacementVariant variant, Map<Position, Cell> grid) {
         Set<Position> newPositions = new HashSet<>();
         for (int i = 0; i < text.length(); i++) {
-            int dx = variant.orientation == Orientation.HORIZONTAL ? i : 0;
-            int dy = variant.orientation == Orientation.VERTICAL ? i : 0;
+            int dx = variant.orientation == HORIZONTAL ? i : 0;
+            int dy = variant.orientation == VERTICAL ? i : 0;
             newPositions.add(new Position(variant.start.x() + dx, variant.start.y() + dy));
         }
 
         for (int i = 0; i < text.length(); i++) {
-            int dx = variant.orientation == Orientation.HORIZONTAL ? i : 0;
-            int dy = variant.orientation == Orientation.VERTICAL ? i : 0;
+            int dx = variant.orientation == HORIZONTAL ? i : 0;
+            int dy = variant.orientation == VERTICAL ? i : 0;
             Position pos = new Position(variant.start.x() + dx, variant.start.y() + dy);
             Cell existing = grid.get(pos);
             char letter = text.charAt(i);

@@ -10,7 +10,9 @@ import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardAc
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetPauseActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetSpectatorActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.ShufflePlayersActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SkipTurnActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.StartGameActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SubmitWordActionDto;
 import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @JsonSubTypes({
@@ -20,6 +22,8 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = SetLockedActionDto.class, name = CROSS_WARD + ".set_locked"),
     @Type(value = SetPauseActionDto.class, name = CROSS_WARD + ".set_pause"),
     @Type(value = ShufflePlayersActionDto.class, name = CROSS_WARD + ".shuffle_players"),
+    @Type(value = SubmitWordActionDto.class, name = CROSS_WARD + ".submit_word"),
+    @Type(value = SkipTurnActionDto.class, name = CROSS_WARD + ".skip_turn"),
 })
 public interface CrossWardActionDto extends ActionDto {
     @Builder
@@ -44,5 +48,13 @@ public interface CrossWardActionDto extends ActionDto {
 
     @Builder
     record ShufflePlayersActionDto() implements CrossWardActionDto {
+    }
+
+    @Builder
+    record SubmitWordActionDto(int wordId, String word) implements CrossWardActionDto {
+    }
+
+    @Builder
+    record SkipTurnActionDto() implements CrossWardActionDto {
     }
 }

@@ -9,12 +9,18 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetLockedAct
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetPauseAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetSpectatorAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.ShufflePlayersAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State;
 
-import static java.time.Duration.ofSeconds;
+import static java.time.Duration.ofMinutes;
 import static java.util.Arrays.stream;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.utils.CrosswordUtils.placeWord;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.function.Failable.asRunnable;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.TARGET_SCORE;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.FINISHED;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeWord;
 import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @JsonSubTypes({
@@ -24,6 +30,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = SetLockedAction.class, name = "set_locked"),
     @Type(value = SetPauseAction.class, name = "set_pause"),
     @Type(value = ShufflePlayersAction.class, name = "shuffle_players"),
+    @Type(value = SkipTurnAction.class, name = "skip_turn"),
 })
 public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlayer, CrossWardInstance, CrossWardActionContext> {
     @Override
@@ -31,10 +38,25 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
         return CROSS_WARD;
     }
 
-    static void endPlayerPhase(CrossWardInstance gameSession, CrossWardActionContext ctx) {
+    static void endPlayerPhase(CrossWardInstance gameSession, CrossWardActionContext ctx) throws ActionException {
+        checkPhase(gameSession, PLAYING);
+
         gameSession.getState().setCurrentPlayer((gameSession.getState().getCurrentPlayer() + 1) % gameSession.getPlayerList().size());
+        //TODO переделать так при текущем подходе не учитывается что может не быть игроков + что игрок может быть в спектаторах
         placeWord(gameSession, gameSession.getPlayerList().get(gameSession.getState().getCurrentPlayer()));
-        ctx.startTimer(gameSession, ofSeconds(2), () -> endPlayerPhase(gameSession, ctx));
+        ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
+    }
+
+    //TODO после исправления текущего игрока исправить и это
+    static boolean tryFinishGame(CrossWardInstance gameSession, CrossWardActionContext ctx, CrossWardPlayer player) {
+        if (player.getScore() < TARGET_SCORE) {
+            return false;
+        }
+
+        gameSession.getState().setCurrentPlayer(0);
+        gameSession.getState().setPhase(FINISHED);
+        ctx.cancelTimer(gameSession.getTimer());
+        return true;
     }
 
     static void checkLocked(CrossWardInstance gameSession) throws ActionException {
@@ -43,9 +65,22 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
         }
     }
 
+    static void checkPaused(CrossWardInstance gameSession) throws ActionException {
+        if (nonNull(gameSession.getTimer().getRemaining())) {
+            throw new ActionException("Game is paused");
+        }
+    }
+
     static void checkPhase(CrossWardInstance gameSession, State.Phase... phases) throws ActionException {
         if (stream(phases).noneMatch(phase -> phase == gameSession.getState().getPhase())) {
-            throw new ActionException("Add hint can be only on HINTING phase");
+            throw new ActionException("Incorrect phase for this action");
+        }
+    }
+
+
+    static void checkTurn(CrossWardInstance gameSession, String userId) throws ActionException {
+        if (!gameSession.getPlayerList().get(gameSession.getState().getCurrentPlayer()).getId().equals(userId)) {
+            throw new ActionException("Wrong player in this action");
         }
     }
 
