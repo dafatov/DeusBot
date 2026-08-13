@@ -15,12 +15,14 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceD
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.PositionCellDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.WordDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardPlayerDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Cell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Position;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
 
 import static java.lang.String.format;
@@ -34,13 +36,16 @@ import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 public interface CrossWardInstanceMapper {
     CrossWardInstanceDto map(CrossWardInstance gameSession, @Context Player player, @Context boolean isFinished);
 
+    @Mapping(target = "currentPlayer", source = "currentPlayer.id")
+    StateDto map(State state);
+
     CrossWardPlayerDto map(CrossWardPlayer player);
 
     @Mapping(target = "x", source = "position.x")
     @Mapping(target = "y", source = "position.y")
     @Mapping(target = "letter", source = "cell.letter", conditionQualifiedByName = "needMapLetter")
     @Mapping(target = "words", source = "cell.words")
-    PositionCellDto map(Position position, Cell cell, @Context boolean isFinished);
+    PositionCellDto map(Position position, Cell cell, @Context Player player, @Context boolean isFinished);
 
     OrientationDto map(Word.Orientation orientation);
 
@@ -58,13 +63,17 @@ public interface CrossWardInstanceMapper {
 
     @Named("needMapLetter")
     @Condition
-    default boolean needMapLetter(Cell cell, @Context boolean isFinished) {
-        return cell.isRevealed() || isFinished;
+    default boolean needMapLetter(Cell cell, @Context Player player, @Context boolean isFinished) {
+        if (!(player instanceof CrossWardPlayer crossWardPlayer)) {
+            throw new IllegalArgumentException("player must be instance of CrossWardPlayer");
+        }
+
+        return cell.isRevealed() || isFinished || crossWardPlayer.isSpectator();
     }
 
-    default List<PositionCellDto> map(Map<Position, Cell> value, @Context boolean isFinished) {
+    default List<PositionCellDto> map(Map<Position, Cell> value, @Context Player player, @Context boolean isFinished) {
         return value.entrySet().stream()
-            .map(positionCellEntry -> map(positionCellEntry.getKey(), positionCellEntry.getValue(), isFinished))
+            .map(positionCellEntry -> map(positionCellEntry.getKey(), positionCellEntry.getValue(), player, isFinished))
             .toList();
     }
 
@@ -82,5 +91,9 @@ public interface CrossWardInstanceMapper {
             .map(g -> g & 0x00FFFFFF)
             .map(g -> format("#%06x", g))
             .orElse(null);
+    }
+
+    default String mapToId(CrossWardPlayer player) {
+        return player.getId();
     }
 }

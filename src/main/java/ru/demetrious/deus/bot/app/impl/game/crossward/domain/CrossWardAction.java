@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.game.crossward.domain;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import org.jetbrains.annotations.Nullable;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Action;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.GetStateAction;
@@ -15,6 +16,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State;
 
 import static java.time.Duration.ofMinutes;
 import static java.util.Arrays.stream;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.function.Failable.asRunnable;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.TARGET_SCORE;
@@ -41,19 +43,27 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
     static void endPlayerPhase(CrossWardInstance gameSession, CrossWardActionContext ctx) throws ActionException {
         checkPhase(gameSession, PLAYING);
 
-        gameSession.getState().setCurrentPlayer((gameSession.getState().getCurrentPlayer() + 1) % gameSession.getPlayerList().size());
-        //TODO переделать так при текущем подходе не учитывается что может не быть игроков + что игрок может быть в спектаторах
-        placeWord(gameSession, gameSession.getPlayerList().get(gameSession.getState().getCurrentPlayer()));
+        int currentIndex = gameSession.getActivePlayers().indexOf(gameSession.getState().getCurrentPlayer());
+        int nextIndex = (currentIndex + 1) % gameSession.getActivePlayers().size();
+
+        gameSession.getState().setCurrentPlayer(gameSession.getActivePlayers().get(nextIndex));
+        placeWord(gameSession, gameSession.getState().getCurrentPlayer());
         ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }
 
-    //TODO после исправления текущего игрока исправить и это
-    static boolean tryFinishGame(CrossWardInstance gameSession, CrossWardActionContext ctx, CrossWardPlayer player) {
+    static boolean tryFinishGame(CrossWardInstance gameSession, CrossWardActionContext ctx, @Nullable CrossWardPlayer player) {
+        if (isNull(player)) {
+            gameSession.getState().setCurrentPlayer(null);
+            gameSession.getState().setPhase(FINISHED);
+            ctx.cancelTimer(gameSession.getTimer());
+            return true;
+        }
+
         if (player.getScore() < TARGET_SCORE) {
             return false;
         }
 
-        gameSession.getState().setCurrentPlayer(0);
+        gameSession.getState().setCurrentPlayer(player);
         gameSession.getState().setPhase(FINISHED);
         ctx.cancelTimer(gameSession.getTimer());
         return true;
@@ -79,7 +89,7 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
 
 
     static void checkTurn(CrossWardInstance gameSession, String userId) throws ActionException {
-        if (!gameSession.getPlayerList().get(gameSession.getState().getCurrentPlayer()).getId().equals(userId)) {
+        if (!gameSession.getState().getCurrentPlayer().getId().equals(userId)) {
             throw new ActionException("Wrong player in this action");
         }
     }
@@ -91,7 +101,7 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
     }
 
     static void checkPlayers(CrossWardInstance gameSession) throws ActionException {
-        if (gameSession.getPlayerList().stream().allMatch(CrossWardPlayer::isSpectator)) {
+        if (gameSession.getActivePlayers().isEmpty()) {
             throw new ActionException("No players in this game");
         }
     }

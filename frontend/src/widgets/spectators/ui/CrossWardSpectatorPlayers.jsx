@@ -5,7 +5,7 @@ import {CopyText} from '@shared/ui/CopyText';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 
 export const CrossWardSpectatorPlayers = () => {
-  const {gameId, locked, spectators, me: {isSpectator}} = useGame();
+  const {gameId, locked, spectators, me: {isSpectator}, phase} = useGame();
 
   return (
     <Paper square sx={theme => ({padding: theme.spacing(1), minHeight: '44px'})}>
@@ -19,7 +19,7 @@ export const CrossWardSpectatorPlayers = () => {
           ))}
           {locked || isSpectator
             ? <></>
-            : <BecomeSpectatorButton gameId={gameId}/>}
+            : <BecomeSpectatorButton gameId={gameId} phase={phase}/>}
         </AvatarGroup>
       </Stack>
     </Paper>

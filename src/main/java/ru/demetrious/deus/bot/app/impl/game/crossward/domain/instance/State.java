@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance;
 
 import lombok.Data;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.WAITING;
 
@@ -8,7 +9,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 public class State {
     private Phase phase = WAITING;
     private boolean locked = false;
-    private int currentPlayer = 0;
+    private CrossWardPlayer currentPlayer;
 
     public enum Phase {
         WAITING, PLAYING, FINISHED

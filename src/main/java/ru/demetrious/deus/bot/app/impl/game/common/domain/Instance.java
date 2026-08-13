@@ -31,4 +31,8 @@ public abstract class Instance<S extends Setting, P extends Player> {
     private final Timer timer = new Timer();
 
     public abstract boolean isFinished();
+
+    public void removePlayer(String userId) {
+        playerList.removeIf(p -> p.getId().equals(userId));
+    }
 }

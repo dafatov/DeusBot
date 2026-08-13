@@ -8,7 +8,7 @@ import lombok.Getter;
 public class StateDto {
     private final PhaseDto phase;
     private final boolean locked;
-    private final int currentPlayer;
+    private final String currentPlayer;
 
     public enum PhaseDto {
         WAITING, PLAYING, FINISHED
