@@ -19,6 +19,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlayer> {
+    private final List<CrossWardPlayer> activePlayers = new ArrayList<>();
     private final State state = new State();
     private final Queue<String> availableWords = new ArrayDeque<>();
     private final Map<Position, Cell> grid = new HashMap<>();
@@ -31,5 +32,11 @@ public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlaye
     @Override
     public boolean isFinished() {
         return state.getPhase() == FINISHED;
+    }
+
+    @Override
+    public void removePlayer(String userId) {
+        activePlayers.removeIf(p -> p.getId().equals(userId));
+        super.removePlayer(userId);
     }
 }

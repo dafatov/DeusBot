@@ -28,6 +28,11 @@ export const GameProvider = ({children, gameId, gameType, transform}) => {
 
   const value = useMemo(() => ({gameType, ...transform(game)}), [transform, game, gameType]);
 
+  //TODO убрать дебаг лог
+  useEffect(() => {
+    console.log({value});
+  }, [value]);
+
   return (
     <GameContext.Provider value={value}>
       {children}

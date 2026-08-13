@@ -91,9 +91,9 @@ export const CrossWardContent = () => {
         </Stack>
         <Divider/>
         <List>
-          {players.map((player, index) => (
+          {players.map(player => (
             <ListItem key={player.id} sx={{backgroundColor: alpha(player.color, 0.5)}}>
-              <ListItemIcon>{index === currentPlayer && (phase === 'PLAYING' && <ArrowRightAlt/> || phase === 'FINISHED' &&
+              <ListItemIcon>{player.id === currentPlayer && (phase === 'PLAYING' && <ArrowRightAlt/> || phase === 'FINISHED' &&
                 <EmojiEventsOutlined/>)}</ListItemIcon>
               <ListItemAvatar>
                 <DiscordAvatar

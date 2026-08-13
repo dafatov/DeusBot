@@ -24,7 +24,7 @@ public class DisconnectWebSocketUseCase implements DisconnectWebSocketInbound {
     public void execute(String userId) {
         gamebox.findByPlayer(userId).ifPresent(pair -> {
             pair.getRight().setDisconnectCompletableFuture(runAsync(() -> {
-                pair.getLeft().getPlayerList().removeIf(p -> p.getId().equals(userId));
+                pair.getLeft().removePlayer(userId);
 
                 log.debug("Disconnect for {}", userId);
                 if (pair.getLeft().getPlayerList().isEmpty()) {

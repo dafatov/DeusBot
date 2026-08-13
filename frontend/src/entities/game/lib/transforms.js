@@ -29,7 +29,8 @@ export const transformCodeNames = game => {
 };
 
 export const transformCrossWard = game => {
-  const me = (game?.playerList ?? []).find(p => getUserId() === p?.id);
+  const playersMap = new Map((game?.playerList ?? []).map(p => [p.id, p]));
+  const me = playersMap.get(getUserId());
   const grid = normalizeGrid(game?.grid);
 
   return {
@@ -46,7 +47,7 @@ export const transformCrossWard = game => {
       isHost: game?.hostId === getUserId(),
       color: me?.color,
     },
-    players: (game?.playerList ?? []).filter(p => !p.spectator),
+    players: (game?.activePlayers ?? []).map(p => playersMap.get(p)),
     words: game?.words ?? {},
   };
 };

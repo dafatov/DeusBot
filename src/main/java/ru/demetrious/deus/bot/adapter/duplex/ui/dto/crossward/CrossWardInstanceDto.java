@@ -15,6 +15,7 @@ public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     private final StateDto state;
     private final List<PositionCellDto> grid;
     private final Map<Integer, WordDto> words;
+    private final List<String> activePlayers;
 
     @Builder
     public record PositionCellDto(int x, int y, boolean revealed, Character letter, Map<OrientationDto, Integer> words) {
