@@ -21,7 +21,7 @@ public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     }
 
     @Builder
-    public record WordDto(String background, String border, Set<CellDto> cells) {
+    public record WordDto(String background, String border, boolean revealed, Set<CellDto> cells) {
     }
 
     @Builder

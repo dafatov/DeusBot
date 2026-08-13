@@ -10,14 +10,18 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetLockedAct
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetPauseAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetSpectatorAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.ShufflePlayersAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SubmitWordAction;
 
 import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetLockedActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetPauseActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetSpectatorActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.ShufflePlayersActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SkipTurnActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.StartGameActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SubmitWordActionDto;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION)
 public interface CrossWardActionMapper {
@@ -27,6 +31,8 @@ public interface CrossWardActionMapper {
     @SubclassMapping(target = SetLockedAction.class, source = SetLockedActionDto.class)
     @SubclassMapping(target = SetPauseAction.class, source = SetPauseActionDto.class)
     @SubclassMapping(target = ShufflePlayersAction.class, source = ShufflePlayersActionDto.class)
+    @SubclassMapping(target = SubmitWordAction.class, source = SubmitWordActionDto.class)
+    @SubclassMapping(target = SkipTurnAction.class, source = SkipTurnActionDto.class)
     CrossWardAction map(CrossWardActionDto actionDto);
 
     GetStateAction map(GetStateActionDto value);
@@ -38,4 +44,6 @@ public interface CrossWardActionMapper {
     SetPauseAction map(SetPauseActionDto value);
 
     ShufflePlayersAction map(ShufflePlayersActionDto value);
+
+    SkipTurnAction map(SkipTurnActionDto value);
 }

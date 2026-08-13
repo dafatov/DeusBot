@@ -26,6 +26,8 @@ export const useRenderer = (
   hoveredCell,
   color,
   shift,
+  manualLetters,
+  activeCell,
 ) => {
   const drawWordSelection = useCallback(ctx => {
     const word = words?.[selectedWord];
@@ -61,15 +63,29 @@ export const useRenderer = (
     ctx.restore();
   }, [hoveredCell, color, cellSize]);
 
-  const drawLetter = useCallback((ctx, current, x, y) => {
-    if (!current) return;
-
-    ctx.fillStyle = NEUTRAL_WORD_COLOR;
+  const drawSymbol = useCallback((ctx, x, y, symbol, color) => {
+    ctx.save();
+    ctx.fillStyle = color;
     ctx.font = `bold ${Math.max(10, cellSize * 0.6)}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(current.letter?.toUpperCase() ?? '', x + cellSize / 2, y + cellSize / 2);
+    ctx.fillText(symbol?.toUpperCase(), x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+    ctx.restore();
   }, [cellSize]);
+
+  const drawCarriage = useCallback(ctx => {
+    if (!activeCell) return;
+
+    drawSymbol(ctx, activeCell.x, activeCell.y, '>', color);
+  }, [activeCell, color, drawSymbol]);
+
+  const drawLetter = useCallback((ctx, current, j, i) => {
+    const manualLetter = manualLetters?.[`${j},${i}`];
+
+    if (!current && !manualLetter) return;
+
+    drawSymbol(ctx, j, i, manualLetter ?? current.letter ?? '', manualLetter ? color : NEUTRAL_WORD_COLOR);
+  }, [manualLetters, color, drawSymbol]);
 
   const createEdges = useCallback((x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom) => [
     {isV: true, x1: x, y1: y, x2: x, y2: y + cellSize, draw: isFirstCol, neighbor: null},
@@ -85,7 +101,7 @@ export const useRenderer = (
     const right = cellsMap.get(`${j + 1},${i}`);
     const bottom = cellsMap.get(`${j},${i + 1}`);
 
-    drawLetter(ctx, current, x, y);
+    drawLetter(ctx, current, j, i);
 
     createEdges(x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom).forEach(({isV, x1, y1, x2, y2, draw, neighbor}) => {
       if (!draw) return;
@@ -111,7 +127,7 @@ export const useRenderer = (
 
       drawLine(ctx, x1, y1, x2, y2, color);
     });
-  }, [cellSize, cellsMap, words]);
+  }, [cellSize, cellsMap, words, drawLetter]);
 
   const draw = useCallback((ctx, width, height) => {
     ctx.clearRect(0, 0, width, height);
@@ -135,9 +151,10 @@ export const useRenderer = (
 
     drawWordSelection(ctx);
     drawHoveredCell(ctx);
+    drawCarriage(ctx);
 
     ctx.restore();
-  }, [canvasRef, containerRef, offset, scale, size, words, cellSize, hoveredCell, color, drawCell, drawWordSelection, drawHoveredCell]);
+  }, [canvasRef, containerRef, offset, scale, size, words, cellSize, hoveredCell, color, drawCell, drawWordSelection, drawHoveredCell, drawCarriage]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

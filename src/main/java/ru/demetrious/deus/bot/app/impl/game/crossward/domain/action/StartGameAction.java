@@ -9,15 +9,17 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 
-import static java.time.Duration.ofSeconds;
+import static java.time.Duration.ofMinutes;
 import static java.util.Collections.shuffle;
 import static java.util.concurrent.ThreadLocalRandom.current;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.utils.CrosswordUtils.placeStartWords;
+import static org.apache.commons.lang3.function.Failable.asRunnable;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkHost;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkLocked;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPlayers;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.endPlayerPhase;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeStartWords;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeWord;
 
 @Slf4j
 @Builder
@@ -33,7 +35,8 @@ public record StartGameAction() implements CrossWardAction {
         gameSession.getState().setLocked(true);
         gameSession.getState().setCurrentPlayer(0);
         gameSession.getPlayerList().forEach(player -> player.setScore(0));
-        ctx.startTimer(gameSession, ofSeconds(2), () -> endPlayerPhase(gameSession, ctx));
+        placeWord(gameSession, gameSession.getPlayerList().getFirst());
+        ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }
 
     // =========================================================================================================================================================

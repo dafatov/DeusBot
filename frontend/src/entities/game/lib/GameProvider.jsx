@@ -1,6 +1,6 @@
 import {useSnackbar} from '@shared/lib/snackbar/hooks';
 import {useSocket, useSocketSubscription} from '@shared/lib/socket/hooks';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {GameContext} from './GameContext';
 
 export const GameProvider = ({children, gameId, gameType, transform}) => {
@@ -26,7 +26,7 @@ export const GameProvider = ({children, gameId, gameType, transform}) => {
     }
   }, [connected, gameId, send]);
 
-  const value = transform?.(game);
+  const value = useMemo(() => ({gameType, ...transform(game)}), [transform, game, gameType]);
 
   return (
     <GameContext.Provider value={value}>
