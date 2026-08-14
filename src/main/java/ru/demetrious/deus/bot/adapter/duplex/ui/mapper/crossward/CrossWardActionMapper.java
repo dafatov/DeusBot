@@ -5,6 +5,7 @@ import org.mapstruct.SubclassMapping;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.GetStateActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.EchoSpellDto;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.GetStateAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetLockedAction;
@@ -15,6 +16,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnActi
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SubmitWordAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.UseSpellAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.EchoSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.RadarSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Spell;
 
@@ -55,5 +57,6 @@ public interface CrossWardActionMapper {
     SkipTurnAction map(SkipTurnActionDto value);
 
     @SubclassMapping(target = RadarSpell.class, source = RadarSpellDto.class)
+    @SubclassMapping(target = EchoSpell.class, source = EchoSpellDto.class)
     Spell map(SpellDto value);
 }

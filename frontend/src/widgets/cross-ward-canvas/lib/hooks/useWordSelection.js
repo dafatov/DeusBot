@@ -1,8 +1,6 @@
-import {useCallback, useState} from 'react';
+import {useCallback} from 'react';
 
-export const useWordSelection = () => {
-  const [selectedWord, setSelectedWord] = useState();
-
+export const useWordSelection = (setSelectedWord) => {
   const onCellClick = useCallback(data => {
     if (!data?.cell?.words) {
       setSelectedWord(null);
@@ -14,7 +12,7 @@ export const useWordSelection = () => {
     setSelectedWord(s => h && v
       ? (s === h ? v : h)
       : h || v);
-  }, [selectedWord]);
+  }, [setSelectedWord]);
 
-  return {selectedWord, onCellClick};
+  return {onCellClick};
 };

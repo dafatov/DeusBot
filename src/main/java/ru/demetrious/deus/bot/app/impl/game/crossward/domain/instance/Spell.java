@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.EchoSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.RadarSpell;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
@@ -14,6 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = PROPERTY, property = "type")
 @JsonSubTypes({
     @Type(value = RadarSpell.class, name = "radar"),
+    @Type(value = EchoSpell.class, name = "echo"),
 })
 public interface Spell {
     void use(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException;
