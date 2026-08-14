@@ -7,20 +7,23 @@ import beepSound from '@shared/assets/sample/beep.wav';
 import {PanZoomProvider} from '@shared/lib/pan-zoom/PanZoomProvider';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {useTimer} from 'react-timer-hook';
 import useSound from 'use-sound';
 import {CrosswordCanvas} from '../cross-ward-canvas';
 import {CrossWardSpectatorPlayers} from '../spectators';
-import {skipTurn, submitWord} from './model/submitWordService';
+import {SpellZone} from '../spell-zone/ui/SpellZone';
+import {skipTurn, submitWord, useSpell} from './model/submitWordService';
 
 export const CrossWardContent = () => {
   const {send} = useSocket();
-  const {gameId, me: {isHost, isSpectator}, phase, players, locked, currentPlayer, timer, paused} = useGame();
+  const {gameId, me: {isHost, isSpectator}, phase, players, locked, currentPlayer, timer, paused, grid: {shift}} = useGame();
   const {minutes, seconds, restart, isRunning} = useTimer({expiryTimestamp: new Date(), autoStart: false});
   // noinspection JSCheckFunctionSignatures
   const [play] = useSound(beepSound, {volume: 0.1});
   const prevCurrentPlayerRef = useRef(currentPlayer);
+
+  const [activeSpell, setActiveSpell] = useState(null);
 
   useEffect(() => {
     if (minutes === 0 && seconds > 0 && seconds < 10) {
@@ -47,6 +50,10 @@ export const CrossWardContent = () => {
     return submitWord(send, gameId, wordId, word);
   };
 
+  const handleAreaSpellClick = ({x, y}) => {
+    useSpell(send, gameId, {type: activeSpell.type, x: x + shift.x, y: y + shift.y, letter: activeSpell.letter});
+  };
+
   useEffect(() => {
     if (phase === 'PLAYING') {
       restart(new Date(Date.now() + (timer * 1000)), !paused);
@@ -68,6 +75,7 @@ export const CrossWardContent = () => {
   return (
     <Stack container direction="column" sx={{height: '100vh'}}>
       <CrossWardSpectatorPlayers/>
+      <SpellZone setActiveSpell={setActiveSpell}/>
       <Paper sx={{
         position: 'absolute',
         top: '50%',
@@ -120,7 +128,7 @@ export const CrossWardContent = () => {
                   sx={t => ({textAlign: 'center', width: '100%', padding: t.spacing()})}>Пропустить</Button></>}
       </Paper>
       <PanZoomProvider>
-        <CrosswordCanvas onWordSubmit={handleWordSubmit}/>
+        <CrosswordCanvas onWordSubmit={handleWordSubmit} areaSpell={activeSpell} onAreaSpellClick={handleAreaSpellClick}/>
       </PanZoomProvider>
       {isHost
         ? <CrossWardControl/>

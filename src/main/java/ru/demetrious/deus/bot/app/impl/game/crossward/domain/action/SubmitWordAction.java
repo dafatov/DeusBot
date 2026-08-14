@@ -32,7 +32,7 @@ public record SubmitWordAction(int wordId, String word) implements CrossWardActi
             .filter(g -> g.getOrder() == wordId)
             .findFirst()
             .orElseThrow(() -> new ActionException("Word not found"));
-        CrossWardPlayer player = gameSession.getPlayerList().stream()
+        CrossWardPlayer player = gameSession.getActivePlayers().stream()
             .filter(g -> StringUtils.equals(g.getId(), userId))
             .findFirst()
             .orElseThrow(() -> new ActionException("Player not found"));
