@@ -20,7 +20,7 @@ public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     private final Map<TagDto, Set<Character>> letterTags;
 
     @Builder
-    public record PositionCellDto(int x, int y, boolean revealed, Character letter, Map<OrientationDto, Integer> words) {
+    public record PositionCellDto(int x, int y, boolean revealed, Character letter, Set<TagDto> tags, Map<OrientationDto, Integer> words) {
     }
 
     @Builder

@@ -24,6 +24,7 @@ export const CrossWardContent = () => {
   const prevCurrentPlayerRef = useRef(currentPlayer);
 
   const [activeSpell, setActiveSpell] = useState(null);
+  const [selectedWord, setSelectedWord] = useState();
 
   useEffect(() => {
     if (minutes === 0 && seconds > 0 && seconds < 10) {
@@ -75,7 +76,7 @@ export const CrossWardContent = () => {
   return (
     <Stack container direction="column" sx={{height: '100vh'}}>
       <CrossWardSpectatorPlayers/>
-      <SpellZone setActiveSpell={setActiveSpell}/>
+      <SpellZone setActiveSpell={setActiveSpell} selectedWord={selectedWord}/>
       <Paper sx={{
         position: 'absolute',
         top: '50%',
@@ -128,7 +129,13 @@ export const CrossWardContent = () => {
                   sx={t => ({textAlign: 'center', width: '100%', padding: t.spacing()})}>Пропустить</Button></>}
       </Paper>
       <PanZoomProvider>
-        <CrosswordCanvas onWordSubmit={handleWordSubmit} areaSpell={activeSpell} onAreaSpellClick={handleAreaSpellClick}/>
+        <CrosswordCanvas
+          onWordSubmit={handleWordSubmit}
+          areaSpell={activeSpell}
+          onAreaSpellClick={handleAreaSpellClick}
+          selectedWord={selectedWord}
+          setSelectedWord={setSelectedWord}
+        />
       </PanZoomProvider>
       {isHost
         ? <CrossWardControl/>

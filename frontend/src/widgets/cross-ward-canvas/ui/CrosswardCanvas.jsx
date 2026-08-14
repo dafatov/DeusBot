@@ -10,12 +10,12 @@ import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
 import {Canvas} from './Canvas';
 
-export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell}) => {
+export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell, selectedWord, setSelectedWord}) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, isDragging} = usePanZoom();
   const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words} = useGame();
 
-  const {selectedWord, onCellClick: handleWordSelectionCellClick} = useWordSelection();
+  const {onCellClick: handleWordSelectionCellClick} = useWordSelection(setSelectedWord);
 
   const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(areaSpell, onAreaSpellClick);
 

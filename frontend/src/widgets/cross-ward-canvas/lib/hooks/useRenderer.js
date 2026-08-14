@@ -1,5 +1,6 @@
 import {alpha} from '@mui/material';
 import {useCallback, useEffect} from 'react';
+import {getCellBackgroundColor} from '../utils/getCellBackgroundColor';
 import {getCellEdgeColor} from '../utils/getCellEdgeColor';
 import {getVisibleRange} from '../utils/getVisibleRange';
 import {getWordEndpoints} from '../utils/getWordEndpoints';
@@ -104,6 +105,13 @@ export const useRenderer = (
     drawSymbol(ctx, j, i, manualLetter ?? current.letter ?? '', manualLetter ? color : NEUTRAL_WORD_COLOR);
   }, [manualLetters, color, drawSymbol]);
 
+  const drawBackground = useCallback((ctx, current, j, i) => {
+    ctx.save();
+    ctx.fillStyle = getCellBackgroundColor(current, words);
+    ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+    ctx.restore();
+  }, [cellSize, words]);
+
   const createEdges = useCallback((x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom) => [
     {isV: true, x1: x, y1: y, x2: x, y2: y + cellSize, draw: isFirstCol, neighbor: null},
     {isV: true, x1: x + cellSize, y1: y, x2: x + cellSize, y2: y + cellSize, draw: true, neighbor: isLastCol ? null : right},
@@ -118,6 +126,7 @@ export const useRenderer = (
     const right = cellsMap.get(`${j + 1},${i}`);
     const bottom = cellsMap.get(`${j},${i + 1}`);
 
+    drawBackground(ctx, current, j, i);
     drawLetter(ctx, current, j, i);
 
     createEdges(x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom).forEach(({isV, x1, y1, x2, y2, draw, neighbor}) => {

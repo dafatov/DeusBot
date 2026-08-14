@@ -45,6 +45,7 @@ public interface CrossWardInstanceMapper {
     @Mapping(target = "y", source = "position.y")
     @Mapping(target = "letter", source = "cell.letter", conditionQualifiedByName = "needMapLetter")
     @Mapping(target = "words", source = "cell.words")
+    @Mapping(target = "tags", source = "cell.tags")
     PositionCellDto map(Position position, Cell cell, @Context Player player, @Context boolean isFinished);
 
     OrientationDto map(Word.Orientation orientation);

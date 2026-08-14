@@ -4,4 +4,7 @@ public enum Tag {
     FREQUENCY_HIGH,
     FREQUENCY_MEDIUM,
     FREQUENCY_LOW,
+
+    ECHO_CONSONANT,
+    ECHO_VOWEL,
 }

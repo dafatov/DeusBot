@@ -1,7 +1,9 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,6 +15,7 @@ import lombok.experimental.Accessors;
 public class Cell {
     private final Position position;
     private final Character letter;
+    private final Set<Tag> tags = new HashSet<>();
     private boolean revealed = false;
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

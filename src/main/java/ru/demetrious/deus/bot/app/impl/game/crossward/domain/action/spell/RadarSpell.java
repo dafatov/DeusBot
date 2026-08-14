@@ -39,14 +39,16 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
             .findFirst()
             .orElseThrow(() -> new ActionException("Player not found"));
 
+        int score = player.getScore();
         for (int i = x - radius; i <= x + radius; i++) {
             for (int j = y - radius; j <= y + radius; j++) {
                 Cell cell = gameSession.getGrid().get(new Position(i, j));
 
                 if (nonNull(cell) && letter.equals(cell.getLetter())) {
-                    cell.reveal(w -> player.equals(w.getOwner()) ? 2 : 1);
+                    score += cell.reveal(w -> player.equals(w.getOwner()) ? 2 : 1);
                 }
             }
         }
+        player.setScore(score);
     }
 }
