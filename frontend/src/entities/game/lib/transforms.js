@@ -49,5 +49,6 @@ export const transformCrossWard = game => {
     },
     players: (game?.activePlayers ?? []).map(p => playersMap.get(p)),
     words: game?.words ?? {},
+    letterTags: game?.letterTags ?? {},
   };
 };

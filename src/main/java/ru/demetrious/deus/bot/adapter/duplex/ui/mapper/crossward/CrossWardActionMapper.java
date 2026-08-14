@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.SubclassMapping;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.GetStateActionDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.GetStateAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetLockedAction;
@@ -13,6 +14,9 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.ShufflePlaye
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SubmitWordAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.UseSpellAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.RadarSpell;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Spell;
 
 import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetLockedActionDto;
@@ -22,6 +26,8 @@ import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardAc
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SkipTurnActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.StartGameActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SubmitWordActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.UseSpellActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.RadarSpellDto;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION)
 public interface CrossWardActionMapper {
@@ -33,6 +39,7 @@ public interface CrossWardActionMapper {
     @SubclassMapping(target = ShufflePlayersAction.class, source = ShufflePlayersActionDto.class)
     @SubclassMapping(target = SubmitWordAction.class, source = SubmitWordActionDto.class)
     @SubclassMapping(target = SkipTurnAction.class, source = SkipTurnActionDto.class)
+    @SubclassMapping(target = UseSpellAction.class, source = UseSpellActionDto.class)
     CrossWardAction map(CrossWardActionDto actionDto);
 
     GetStateAction map(GetStateActionDto value);
@@ -46,4 +53,7 @@ public interface CrossWardActionMapper {
     ShufflePlayersAction map(ShufflePlayersActionDto value);
 
     SkipTurnAction map(SkipTurnActionDto value);
+
+    @SubclassMapping(target = RadarSpell.class, source = RadarSpellDto.class)
+    Spell map(SpellDto value);
 }

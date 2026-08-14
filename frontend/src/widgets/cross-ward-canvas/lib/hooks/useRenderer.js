@@ -1,3 +1,4 @@
+import {alpha} from '@mui/material';
 import {useCallback, useEffect} from 'react';
 import {getCellEdgeColor} from '../utils/getCellEdgeColor';
 import {getVisibleRange} from '../utils/getVisibleRange';
@@ -28,6 +29,7 @@ export const useRenderer = (
   shift,
   manualLetters,
   activeCell,
+  areaSpell,
 ) => {
   const drawWordSelection = useCallback(ctx => {
     const word = words?.[selectedWord];
@@ -62,6 +64,21 @@ export const useRenderer = (
     );
     ctx.restore();
   }, [hoveredCell, color, cellSize]);
+
+  const drawAreaSpell = useCallback(ctx => {
+    if (!areaSpell?.radius || !hoveredCell) return;
+
+    ctx.save();
+    ctx.strokeStyle = alpha(color, 0.25);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      (hoveredCell.x - areaSpell.radius) * cellSize,
+      (hoveredCell.y - areaSpell.radius) * cellSize,
+      (2 * areaSpell.radius + 1) * cellSize,
+      (2 * areaSpell.radius + 1) * cellSize
+    );
+    ctx.restore();
+  }, [areaSpell, hoveredCell]);
 
   const drawSymbol = useCallback((ctx, x, y, symbol, color) => {
     ctx.save();
@@ -152,9 +169,10 @@ export const useRenderer = (
     drawWordSelection(ctx);
     drawHoveredCell(ctx);
     drawCarriage(ctx);
+    drawAreaSpell(ctx);
 
     ctx.restore();
-  }, [canvasRef, containerRef, offset, scale, size, words, cellSize, hoveredCell, color, drawCell, drawWordSelection, drawHoveredCell, drawCarriage]);
+  }, [canvasRef, containerRef, offset, scale, size, words, cellSize, hoveredCell, color, drawCell, drawWordSelection, drawHoveredCell, drawCarriage, drawAreaSpell]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.InstanceDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.TagDto;
 
 @Getter
 @SuperBuilder
@@ -16,6 +17,7 @@ public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     private final List<PositionCellDto> grid;
     private final Map<Integer, WordDto> words;
     private final List<String> activePlayers;
+    private final Map<TagDto, Set<Character>> letterTags;
 
     @Builder
     public record PositionCellDto(int x, int y, boolean revealed, Character letter, Map<OrientationDto, Integer> words) {

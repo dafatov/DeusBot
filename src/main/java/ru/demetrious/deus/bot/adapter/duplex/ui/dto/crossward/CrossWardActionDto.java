@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import lombok.Builder;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.ActionDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto;
 
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.GetStateActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SetLockedActionDto;
@@ -13,6 +14,7 @@ import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardAc
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SkipTurnActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.StartGameActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SubmitWordActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.UseSpellActionDto;
 import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @JsonSubTypes({
@@ -24,6 +26,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = ShufflePlayersActionDto.class, name = CROSS_WARD + ".shuffle_players"),
     @Type(value = SubmitWordActionDto.class, name = CROSS_WARD + ".submit_word"),
     @Type(value = SkipTurnActionDto.class, name = CROSS_WARD + ".skip_turn"),
+    @Type(value = UseSpellActionDto.class, name = CROSS_WARD + ".use_spell"),
 })
 public interface CrossWardActionDto extends ActionDto {
     @Builder
@@ -56,5 +59,9 @@ public interface CrossWardActionDto extends ActionDto {
 
     @Builder
     record SkipTurnActionDto() implements CrossWardActionDto {
+    }
+
+    @Builder
+    record UseSpellActionDto(SpellDto spell) implements CrossWardActionDto {
     }
 }

@@ -1,6 +1,7 @@
 import {useGame} from '@entities/game/lib/hooks';
 import {usePanZoom} from '@shared/lib/pan-zoom/hooks';
 import React, {useEffect, useRef} from 'react';
+import {useAreaSpell} from '../lib/hooks/useAreaSpell';
 import {useCellHover} from '../lib/hooks/useCellHover';
 import {useKeyboardEvents} from '../lib/hooks/useKeyboardEvents';
 import {useMouseEvents} from '../lib/hooks/useMouseEvents';
@@ -9,12 +10,14 @@ import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
 import {Canvas} from './Canvas';
 
-export const CrosswordCanvas = ({cellSize = 40, onWordSubmit}) => {
+export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell}) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, isDragging} = usePanZoom();
   const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words} = useGame();
 
-  const {selectedWord, onCellClick} = useWordSelection();
+  const {selectedWord, onCellClick: handleWordSelectionCellClick} = useWordSelection();
+
+  const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(areaSpell, onAreaSpellClick);
 
   const {
     onLetterDown,
@@ -22,7 +25,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit}) => {
     onSpaceDown,
     onEnterDown,
     manualLetters,
-    activeCell
+    activeCell,
   } = useWordSelectionInput(selectedWord, words, cellsMap, shift, onWordSubmit);
 
   const {onKeyDown} = useKeyboardEvents(onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown);
@@ -30,7 +33,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit}) => {
   const {hoveredCell, onHover} = useCellHover();
 
   const {onClick, onMouseMove, onMouseLeave} = useMouseEvents(
-    onCellClick,
+    areaSpell ? handleAreaSpellCellClick : handleWordSelectionCellClick,
     onHover,
     canvasRef,
     {x: offsetX, y: offsetY},
@@ -55,6 +58,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit}) => {
     shift,
     manualLetters,
     activeCell,
+    areaSpell,
   );
 
   useEffect(() => {
