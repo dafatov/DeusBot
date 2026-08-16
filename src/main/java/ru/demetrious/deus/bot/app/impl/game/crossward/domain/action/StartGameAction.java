@@ -16,6 +16,7 @@ import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag;
 
 import static java.time.Duration.ofMinutes;
@@ -40,16 +41,16 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtil
 @Builder
 public record StartGameAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         checkLocked(gameSession);
-        checkHost(gameSession, userId);
+        checkHost(gameSession, player);
         checkPlayers(gameSession);
 
         startBoard(gameSession, ctx);
         gameSession.getState().setPhase(PLAYING);
         gameSession.getState().setLocked(true);
         gameSession.getState().setCurrentPlayer(gameSession.getPlayerList().getFirst());
-        gameSession.getPlayerList().forEach(player -> player.setScore(0));
+        gameSession.getPlayerList().forEach(p -> p.setScore(0));
         placeWord(gameSession, gameSession.getState().getCurrentPlayer());
         ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }

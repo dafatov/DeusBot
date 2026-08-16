@@ -5,7 +5,7 @@ import ru.demetrious.deus.bot.app.api.game.GetGamePackWordsOutbound;
 import ru.demetrious.deus.bot.app.api.game.NotifyGameStateOutbound;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionContext;
 
-public final class CrossWardActionContext extends ActionContext<CrossWardSetting, CrossWardPlayer, CrossWardInstance> {
+public final class CrossWardActionContext extends ActionContext<CrossWardInstance> {
     public CrossWardActionContext(GetGamePackWordsOutbound dictionary,
                                   NotifyGameStateOutbound notifyGameStateOutbound,
                                   ExecutorService virtualThreadPerTaskExecutor) {

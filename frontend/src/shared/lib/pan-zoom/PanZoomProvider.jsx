@@ -68,6 +68,19 @@ export const PanZoomProvider = ({children, initialScale = 1, initialOffsetX = 0,
     setOffsetY((rect.height - gridHeight) / 2);
   }, []);
 
+  const moveToView = useCallback((worldX, worldY) => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
+
+    setOffsetX(rect.width / 2 - worldX * scale);
+    setOffsetY(rect.height / 2 - worldY * scale);
+  }, [scale]);
+
   useEffect(() => {
     const container = containerRef.current;
 
@@ -81,7 +94,7 @@ export const PanZoomProvider = ({children, initialScale = 1, initialOffsetX = 0,
   }, [handleWheel]);
 
   return (
-    <PanZoomContext.Provider value={{containerRef, scale, offsetX, offsetY, resetView, isDragging}}>
+    <PanZoomContext.Provider value={{containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging}}>
       <div
         ref={containerRef}
         style={{

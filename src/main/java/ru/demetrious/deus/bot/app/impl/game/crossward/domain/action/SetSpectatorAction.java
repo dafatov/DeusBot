@@ -15,13 +15,8 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAct
 
 public record SetSpectatorAction(boolean spectator) implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         checkLocked(gameSession);
-
-        CrossWardPlayer player = gameSession.getPlayerList().stream()
-            .filter(p -> p.getId().equals(userId))
-            .findFirst()
-            .orElseThrow(() -> new ActionException("Player not found"));
 
         if (spectator) {
             player.setSpectator(true);

@@ -5,6 +5,7 @@ import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 
 import static java.util.Objects.isNull;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkHost;
@@ -15,9 +16,9 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 @Builder
 public record SetPauseAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         checkLocked(gameSession);
-        checkHost(gameSession, userId);
+        checkHost(gameSession, player);
         checkPhase(gameSession, PLAYING);
 
         if (isNull(gameSession.getTimer().getRemaining())) {

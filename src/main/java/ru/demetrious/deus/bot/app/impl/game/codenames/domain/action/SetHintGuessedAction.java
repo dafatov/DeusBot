@@ -4,6 +4,7 @@ import lombok.Builder;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Hint;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
@@ -14,9 +15,9 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAct
 @Builder
 public record SetHintGuessedAction(String word, Team team, int guessed) implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
         checkPaused(gameSession);
-        checkTeamMate(gameSession, userId, team);
+        checkTeamMate(player, team);
 
         Hint hint = gameSession.getHintList().stream()
             .filter(h -> h.getWord().equals(word) && h.getTeam() == team)

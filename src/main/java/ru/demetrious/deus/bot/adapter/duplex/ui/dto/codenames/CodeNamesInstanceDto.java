@@ -13,7 +13,7 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.WordDto;
 
 @Getter
 @SuperBuilder
-public class CodeNamesInstanceDto extends InstanceDto<CodeNamesPlayerDto> {
+public class CodeNamesInstanceDto extends InstanceDto<CodeNamesPlayerDto, CodeNamesActionDto> {
     private final StateDto state;
     private final Set<WordDto> wordList;
     private final List<HintDto> hintList;

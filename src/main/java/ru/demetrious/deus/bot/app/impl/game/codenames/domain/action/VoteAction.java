@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
@@ -28,26 +29,26 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vot
 @Builder
 public record VoteAction(Vote vote) implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, GUESSING);
-        checkTeamMate(gameSession, userId, gameSession.getState().getTeam());
+        checkTeamMate(player, gameSession.getState().getTeam());
 
-        updateVotes(gameSession.getVoteMap(), userId);
+        updateVotes(gameSession.getVoteMap(), player);
 
         if (!isAllVotesCompatible(gameSession)) {
             return;
         }
 
-        resolveVoting(gameSession, userId, ctx);
+        resolveVoting(gameSession, player, ctx);
     }
 
     // =========================================================================================================================================================
     // = Implementation
     // =========================================================================================================================================================
 
-    private void updateVotes(Map<String, Vote> voteMap, String userId) {
-        voteMap.compute(userId, (_, previous) -> switch (vote) {
+    private void updateVotes(Map<String, Vote> voteMap, CodeNamesPlayer player) {
+        voteMap.compute(player.getId(), (_, previous) -> switch (vote) {
             case WordVote v -> isNull(previous) || !(previous instanceof WordVote(String word)) || !StringUtils.equals(word, v.word())
                 ? new WordVote(v.word())
                 : null;
@@ -65,11 +66,11 @@ public record VoteAction(Vote vote) implements CodeNamesAction {
             && gameSession.getVoteMap().values().stream().map(WordVote.class::cast).map(WordVote::word).distinct().count() == 1);
     }
 
-    private static void resolveVoting(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
+    private static void resolveVoting(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
         Vote vote = gameSession.getVoteMap().values().iterator().next();
         Boolean needSkipPhase = switch (vote) {
             case SkipVote _ -> true;
-            case WordVote v -> resolveWordVoting(gameSession, userId, ctx, v);
+            case WordVote v -> resolveWordVoting(gameSession, player, ctx, v);
             default -> throw new IllegalStateException("Unexpected vote value: " + vote);
         };
 
@@ -79,7 +80,7 @@ public record VoteAction(Vote vote) implements CodeNamesAction {
         }
     }
 
-    private static Boolean resolveWordVoting(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx, WordVote vote) throws ActionException {
+    private static Boolean resolveWordVoting(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx, WordVote vote) throws ActionException {
         Word word = gameSession.getWordList().stream()
             .filter(w -> StringUtils.equals(w.getText(), vote.word()))
             .findFirst()
@@ -94,11 +95,7 @@ public record VoteAction(Vote vote) implements CodeNamesAction {
         word.setRevealed(new Reveal(previousOrder + 1, gameSession.getState().getTeam(), gameSession.getState().getRound()));
         return switch (word.getColor()) {
             case BLACK -> {
-                finishGame(gameSession, ctx, gameSession.getPlayerList().stream()
-                    .filter(p -> p.getId().equals(userId))
-                    .findFirst()
-                    .orElseThrow()
-                    .getTeam() == Team.BLUE ? Team.RED : Team.BLUE);
+                finishGame(gameSession, ctx, player.getTeam() == Team.BLUE ? Team.RED : Team.BLUE);
                 yield null;
             }
             case RED -> handleColoredWord(gameSession, ctx, Team.RED);

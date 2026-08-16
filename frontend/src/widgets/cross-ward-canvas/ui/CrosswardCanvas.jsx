@@ -8,17 +8,20 @@ import {useMouseEvents} from '../lib/hooks/useMouseEvents';
 import {useRenderer} from '../lib/hooks/useRenderer';
 import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
+import {getWordEndpoints} from '../lib/utils/getWordEndpoints';
 import {Canvas} from './Canvas';
 
-export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell, selectedWord, setSelectedWord}) => {
+//TODO отображать какими буквами клетка точно не является
+export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell, selectedWord, setSelectedWord, historyVisible}) => {
   const canvasRef = useRef(null);
-  const {containerRef, scale, offsetX, offsetY, resetView, isDragging} = usePanZoom();
+  const {containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging} = usePanZoom();
   const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words} = useGame();
 
   const {onCellClick: handleWordSelectionCellClick} = useWordSelection(setSelectedWord);
 
-  const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(areaSpell, onAreaSpellClick);
+  const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(onAreaSpellClick);
 
+  //TODO Съезжают введенные буквы при вводе при изменении размера поля
   const {
     onLetterDown,
     onBackspaceDown,
@@ -59,6 +62,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, 
     manualLetters,
     activeCell,
     areaSpell,
+    historyVisible,
   );
 
   useEffect(() => {
@@ -67,6 +71,27 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, 
     });
     return () => cancelAnimationFrame(rafId);
   }, []);
+
+  useEffect(() => {
+    if (!historyVisible) {
+      return;
+    }
+
+    let x = historyVisible?.x;
+    let y = historyVisible?.y;
+    if (historyVisible.wordId) {
+      const {first, last} = getWordEndpoints(words[historyVisible.wordId].cells);
+
+      x = (first.x + last.x) / 2 - shift.x;
+      y = (first.y + last.y) / 2 - shift.y;
+    }
+
+    if (!x || !y) {
+      return;
+    }
+
+    moveToView(x * cellSize, y * cellSize);
+  }, [historyVisible, moveToView, words, shift]);
 
   return (
     <Canvas

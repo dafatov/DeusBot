@@ -4,6 +4,7 @@ import lombok.Builder;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
 import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkHost;
@@ -11,8 +12,8 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAct
 @Builder
 public record SetLockedAction() implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
-        checkHost(gameSession, userId);
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
+        checkHost(gameSession, player);
 
         gameSession.getState().setLocked(!gameSession.getState().isLocked());
     }

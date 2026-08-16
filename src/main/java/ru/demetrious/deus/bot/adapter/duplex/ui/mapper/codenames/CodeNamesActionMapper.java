@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.mapper.codenames;
 
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.SubclassMapping;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesActionDto;
@@ -44,19 +45,39 @@ public interface CodeNamesActionMapper {
     @SubclassMapping(target = SetPauseAction.class, source = SetPauseActionDto.class)
     CodeNamesAction map(CodeNamesActionDto actionDto);
 
-    GetStateAction map(GetStateActionDto value);
+    GetStateAction mapGetState(GetStateActionDto value);
 
-    StartGameAction map(StartGameActionDto value);
+    StartGameAction mapStartGame(StartGameActionDto value);
 
-    ShufflePlayersAction map(ShufflePlayersActionDto value);
+    ShufflePlayersAction mapShufflePlayers(ShufflePlayersActionDto value);
 
-    SetLockedAction map(SetLockedActionDto value);
+    SetLockedAction mapSetLocked(SetLockedActionDto value);
 
-    SetPauseAction map(SetPauseActionDto value);
+    SetPauseAction mapSetPause(SetPauseActionDto value);
 
     @SubclassMapping(target = WordVote.class, source = WordVoteDto.class)
     @SubclassMapping(target = SkipVote.class, source = SkipVoteDto.class)
     Vote map(VoteDto value);
 
-    SkipVote map(SkipVoteDto value);
+    SkipVote mapSkip(SkipVoteDto value);
+
+    // =========================================================================================================================================================
+
+    @InheritInverseConfiguration
+    CodeNamesActionDto map(CodeNamesAction action);
+
+    GetStateActionDto mapGetState(GetStateAction value);
+
+    StartGameActionDto mapStartGame(StartGameAction value);
+
+    ShufflePlayersActionDto mapShufflePlayers(ShufflePlayersAction value);
+
+    SetLockedActionDto mapSetLocked(SetLockedAction value);
+
+    SetPauseActionDto mapSetPause(SetPauseAction value);
+
+    @InheritInverseConfiguration
+    VoteDto map(Vote vote);
+
+    SkipVoteDto mapSkip(SkipVote skipVote);
 }

@@ -34,7 +34,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = ShufflePlayersAction.class, name = "shuffle_players"),
     @Type(value = SkipTurnAction.class, name = "skip_turn"),
 })
-public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlayer, CrossWardInstance, CrossWardActionContext> {
+public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstance, CrossWardActionContext> {
     @Override
     default String getGame() {
         return CROSS_WARD;
@@ -88,14 +88,14 @@ public interface CrossWardAction extends Action<CrossWardSetting, CrossWardPlaye
     }
 
 
-    static void checkTurn(CrossWardInstance gameSession, String userId) throws ActionException {
-        if (!gameSession.getState().getCurrentPlayer().getId().equals(userId)) {
+    static void checkTurn(CrossWardInstance gameSession, CrossWardPlayer player) throws ActionException {
+        if (!gameSession.getState().getCurrentPlayer().equals(player)) {
             throw new ActionException("Wrong player in this action");
         }
     }
 
-    static void checkHost(CrossWardInstance gameSession, String userId) throws ActionException {
-        if (!gameSession.getHostId().equals(userId)) {
+    static void checkHost(CrossWardInstance gameSession, CrossWardPlayer player) throws ActionException {
+        if (!gameSession.getHostId().equals(player.getId())) {
             throw new ActionException("Only host can start game");
         }
     }

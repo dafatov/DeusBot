@@ -1,4 +1,5 @@
 import {getUserId} from '@shared/lib/cookies';
+import {groupHistoryByIssuer} from '../utils/crossward/groupHistoryByIssuer';
 import {normalizeGrid} from '../utils/crossward/normalizeGrid';
 
 export const transformCodeNames = game => {
@@ -50,5 +51,7 @@ export const transformCrossWard = game => {
     players: (game?.activePlayers ?? []).map(p => playersMap.get(p)),
     words: game?.words ?? {},
     letterTags: game?.letterTags ?? {},
+    history: groupHistoryByIssuer(game?.history ?? []),
+    findPlayer: id => playersMap.get(id),
   };
 };

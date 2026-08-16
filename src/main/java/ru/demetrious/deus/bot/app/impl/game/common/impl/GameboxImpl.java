@@ -38,7 +38,7 @@ public class GameboxImpl implements Gamebox {
     }
 
     @Override
-    public Optional<Pair<? extends Instance<?, ?>, ? extends Player>> findByPlayer(String userId) {
+    public Optional<Pair<? extends Instance<?, ?, ?>, ? extends Player>> findByPlayer(String userId) {
         return processors.values().stream()
             .map(f -> f.findPlayer(userId))
             .filter(Optional::isPresent)
@@ -47,7 +47,7 @@ public class GameboxImpl implements Gamebox {
     }
 
     @Override
-    public void performAction(String gameId, String userId, Action<?, ?, ?, ?> action) throws ActionException {
+    public void performAction(String gameId, String userId, Action<?, ?, ?> action) throws ActionException {
         Processor<?, ?, ?, ?, ?> processor = findProcessor(gameId);
 
         if (!StringUtils.equals(processor.getGame(), action.getGame())) {

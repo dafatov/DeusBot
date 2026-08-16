@@ -23,5 +23,5 @@ public interface InstanceMapper {
     @SubclassMapping(target = CodeNamesInstanceDto.class, source = CodeNamesInstance.class)
     @SubclassMapping(target = CrossWardInstanceDto.class, source = CrossWardInstance.class)
     @SuppressWarnings("UnmappedTargetProperties")
-    InstanceDto<?> map(Instance<?, ?> gameSession, @Context Player player, @Context boolean isFinished);
+    InstanceDto<?, ?> map(Instance<?, ?, ?> gameSession, @Context Player player, @Context boolean isFinished);
 }
