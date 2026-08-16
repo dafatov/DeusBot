@@ -9,6 +9,8 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.EventDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.CellDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto.OrientationDto;
@@ -17,7 +19,9 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceD
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardPlayerDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Cell;
@@ -32,6 +36,7 @@ import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION, uses = {
     TimerMapper.class,
+    CrossWardActionMapper.class
 })
 public interface CrossWardInstanceMapper {
     CrossWardInstanceDto map(CrossWardInstance gameSession, @Context Player player, @Context boolean isFinished);
@@ -57,6 +62,9 @@ public interface CrossWardInstanceMapper {
     @Mapping(target = "x", source = "position.x")
     @Mapping(target = "y", source = "position.y")
     CellDto map(Cell cell);
+
+    @Mapping(target = "issuerId", source = "issuer.id")
+    EventDto<CrossWardActionDto> map(Event<CrossWardAction, CrossWardPlayer> event);
 
     // =========================================================================================================================================================
     // = Implementation

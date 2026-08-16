@@ -18,7 +18,7 @@ public class FireGameActionUseCase implements FireGameActionInbound {
     private final NotifyGameErrorOutbound notifyGameErrorOutbound;
 
     @Override
-    public void execute(String gameId, String userId, Action<?, ?, ?, ?> action) {
+    public void execute(String gameId, String userId, Action<?, ?, ?> action) {
         log.debug("execute: gameId={}, userId={}, action={}", gameId, userId, writeValueAsString(action));
 
         try {

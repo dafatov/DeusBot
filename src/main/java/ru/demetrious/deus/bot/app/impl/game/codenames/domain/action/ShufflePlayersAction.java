@@ -20,9 +20,9 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPla
 @Builder
 public record ShufflePlayersAction() implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, String userId, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
         checkLocked(gameSession);
-        checkHost(gameSession, userId);
+        checkHost(gameSession, player);
 
         List<CodeNamesPlayer> list = gameSession.getPlayerList().stream().filter(p -> !p.getTeam().equals(SPECTATOR)).collect(toList());
 
@@ -31,11 +31,11 @@ public record ShufflePlayersAction() implements CodeNamesAction {
         int red = list.size() / 2;
         int last = list.size() - 1;
         for (int i = 0; i < list.size(); i++) {
-            CodeNamesPlayer player = list.get(i);
+            CodeNamesPlayer p = list.get(i);
             boolean isRed = i < red;
 
-            player.setTeam(isRed ? RED : BLUE);
-            player.setCaptain((isRed && i == 0) || (!isRed && i == last));
+            p.setTeam(isRed ? RED : BLUE);
+            p.setCaptain((isRed && i == 0) || (!isRed && i == last));
         }
     }
 }

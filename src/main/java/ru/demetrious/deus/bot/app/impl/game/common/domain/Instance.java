@@ -23,11 +23,12 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 })
 @EqualsAndHashCode(of = "key")
 @Data
-public abstract class Instance<S extends Setting, P extends Player> {
+public abstract class Instance<S extends Setting, P extends Player, A extends Action<P, ?, ?>> {
     private final String key;
     private final String hostId;
     private final S setting;
     private final List<P> playerList = setUniqueList(new ArrayList<>());
+    private final List<Event<A, P>> history = new ArrayList<>();
     private final Timer timer = new Timer();
 
     public abstract boolean isFinished();

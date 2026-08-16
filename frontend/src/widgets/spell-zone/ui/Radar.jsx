@@ -3,7 +3,7 @@ import {LocationSearching, QuestionMark} from '@mui/icons-material';
 import {Avatar, Badge, IconButton, ListSubheader, MenuItem, Select, Tooltip, Typography} from '@mui/material';
 import {useMemo, useState} from 'react';
 
-const FREQUENCY_RADIUS = {
+export const FREQUENCY_RADIUS = {
   FREQUENCY_HIGH: 1,
   FREQUENCY_MEDIUM: 2,
   FREQUENCY_LOW: 3,

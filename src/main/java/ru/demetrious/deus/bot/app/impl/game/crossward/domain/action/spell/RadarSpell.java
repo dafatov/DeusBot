@@ -2,7 +2,6 @@ package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell;
 
 import java.util.Map;
 import lombok.Builder;
-import org.apache.commons.lang3.StringUtils;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
@@ -28,16 +27,12 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
     );
 
     @Override
-    public void use(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         int radius = TAG_RADIUS.entrySet().stream()
             .filter(t -> gameSession.getLetterTags().get(t.getKey()).contains(letter))
             .findFirst()
             .map(Entry::getValue)
             .orElseThrow(() -> new ActionException("No such letter tag: " + letter));
-        CrossWardPlayer player = gameSession.getActivePlayers().stream()
-            .filter(g -> StringUtils.equals(g.getId(), userId))
-            .findFirst()
-            .orElseThrow(() -> new ActionException("Player not found"));
 
         int score = player.getScore();
         for (int i = x - radius; i <= x + radius; i++) {

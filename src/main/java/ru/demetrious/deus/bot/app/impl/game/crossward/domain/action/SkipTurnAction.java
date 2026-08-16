@@ -6,6 +6,7 @@ import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPaused;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPhase;
@@ -17,10 +18,10 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 @Builder
 public record SkipTurnAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, PLAYING);
-        checkTurn(gameSession, userId);
+        checkTurn(gameSession, player);
 
         endPlayerPhase(gameSession, ctx);
     }

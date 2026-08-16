@@ -20,5 +20,5 @@ import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 public interface ActionMapper {
     @SubclassMapping(target = CodeNamesAction.class, source = CodeNamesActionDto.class)
     @SubclassMapping(target = CrossWardAction.class, source = CrossWardActionDto.class)
-    Action<?, ?, ?, ?> map(ActionDto actionDto);
+    Action<?, ?, ?> map(ActionDto actionDto);
 }

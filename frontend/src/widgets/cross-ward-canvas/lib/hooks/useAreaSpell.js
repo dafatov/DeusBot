@@ -1,13 +1,13 @@
 import {useCallback} from 'react';
 
-export const useAreaSpell = (activeSpell, onAriaSpellClick) => {
+export const useAreaSpell = (onAriaSpellClick) => {
   const onCellClick = useCallback(data => {
     if (!data) {
       return;
     }
 
     onAriaSpellClick(data);
-  }, [activeSpell, onAriaSpellClick]);
+  }, [onAriaSpellClick]);
 
   return {onCellClick};
 };

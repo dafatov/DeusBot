@@ -18,9 +18,9 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAct
 @Builder
 public record ShufflePlayersAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         checkLocked(gameSession);
-        checkHost(gameSession, userId);
+        checkHost(gameSession, player);
 
         List<CrossWardPlayer> players = gameSession.getPlayerList();
         List<CrossWardPlayer> shuffled = new ArrayList<>(players);

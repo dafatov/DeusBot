@@ -21,7 +21,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlayer> {
+public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlayer, CrossWardAction> {
     private final List<CrossWardPlayer> activePlayers = new ArrayList<>();
     private final State state = new State();
     private final Queue<String> availableWords = new ArrayDeque<>();

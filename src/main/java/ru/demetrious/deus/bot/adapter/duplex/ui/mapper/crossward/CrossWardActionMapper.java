@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.mapper.crossward;
 
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.SubclassMapping;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
@@ -44,19 +45,39 @@ public interface CrossWardActionMapper {
     @SubclassMapping(target = UseSpellAction.class, source = UseSpellActionDto.class)
     CrossWardAction map(CrossWardActionDto actionDto);
 
-    GetStateAction map(GetStateActionDto value);
+    GetStateAction mapGetState(GetStateActionDto value);
 
-    StartGameAction map(StartGameActionDto value);
+    StartGameAction mapStartGame(StartGameActionDto value);
 
-    SetLockedAction map(SetLockedActionDto value);
+    SetLockedAction mapSetLocked(SetLockedActionDto value);
 
-    SetPauseAction map(SetPauseActionDto value);
+    SetPauseAction mapSetPause(SetPauseActionDto value);
 
-    ShufflePlayersAction map(ShufflePlayersActionDto value);
+    ShufflePlayersAction mapShufflePlayers(ShufflePlayersActionDto value);
 
-    SkipTurnAction map(SkipTurnActionDto value);
+    SkipTurnAction mapSkipTurn(SkipTurnActionDto value);
 
     @SubclassMapping(target = RadarSpell.class, source = RadarSpellDto.class)
     @SubclassMapping(target = EchoSpell.class, source = EchoSpellDto.class)
     Spell map(SpellDto value);
+
+    // =========================================================================================================================================================
+
+    @InheritInverseConfiguration
+    CrossWardActionDto map(CrossWardAction action);
+
+    GetStateActionDto mapGetState(GetStateAction value);
+
+    StartGameActionDto mapStartGame(StartGameAction value);
+
+    SetLockedActionDto mapSetLocked(SetLockedAction value);
+
+    SetPauseActionDto mapSetPause(SetPauseAction value);
+
+    ShufflePlayersActionDto mapShufflePlayers(ShufflePlayersAction value);
+
+    SkipTurnActionDto mapSkipTurn(SkipTurnAction value);
+
+    @InheritInverseConfiguration
+    SpellDto map(Spell spell);
 }

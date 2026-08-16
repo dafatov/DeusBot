@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Spell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
@@ -25,7 +26,7 @@ public record EchoSpell(int wordId) implements Spell {
     );
 
     @Override
-    public void use(CrossWardInstance gameSession, String userId, CrossWardActionContext ctx) throws ActionException {
+    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         Word word = gameSession.getWords().stream()
             .filter(w -> w.getOrder() == wordId)
             .findFirst()

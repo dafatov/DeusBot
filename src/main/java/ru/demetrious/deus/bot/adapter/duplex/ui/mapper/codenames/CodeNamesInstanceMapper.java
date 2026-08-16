@@ -8,33 +8,32 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.SubclassMapping;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.EventDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesInstanceDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesPlayerDto;
-import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.VoteDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.WordDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
+import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toMap;
 import static org.mapstruct.SubclassExhaustiveStrategy.RUNTIME_EXCEPTION;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesPlayerDto.TeamDto;
-import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.VoteDto.SkipVoteDto;
-import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.VoteDto.WordVoteDto;
 import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
 import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team.SPECTATOR;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote.SkipVote;
-import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote.WordVote;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION, uses = {
     TimerMapper.class,
+    CodeNamesActionMapper.class
 })
 public interface CodeNamesInstanceMapper {
+    @Mapping(target = "history", ignore = true)
     CodeNamesInstanceDto map(CodeNamesInstance gameSession, @Context Player player, @Context boolean isFinished);
 
     CodeNamesPlayerDto map(CodeNamesPlayer player);
@@ -44,11 +43,8 @@ public interface CodeNamesInstanceMapper {
 
     TeamDto map(Team team);
 
-    @SubclassMapping(target = SkipVoteDto.class, source = SkipVote.class)
-    @SubclassMapping(target = WordVoteDto.class, source = WordVote.class)
-    VoteDto map(Vote vote);
-
-    SkipVoteDto map(SkipVote skipVote);
+    @Mapping(target = "issuerId", source = "issuer.id")
+    EventDto<CodeNamesActionDto> map(Event<CodeNamesAction, CodeNamesPlayer> event);
 
     // =========================================================================================================================================================
     // = Implementation

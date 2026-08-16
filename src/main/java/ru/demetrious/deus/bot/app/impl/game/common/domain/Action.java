@@ -14,8 +14,8 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
     @Type(value = CodeNamesAction.class),
     @Type(value = CrossWardAction.class),
 })
-public interface Action<S extends Setting, P extends Player, G extends Instance<S, P>, C extends ActionContext<S, P, G>> {
+public interface Action<P extends Player, G extends Instance<?, P, ?>, C extends ActionContext<G>> {
     String getGame();
 
-    void perform(G gameSession, String userId, C ctx) throws ActionException;
+    void perform(G gameSession, P player, C ctx) throws ActionException;
 }
