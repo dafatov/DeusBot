@@ -21,7 +21,6 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, 
 
   const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(onAreaSpellClick);
 
-  //TODO Съезжают введенные буквы при вводе при изменении размера поля
   const {
     onLetterDown,
     onBackspaceDown,

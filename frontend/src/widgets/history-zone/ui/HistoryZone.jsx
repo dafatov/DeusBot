@@ -1,5 +1,16 @@
 import {useGame} from '@entities/game/lib/hooks';
-import {AbcOutlined, DisabledVisible, ExpandLess, ExpandMore, LocationSearching, Send, Visibility} from '@mui/icons-material';
+import {
+  AbcOutlined,
+  Church,
+  DisabledVisible,
+  ExpandLess,
+  ExpandMore,
+  LocationSearching,
+  Man4,
+  Microsoft,
+  Send,
+  Visibility
+} from '@mui/icons-material';
 import {Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Paper} from '@mui/material';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 import {useState} from 'react';
@@ -45,6 +56,46 @@ export const HistoryZone = ({historyVisible, setHistoryVisible}) => {
               </ListItemIcon>
               <ListItemText>{action.spell.letter}</ListItemText>
             </ListItem>;
+          case 'loner':
+            return <ListItem
+              key={i}
+              secondaryAction={
+                <IconButton edge="end" aria-label="show" onClick={() => setHistoryVisible2(historyVisible?.i === i ? null : {
+                  i, ...{
+                    type: 'area',
+                    color,
+                    x: action.spell.x - shift.x,
+                    y: action.spell.y - shift.y,
+                    radius: 5
+                  }
+                })}>
+                  {historyVisible?.i === i ? <DisabledVisible/> : <Visibility/>}
+                </IconButton>
+              }>
+              <ListItemIcon>
+                <Man4/>
+              </ListItemIcon>
+            </ListItem>;
+          case 'crucifix':
+            return <ListItem
+              key={i}
+              secondaryAction={
+                <IconButton edge="end" aria-label="show" onClick={() => setHistoryVisible2(historyVisible?.i === i ? null : {
+                  i, ...{
+                    type: 'area',
+                    color,
+                    x: action.spell.x - shift.x,
+                    y: action.spell.y - shift.y,
+                    radius: 0
+                  }
+                })}>
+                  {historyVisible?.i === i ? <DisabledVisible/> : <Visibility/>}
+                </IconButton>
+              }>
+              <ListItemIcon>
+                <Church/>
+              </ListItemIcon>
+            </ListItem>;
           case 'echo':
             return <ListItem
               key={i}
@@ -57,7 +108,19 @@ export const HistoryZone = ({historyVisible, setHistoryVisible}) => {
               <ListItemIcon>
                 <AbcOutlined/>
               </ListItemIcon>
-              <ListItemText>{action.spell.letter}</ListItemText>
+            </ListItem>;
+          case 'crosslight':
+            return <ListItem
+              key={i}
+              secondaryAction={
+                <IconButton edge="end" aria-label="show"
+                            onClick={() => setHistoryVisible2(historyVisible?.i === i ? null : {i, ...{type: 'word', wordId: action.spell.wordId}})}>
+                  {historyVisible?.i === i ? <DisabledVisible/> : <Visibility/>}
+                </IconButton>
+              }>
+              <ListItemIcon>
+                <Microsoft/>
+              </ListItemIcon>
             </ListItem>;
         }
 

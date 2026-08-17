@@ -30,10 +30,12 @@ public class Cell {
             return 0;
         }
 
-        revealed = true;
-        return words.stream()
+        int points = words.stream()
             .filter(word -> word != excludeWord)
             .mapToInt(word -> word.reveal(this, wordCoefficientFunction))
             .sum();
+
+        revealed = true;
+        return points;
     }
 }

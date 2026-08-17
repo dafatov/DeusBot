@@ -17,7 +17,10 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnActi
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SubmitWordAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.UseSpellAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.CrosslightSpell;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.CrucifixSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.EchoSpell;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.LonerSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell.RadarSpell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Spell;
 
@@ -30,6 +33,9 @@ import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardAc
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.StartGameActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.SubmitWordActionDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto.UseSpellActionDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.CrosslightSpellDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.CrucifixDto;
+import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.LonerSpellDto;
 import static ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.SpellDto.RadarSpellDto;
 
 @Mapper(subclassExhaustiveStrategy = RUNTIME_EXCEPTION)
@@ -59,6 +65,9 @@ public interface CrossWardActionMapper {
 
     @SubclassMapping(target = RadarSpell.class, source = RadarSpellDto.class)
     @SubclassMapping(target = EchoSpell.class, source = EchoSpellDto.class)
+    @SubclassMapping(target = LonerSpell.class, source = LonerSpellDto.class)
+    @SubclassMapping(target = CrosslightSpell.class, source = CrosslightSpellDto.class)
+    @SubclassMapping(target = CrucifixSpell.class, source = CrucifixDto.class)
     Spell map(SpellDto value);
 
     // =========================================================================================================================================================
