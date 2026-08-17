@@ -22,7 +22,6 @@ import static org.apache.commons.lang3.function.Failable.asRunnable;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.TARGET_SCORE;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.FINISHED;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
-import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeWord;
 import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
 
 @JsonSubTypes({
@@ -47,7 +46,7 @@ public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstan
         int nextIndex = (currentIndex + 1) % gameSession.getActivePlayers().size();
 
         gameSession.getState().setCurrentPlayer(gameSession.getActivePlayers().get(nextIndex));
-        placeWord(gameSession, gameSession.getState().getCurrentPlayer());
+        gameSession.placeWord();
         ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }
 

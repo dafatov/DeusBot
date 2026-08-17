@@ -15,6 +15,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAct
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkTurn;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.endPlayerPhase;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.tryFinishGame;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.SCORE_COEFFICIENT_FUNCTION;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
 
 
@@ -37,7 +38,7 @@ public record SubmitWordAction(int wordId, String word) implements CrossWardActi
             return;
         }
 
-        player.setScore(player.getScore() + word.reveal(w -> player.equals(w.getOwner()) ? 2 : 1));
+        player.setScore(player.getScore() + word.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player)));
         if (tryFinishGame(gameSession, ctx, player)) {
             return;
         }

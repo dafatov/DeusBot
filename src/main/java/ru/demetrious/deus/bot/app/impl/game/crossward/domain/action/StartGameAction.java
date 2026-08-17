@@ -34,8 +34,6 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_HIGH;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_LOW;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_MEDIUM;
-import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeStartWords;
-import static ru.demetrious.deus.bot.app.impl.game.crossward.utils.CrosswordUtils.placeWord;
 
 @Slf4j
 @Builder
@@ -51,7 +49,7 @@ public record StartGameAction() implements CrossWardAction {
         gameSession.getState().setLocked(true);
         gameSession.getState().setCurrentPlayer(gameSession.getPlayerList().getFirst());
         gameSession.getPlayerList().forEach(p -> p.setScore(0));
-        placeWord(gameSession, gameSession.getState().getCurrentPlayer());
+        gameSession.placeWord();
         ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }
 
@@ -68,8 +66,7 @@ public record StartGameAction() implements CrossWardAction {
         calcFrequencies(gameSession, words);
         gameSession.getWords().clear();
         gameSession.getGrid().clear();
-
-        placeStartWords(gameSession);
+        gameSession.placeStartWords();
     }
 
     private static void calcFrequencies(CrossWardInstance gameSession, List<String> words) {

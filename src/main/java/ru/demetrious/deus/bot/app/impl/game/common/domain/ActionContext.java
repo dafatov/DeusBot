@@ -41,13 +41,13 @@ public abstract class ActionContext<G extends Instance<?, ?, ?>> {
     public void startTimer(G gameSession, Duration delay, Runnable task) {
         Timer timer = gameSession.getTimer();
 
+        cancelTimer(timer);
         timer.setTask(() -> {
             cancelTimer(timer);
             task.run();
             notifyGameStateOutbound.notifyGameState(gameSession);
         });
         timer.setFinish(now().plus(delay));
-        timer.setRemaining(null);
         timer.setFuture(runAsync(timer.getTask(), delayedExecutor(delay.toMillis(), MILLISECONDS, virtualThreadPerTaskExecutor)));
         log.trace("Timer started: {}", timer);
     }

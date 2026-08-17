@@ -95,16 +95,16 @@ export const useRenderer = (
   const drawCarriage = useCallback(ctx => {
     if (!activeCell) return;
 
-    drawSymbol(ctx, activeCell.x, activeCell.y, '>', color);
-  }, [activeCell, color, drawSymbol]);
+    drawSymbol(ctx, activeCell.x - shift.x, activeCell.y - shift.y, '>', color);
+  }, [activeCell, shift, color, drawSymbol]);
 
   const drawLetter = useCallback((ctx, current, j, i) => {
-    const manualLetter = manualLetters?.[`${j},${i}`];
+    const manualLetter = manualLetters?.[`${j + shift.x},${i + shift.y}`];
 
     if (!current && !manualLetter) return;
 
-    drawSymbol(ctx, j, i, manualLetter ?? current.letter ?? '', manualLetter ? color : NEUTRAL_WORD_COLOR);
-  }, [manualLetters, color, drawSymbol]);
+    drawSymbol(ctx, j, i, current.letter ?? manualLetter ?? '', !current.letter && manualLetter ? color : NEUTRAL_WORD_COLOR);
+  }, [manualLetters, shift, color, drawSymbol]);
 
   const drawBackground = useCallback((ctx, current, j, i) => {
     ctx.save();

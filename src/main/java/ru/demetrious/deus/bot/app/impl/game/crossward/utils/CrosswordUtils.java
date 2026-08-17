@@ -8,9 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
-import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
-import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Cell;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Position;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
@@ -27,37 +24,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Wor
 @Slf4j
 @UtilityClass
 public class CrosswordUtils {
-    public static void placeStartWords(CrossWardInstance gameSession) {
-        placeWord(gameSession, 3, null, true);
-    }
-
-    public static void placeWord(CrossWardInstance gameSession, CrossWardPlayer owner) {
-        placeWord(gameSession, 1, owner, false);
-    }
-
-    // =========================================================================================================================================================
-    // = Implementation
-    // =========================================================================================================================================================
-
-    private static void placeWord(CrossWardInstance gameSession, int count, @Nullable CrossWardPlayer owner, boolean revealed) {
-        int index = 0;
-        while (index < count) {
-            String text = gameSession.getAvailableWords().poll();
-            Optional<Word> word = tryPlaceWord(text, gameSession.getWords(), gameSession.getGrid());
-            if (word.isEmpty()) {
-                gameSession.getAvailableWords().add(text);
-            } else {
-                log.trace("[Added] {}", word.get().getText());
-                index++;
-                word.get().setOwner(owner);
-                word.get().setOrder(gameSession.getWords().size());
-                word.get().setRevealed(revealed);
-                word.get().getCells().forEach(cell -> cell.setRevealed(cell.isRevealed() || revealed));
-            }
-        }
-    }
-
-    private static Optional<Word> tryPlaceWord(String text, List<Word> words, Map<Position, Cell> grid) {
+    public static Optional<Word> tryPlaceWord(String text, List<Word> words, Map<Position, Cell> grid) {
         if (words.isEmpty()) {
             return of(placeWord(text, new PlacementVariant(new Position(0, 0), current().nextBoolean() ? HORIZONTAL : VERTICAL), words, grid));
         }
@@ -73,6 +40,10 @@ public class CrosswordUtils {
         }
         return empty();
     }
+
+    // =========================================================================================================================================================
+    // = Implementation
+    // =========================================================================================================================================================
 
     private static List<PlacementVariant> createVariants(String text, Map<Position, Cell> grid) {
         List<PlacementVariant> variants = new ArrayList<>();

@@ -1,5 +1,5 @@
 import {useGameSessionStorage} from '@entities/game/lib/hooks';
-import {useCallback, useMemo} from 'react';
+import {useCallback, useEffect, useMemo} from 'react';
 
 const clearSelectedManualLetters = (setManualLetters, sortedCells) => {
   setManualLetters(manualLetters => sortedCells?.reduce((acc, c) => {
@@ -13,11 +13,25 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
 
   const sortedCells = useMemo(() => words[selectedWord]?.cells
       .toSorted((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x)
-      .map(c => ({...c, x: c.x - shift.x, y: c.y - shift.y}))
-    , [words[selectedWord], shift]);
+    , [words[selectedWord]]);
 
-  const activeCell = useMemo(() => sortedCells?.find(c => !manualLetters[`${c.x},${c.y}`] && !cells.get(`${c.x},${c.y}`)?.revealed)
-    , [sortedCells, cells, manualLetters]);
+  const activeCell = useMemo(() => sortedCells?.find(c => !manualLetters[`${c.x},${c.y}`] && !cells.get(`${c.x - shift.x},${c.y - shift.y}`)?.revealed)
+    , [sortedCells, cells, manualLetters, shift]);
+
+  useEffect(() => {
+    setManualLetters(manualLetters => {
+      const keysToRemove = Object.keys(manualLetters).filter(key => {
+        const [x, y] = key.split(',');
+
+        return cells.get(`${x - shift.x},${y - shift.y}`)?.revealed === true;
+      });
+
+      return keysToRemove.reduce((acc, key) => {
+        const {[key]: _, ...rest} = acc;
+        return rest;
+      }, manualLetters);
+    });
+  }, [cells, shift, setManualLetters]);
 
   const onLetterDown = useCallback(letter => {
     if (!selectedWord) return;
@@ -59,7 +73,7 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
   }, [onBackspaceDown]);
 
   const onEnterDown = useCallback(() => {
-    const word = sortedCells?.map(c => manualLetters[`${c.x},${c.y}`] || cells.get(`${c.x},${c.y}`)?.letter)?.join('');
+    const word = sortedCells?.map(c => cells.get(`${c.x - shift.x},${c.y - shift.y}`)?.letter || manualLetters[`${c.x},${c.y}`])?.join('');
 
     if (!word || word?.length !== sortedCells?.length) {
       return;
@@ -67,7 +81,7 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
 
     onWordSubmit(selectedWord, word)
       .then(() => clearSelectedManualLetters(setManualLetters, sortedCells));
-  }, [sortedCells, manualLetters, selectedWord, onWordSubmit, setManualLetters]);
+  }, [sortedCells, manualLetters, cells, selectedWord, onWordSubmit, setManualLetters]);
 
   return {onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown, manualLetters, activeCell};
 };

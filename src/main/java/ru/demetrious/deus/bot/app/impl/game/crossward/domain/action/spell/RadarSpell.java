@@ -14,6 +14,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag;
 import static java.util.Map.Entry;
 import static java.util.Map.of;
 import static java.util.Objects.nonNull;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.SCORE_COEFFICIENT_FUNCTION;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_HIGH;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_LOW;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_MEDIUM;
@@ -40,7 +41,7 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
                 Cell cell = gameSession.getGrid().get(new Position(i, j));
 
                 if (nonNull(cell) && letter.equals(cell.getLetter())) {
-                    score += cell.reveal(w -> player.equals(w.getOwner()) ? 2 : 1);
+                    score += cell.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player));
                 }
             }
         }

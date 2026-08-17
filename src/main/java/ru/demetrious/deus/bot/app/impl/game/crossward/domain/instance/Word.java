@@ -42,7 +42,6 @@ public class Word {
 
         int initial = toIntExact(cells.stream().filter(Cell::isRevealed).count());
         int points = cells.stream()
-            .filter(cell -> cell != excludeCell)
             .mapToInt(cell -> cell.reveal(this, wordCoefficientFunction))
             .sum();
         int after = toIntExact(cells.stream().filter(Cell::isRevealed).count());

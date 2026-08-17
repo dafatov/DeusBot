@@ -8,7 +8,7 @@ import {CrosswordCanvas} from '../cross-ward-canvas';
 import {HistoryZone} from '../history-zone/ui/HistoryZone';
 import {PlayersZone} from '../players-zone/ui/PlayersZone';
 import {CrossWardSpectatorPlayers} from '../spectators';
-import {SpellZone} from '../spell-zone/ui/SpellZone';
+import {SpellZone} from '../spell-zone';
 import {submitWord, useSpell} from './model/submitWordService';
 
 export const CrossWardContent = () => {
@@ -24,7 +24,7 @@ export const CrossWardContent = () => {
   };
 
   const handleAreaSpellClick = ({x, y}) => {
-    useSpell(send, gameId, {type: activeSpell.type, x: x + shift.x, y: y + shift.y, letter: activeSpell.letter});
+    useSpell(send, gameId, {x: x + shift.x, y: y + shift.y, ...activeSpell});
   };
 
   return (
