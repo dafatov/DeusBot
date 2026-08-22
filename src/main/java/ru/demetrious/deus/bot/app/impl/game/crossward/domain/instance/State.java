@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance;
 
+import java.time.Instant;
 import lombok.Data;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 
@@ -7,6 +8,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 
 @Data
 public class State {
+    private Instant startedAt;
     private Phase phase = WAITING;
     private boolean locked = false;
     private CrossWardPlayer currentPlayer;

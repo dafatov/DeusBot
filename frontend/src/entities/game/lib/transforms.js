@@ -36,6 +36,7 @@ export const transformCrossWard = game => {
 
   return {
     gameId: game?.key,
+    startedAt: game?.state?.startedAt,
     phase: game?.state?.phase,
     locked: game?.state?.locked,
     paused: !!game?.timer?.remaining,
@@ -44,6 +45,7 @@ export const transformCrossWard = game => {
     grid,
     spectators: (game?.playerList ?? []).filter(p => p.spectator),
     me: {
+      isCurrentPlayer: me?.id === game?.state?.currentPlayer,
       isSpectator: me?.spectator,
       isHost: game?.hostId === getUserId(),
       color: me?.color,

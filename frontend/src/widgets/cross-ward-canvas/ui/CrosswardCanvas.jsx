@@ -15,7 +15,7 @@ import {Canvas} from './Canvas';
 export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, activeSpell, selectedWord, setSelectedWord, historyVisible}) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging} = usePanZoom();
-  const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words} = useGame();
+  const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words, startedAt} = useGame();
 
   const {onCellClick: handleWordSelectionCellClick} = useWordSelection(setSelectedWord);
 
@@ -28,7 +28,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, acti
     onEnterDown,
     manualLetters,
     activeCell,
-  } = useWordSelectionInput(selectedWord, words, cellsMap, shift, onWordSubmit);
+  } = useWordSelectionInput(startedAt, selectedWord, words, cellsMap, shift, onWordSubmit);
 
   const {onKeyDown} = useKeyboardEvents(onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown);
 

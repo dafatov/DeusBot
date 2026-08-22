@@ -1,15 +1,34 @@
 import {useGameSessionStorage} from '@entities/game/lib/hooks';
 import {useCallback, useEffect, useMemo} from 'react';
 
-const clearSelectedManualLetters = (setManualLetters, sortedCells) => {
-  setManualLetters(manualLetters => sortedCells?.reduce((acc, c) => {
+const clearSelectedManualLetters = (saveManualLetters, sortedCells) => {
+  saveManualLetters(manualLetters => sortedCells?.reduce((acc, c) => {
     const {[`${c.x},${c.y}`]: _, ...rest} = acc;
     return rest;
   }, manualLetters));
 };
 
-export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordSubmit) => {
-  const [manualLetters, setManualLetters] = useGameSessionStorage('manualLetters', {});
+export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shift, onWordSubmit) => {
+  const [storageValue, setStorageValue] = useGameSessionStorage('manualLetters', {});
+
+  const manualLetters = useMemo(() => (storageValue?.started_at === startedAt && storageValue?.data) || {}
+    , [storageValue, startedAt]);
+
+  const saveManualLetters = useCallback(arg => {
+    const newLetters = typeof arg === 'function' ? arg(manualLetters) : arg;
+
+    if (newLetters === manualLetters) {
+      return;
+    }
+
+    setStorageValue({started_at: startedAt, data: newLetters});
+  }, [startedAt, setStorageValue, manualLetters]);
+
+  useEffect(() => {
+    if (storageValue && storageValue.started_at !== startedAt) {
+      saveManualLetters({});
+    }
+  }, [startedAt, storageValue, saveManualLetters]);
 
   const sortedCells = useMemo(() => words[selectedWord]?.cells
       .toSorted((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x)
@@ -19,7 +38,7 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
     , [sortedCells, cells, manualLetters, shift]);
 
   useEffect(() => {
-    setManualLetters(manualLetters => {
+    saveManualLetters(manualLetters => {
       const keysToRemove = Object.keys(manualLetters).filter(key => {
         const [x, y] = key.split(',');
 
@@ -31,7 +50,7 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
         return rest;
       }, manualLetters);
     });
-  }, [cells, shift, setManualLetters]);
+  }, [cells, shift, saveManualLetters]);
 
   const onLetterDown = useCallback(letter => {
     if (!selectedWord) return;
@@ -40,8 +59,8 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
 
     if (!word || word.revealed || !activeCell) return;
 
-    setManualLetters(manualLetters => ({...manualLetters, [`${activeCell.x},${activeCell.y}`]: letter.toLowerCase()}));
-  }, [selectedWord, words, activeCell, setManualLetters]);
+    saveManualLetters(manualLetters => ({...manualLetters, [`${activeCell.x},${activeCell.y}`]: letter.toLowerCase()}));
+  }, [selectedWord, words, activeCell, saveManualLetters]);
 
   const onBackspaceDown = useCallback(isCtrl => {
     if (!selectedWord) return;
@@ -51,11 +70,11 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
     if (!word) return;
 
     if (isCtrl) {
-      clearSelectedManualLetters(setManualLetters, sortedCells);
+      clearSelectedManualLetters(saveManualLetters, sortedCells);
       return;
     }
 
-    setManualLetters(manualLetters => {
+    saveManualLetters(manualLetters => {
       const lastCell = sortedCells?.findLast(cell => Object.hasOwn(manualLetters, `${cell.x},${cell.y}`));
 
       if (!lastCell) return manualLetters;
@@ -64,7 +83,7 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
 
       return rest;
     });
-  }, [selectedWord, words, sortedCells, setManualLetters]);
+  }, [selectedWord, words, sortedCells, saveManualLetters]);
 
   const onSpaceDown = useCallback(isCtrl => {
     if (isCtrl) {
@@ -80,8 +99,8 @@ export const useWordSelectionInput = (selectedWord, words, cells, shift, onWordS
     }
 
     onWordSubmit(selectedWord, word)
-      .then(() => clearSelectedManualLetters(setManualLetters, sortedCells));
-  }, [sortedCells, manualLetters, cells, selectedWord, onWordSubmit, setManualLetters]);
+      .then(() => clearSelectedManualLetters(saveManualLetters, sortedCells));
+  }, [sortedCells, manualLetters, cells, selectedWord, onWordSubmit, saveManualLetters]);
 
   return {onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown, manualLetters, activeCell};
 };
