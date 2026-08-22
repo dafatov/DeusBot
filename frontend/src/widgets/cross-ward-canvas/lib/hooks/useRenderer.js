@@ -4,8 +4,10 @@ import {getCellBackgroundColor} from '../utils/getCellBackgroundColor';
 import {getCellEdgeColor} from '../utils/getCellEdgeColor';
 import {getVisibleRange} from '../utils/getVisibleRange';
 import {getWordEndpoints} from '../utils/getWordEndpoints';
+import {getWordId} from '../utils/getWordId';
 
 const NEUTRAL_WORD_COLOR = '#000000';
+const PREVIEW_ALPHA = 0.5;
 
 const drawLine = (ctx, x1, y1, x2, y2, color) => {
   ctx.strokeStyle = color;
@@ -30,10 +32,10 @@ export const useRenderer = (
   shift,
   manualLetters,
   activeCell,
-  areaSpell,
+  activeSpell,
   historyVisible,
 ) => {
-  const drawWordSelection = useCallback((ctx, wordId) => {
+  const drawWordSelection = useCallback((ctx, wordId, preview = true) => {
     const word = words?.[wordId];
 
     if (!word) return;
@@ -41,7 +43,7 @@ export const useRenderer = (
     const endpoints = getWordEndpoints(word.cells);
 
     ctx.save();
-    ctx.strokeStyle = word.border ?? NEUTRAL_WORD_COLOR;
+    ctx.strokeStyle = alpha(word.border ?? NEUTRAL_WORD_COLOR, preview ? PREVIEW_ALPHA : 1);
     ctx.lineWidth = 3;
     ctx.strokeRect(
       (endpoints.first.x - shift.x) * cellSize,
@@ -53,7 +55,13 @@ export const useRenderer = (
   }, [words, shift, cellSize]);
 
   const drawHoveredCell = useCallback(ctx => {
-    if (!hoveredCell) return;
+    if (!hoveredCell || activeSpell) return;
+
+    const wordId = getWordId(hoveredCell);
+    if (wordId) {
+      drawWordSelection(ctx, wordId);
+      return;
+    }
 
     ctx.save();
     ctx.strokeStyle = color;
@@ -65,13 +73,13 @@ export const useRenderer = (
       cellSize
     );
     ctx.restore();
-  }, [hoveredCell, color, cellSize]);
+  }, [hoveredCell, activeSpell, color, cellSize, drawWordSelection]);
 
   const drawArea = useCallback((ctx, area) => {
-    if (!area?.radius) return;
+    if (!area?.radius && area.radius !== 0) return;
 
     ctx.save();
-    ctx.strokeStyle = alpha(area.color, 0.25);
+    ctx.strokeStyle = alpha(area.color, PREVIEW_ALPHA);
     ctx.lineWidth = 2;
     ctx.strokeRect(
       (area.x - area.radius) * cellSize,
@@ -169,13 +177,19 @@ export const useRenderer = (
     });
   }, [cellSize, cellsMap, words, drawLetter]);
 
-  const drawAreaSpell = useCallback(ctx => {
-    if (!areaSpell || !hoveredCell) {
+  const drawSpell = useCallback(ctx => {
+    if (!activeSpell || !hoveredCell) {
       return;
     }
 
-    drawArea(ctx, {x: hoveredCell.x, y: hoveredCell.y, radius: areaSpell.radius, color});
-  }, [areaSpell, hoveredCell, drawArea]);
+    if (activeSpell.group === 'area') {
+      drawArea(ctx, {x: hoveredCell.x, y: hoveredCell.y, radius: activeSpell.radius, color});
+    } else if (activeSpell.group === 'word') {
+      drawWordSelection(ctx, getWordId(hoveredCell));
+    } else {
+      console.warn('Failed preview activeSpell using', activeSpell);
+    }
+  }, [activeSpell, hoveredCell, drawArea, drawWordSelection]);
 
   const draw = useCallback((ctx, width, height) => {
     ctx.clearRect(0, 0, width, height);
@@ -197,14 +211,14 @@ export const useRenderer = (
       }
     }
 
-    drawWordSelection(ctx, selectedWord);
+    drawWordSelection(ctx, selectedWord, false);
     drawHoveredCell(ctx);
     drawCarriage(ctx);
-    drawAreaSpell(ctx);
+    drawSpell(ctx);
     drawHistory(ctx);
 
     ctx.restore();
-  }, [offset, scale, size, cellSize, selectedWord, drawCell, drawWordSelection, drawHoveredCell, drawCarriage, drawAreaSpell, drawHistory]);
+  }, [offset, scale, size, cellSize, selectedWord, drawCell, drawWordSelection, drawHoveredCell, drawCarriage, drawSpell, drawHistory]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

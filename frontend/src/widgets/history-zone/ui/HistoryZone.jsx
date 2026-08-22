@@ -14,7 +14,7 @@ import {
 import {Collapse, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Paper} from '@mui/material';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 import {useState} from 'react';
-import {FREQUENCY_RADIUS} from '../../spell-zone/ui/Radar';
+import {FREQUENCY_RADIUS} from '../../spell-zone/model/constants';
 
 export const HistoryZone = ({historyVisible, setHistoryVisible}) => {
   const {grid: {shift}, history, findPlayer, letterTags} = useGame();

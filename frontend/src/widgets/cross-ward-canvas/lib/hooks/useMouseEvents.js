@@ -10,7 +10,7 @@ export const useMouseEvents = (onCellClick, onCellHover, canvasRef, offset, scal
     if (indices) {
       const {x, y} = indices;
 
-      callback({x, y, cell: cells.get(`${x},${y}`)});
+      callback({...indices, cell: cells.get(`${x},${y}`)});
     } else {
       callback(null);
     }

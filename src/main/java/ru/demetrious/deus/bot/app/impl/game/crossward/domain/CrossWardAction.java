@@ -12,6 +12,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SetSpectator
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.ShufflePlayersAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.SkipTurnAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.StartGameAction;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.UseSpellAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State;
 
 import static java.time.Duration.ofMinutes;
@@ -32,6 +33,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = SetPauseAction.class, name = "set_pause"),
     @Type(value = ShufflePlayersAction.class, name = "shuffle_players"),
     @Type(value = SkipTurnAction.class, name = "skip_turn"),
+    @Type(value = UseSpellAction.class, name = "use_spell"),
 })
 public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstance, CrossWardActionContext> {
     @Override

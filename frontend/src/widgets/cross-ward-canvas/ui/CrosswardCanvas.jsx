@@ -12,14 +12,14 @@ import {getWordEndpoints} from '../lib/utils/getWordEndpoints';
 import {Canvas} from './Canvas';
 
 //TODO отображать какими буквами клетка точно не является
-export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, areaSpell, selectedWord, setSelectedWord, historyVisible}) => {
+export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, activeSpell, selectedWord, setSelectedWord, historyVisible}) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging} = usePanZoom();
   const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words} = useGame();
 
   const {onCellClick: handleWordSelectionCellClick} = useWordSelection(setSelectedWord);
 
-  const {onCellClick: handleAreaSpellCellClick} = useAreaSpell(onAreaSpellClick);
+  const {onCellClick: handleSpellCellClick} = useAreaSpell(onSpellClick);
 
   const {
     onLetterDown,
@@ -35,7 +35,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, 
   const {hoveredCell, onHover} = useCellHover();
 
   const {onClick, onMouseMove, onMouseLeave} = useMouseEvents(
-    areaSpell ? handleAreaSpellCellClick : handleWordSelectionCellClick,
+    activeSpell ? handleSpellCellClick : handleWordSelectionCellClick,
     onHover,
     canvasRef,
     {x: offsetX, y: offsetY},
@@ -60,7 +60,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onAreaSpellClick, 
     shift,
     manualLetters,
     activeCell,
-    areaSpell,
+    activeSpell,
     historyVisible,
   );
 
