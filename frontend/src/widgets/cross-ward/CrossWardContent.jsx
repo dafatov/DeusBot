@@ -13,7 +13,7 @@ import {submitWord, useSpell} from './model/submitWordService';
 
 export const CrossWardContent = () => {
   const {send} = useSocket();
-  const {gameId, me: {isHost}, grid: {shift}} = useGame();
+  const {gameId, phase, me: {isHost, isCurrentPlayer}, grid: {shift}} = useGame();
 
   const [activeSpell, setActiveSpell] = useState(null);
   const [selectedWord, setSelectedWord] = useState();
@@ -37,9 +37,13 @@ export const CrossWardContent = () => {
   return (
     <Stack container direction="column" sx={{height: '100vh'}}>
       <CrossWardSpectatorPlayers/>
-      <SpellZone activeSpell={activeSpell} setActiveSpell={setActiveSpell}/>
+      {phase === 'PLAYING' && isCurrentPlayer
+        ? <SpellZone activeSpell={activeSpell} setActiveSpell={setActiveSpell}/>
+        : <></>}
+      {phase !== 'WAITING'
+        ? <HistoryZone historyVisible={historyVisible} setHistoryVisible={setHistoryVisible}/>
+        : <></>}
       <PlayersZone/>
-      <HistoryZone historyVisible={historyVisible} setHistoryVisible={setHistoryVisible}/>
       <PanZoomProvider>
         <CrosswordCanvas
           onWordSubmit={handleWordSubmit}

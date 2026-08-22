@@ -111,7 +111,7 @@ export const useRenderer = (
 
     if (!current && !manualLetter) return;
 
-    drawSymbol(ctx, j, i, current.letter ?? manualLetter ?? '', !current.letter && manualLetter ? color : NEUTRAL_WORD_COLOR);
+    drawSymbol(ctx, j, i, current?.letter ?? manualLetter ?? '', !current?.letter && manualLetter ? color : NEUTRAL_WORD_COLOR);
   }, [manualLetters, shift, color, drawSymbol]);
 
   const drawBackground = useCallback((ctx, current, j, i) => {

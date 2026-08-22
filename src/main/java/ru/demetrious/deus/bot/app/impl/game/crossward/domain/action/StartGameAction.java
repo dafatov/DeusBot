@@ -20,6 +20,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag;
 
 import static java.time.Duration.ofMinutes;
+import static java.time.Instant.now;
 import static java.util.Collections.shuffle;
 import static java.util.Comparator.comparingDouble;
 import static java.util.concurrent.ThreadLocalRandom.current;
@@ -45,6 +46,7 @@ public record StartGameAction() implements CrossWardAction {
         checkPlayers(gameSession);
 
         startBoard(gameSession, ctx);
+        gameSession.getState().setStartedAt(now());
         gameSession.getState().setPhase(PLAYING);
         gameSession.getState().setLocked(true);
         gameSession.getState().setCurrentPlayer(gameSession.getPlayerList().getFirst());
