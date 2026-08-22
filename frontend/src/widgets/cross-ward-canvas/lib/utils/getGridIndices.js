@@ -16,5 +16,15 @@ export const getGridIndices = (canvasRef, event, offsetX, offsetY, scale, cellSi
     return null;
   }
 
-  return {x, y};
+  const dx = gridX - (x * cellSize + cellSize / 2);
+  const dy = gridY - (y * cellSize + cellSize / 2);
+
+  let sector;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    sector = dx >= 0 ? 'E' : 'W';
+  } else {
+    sector = dy >= 0 ? 'S' : 'N';
+  }
+
+  return {x, y, sector};
 };

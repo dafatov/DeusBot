@@ -1,13 +1,15 @@
 import {useCallback} from 'react';
+import {getWordId} from '../utils/getWordId';
 
-export const useAreaSpell = (onAriaSpellClick) => {
+
+export const useAreaSpell = onSpellClick => {
   const onCellClick = useCallback(data => {
     if (!data) {
       return;
     }
 
-    onAriaSpellClick(data);
-  }, [onAriaSpellClick]);
+    onSpellClick({...data, wordId: getWordId(data)});
+  }, [onSpellClick]);
 
   return {onCellClick};
 };

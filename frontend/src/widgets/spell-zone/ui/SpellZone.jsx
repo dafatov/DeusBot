@@ -1,21 +1,11 @@
-import {useGame} from '@entities/game/lib/hooks';
-import {Divider, Paper, Stack} from '@mui/material';
-import {useSocket} from '@shared/lib/socket/hooks';
-import {useSpell} from '../../cross-ward/model/submitWordService';
-import {Crosslight} from './Crosslight';
-import {Crucifix} from './Crucifix';
-import {Echo} from './Echo';
-import {Loner} from './Loner';
-import {Radar} from './Radar';
+import {Paper, Stack, ToggleButtonGroup} from '@mui/material';
+import {Crosslight} from './spell/Crosslight';
+import {Crucifix} from './spell/Crucifix';
+import {Echo} from './spell/Echo';
+import {Loner} from './spell/Loner';
+import {Radar} from './spell/Radar';
 
-export const SpellZone = ({setActiveSpell, selectedWord}) => {
-  const {send} = useSocket();
-  const {gameId} = useGame();
-
-  const handleOnWordSpellClick = ({type}) => {
-    useSpell(send, gameId, {type, wordId: selectedWord});
-  };
-
+export const SpellZone = ({activeSpell, setActiveSpell}) => {
   return (
     <Paper
       sx={(t) => ({
@@ -29,13 +19,13 @@ export const SpellZone = ({setActiveSpell, selectedWord}) => {
       })}
     >
       <Stack direction="row" spacing={1}>
-        <Loner setActiveSpell={setActiveSpell}/>
-        <Radar setActiveSpell={setActiveSpell}/>
-        <Divider orientation="vertical" flexItem/>
-        <Crucifix setActiveSpell={setActiveSpell}/>
-        <Divider orientation="vertical" flexItem/>
-        <Echo selectedWord={selectedWord} handleOnWordSpellClick={handleOnWordSpellClick}/>
-        <Crosslight selectedWord={selectedWord} handleOnWordSpellClick={handleOnWordSpellClick}/>
+        <ToggleButtonGroup exclusive value={activeSpell} onChange={(_, newValue) => setActiveSpell(newValue)}>
+          <Loner/>
+          <Radar activeSpell={activeSpell} setActiveSpell={setActiveSpell}/>
+          <Crucifix/>
+          <Echo/>
+          <Crosslight/>
+        </ToggleButtonGroup>
       </Stack>
     </Paper>
   );

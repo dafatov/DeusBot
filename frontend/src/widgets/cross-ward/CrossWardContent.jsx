@@ -23,21 +23,28 @@ export const CrossWardContent = () => {
     return submitWord(send, gameId, wordId, word);
   };
 
-  const handleAreaSpellClick = ({x, y}) => {
-    useSpell(send, gameId, {x: x + shift.x, y: y + shift.y, ...activeSpell});
+  const handleSpellClick = data => {
+    const request = activeSpell.onCellClick(data);
+    const {x, y, group, ...others} = request;
+
+    if (others.type && (group === 'area' && x != null && y != null || group === 'word' && others.wordId != null)) {
+      useSpell(send, gameId, {...others, x: x + shift.x, y: y + shift.y});
+    } else {
+      console.warn('Failed validation activeSpell using', data);
+    }
   };
 
   return (
     <Stack container direction="column" sx={{height: '100vh'}}>
       <CrossWardSpectatorPlayers/>
-      <SpellZone setActiveSpell={setActiveSpell} selectedWord={selectedWord}/>
+      <SpellZone activeSpell={activeSpell} setActiveSpell={setActiveSpell}/>
       <PlayersZone/>
       <HistoryZone historyVisible={historyVisible} setHistoryVisible={setHistoryVisible}/>
       <PanZoomProvider>
         <CrosswordCanvas
           onWordSubmit={handleWordSubmit}
-          areaSpell={activeSpell}
-          onAreaSpellClick={handleAreaSpellClick}
+          activeSpell={activeSpell}
+          onSpellClick={handleSpellClick}
           selectedWord={selectedWord}
           setSelectedWord={setSelectedWord}
           historyVisible={historyVisible}

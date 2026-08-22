@@ -1,4 +1,5 @@
 import {useCallback} from 'react';
+import {getWordId} from '../utils/getWordId';
 
 export const useWordSelection = (setSelectedWord) => {
   const onCellClick = useCallback(data => {
@@ -7,11 +8,7 @@ export const useWordSelection = (setSelectedWord) => {
       return;
     }
 
-    const {HORIZONTAL: h, VERTICAL: v} = data.cell.words;
-
-    setSelectedWord(s => h && v
-      ? (s === h ? v : h)
-      : h || v);
+    setSelectedWord(getWordId(data));
   }, [setSelectedWord]);
 
   return {onCellClick};
