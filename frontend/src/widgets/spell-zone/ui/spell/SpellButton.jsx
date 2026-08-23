@@ -1,15 +1,27 @@
 import {QuestionMark} from '@mui/icons-material';
-import {Badge, ToggleButton, Tooltip} from '@mui/material';
+import {Badge, Box, ToggleButton, Tooltip} from '@mui/material';
 
-export const SpellButton = ({children, value, tooltip}) => {
+const AFFECT_COLOR = {
+  none: '#50ef50',
+  'end_turn': '#ff0000',
+};
+
+export const SpellButton = ({children, value, disabled, tooltip}) => {
   return (
-    <ToggleButton color="primary" value={value} variant="outlined" sx={{minWidth: 0}}>
+    <ToggleButton disabled={disabled} color="primary" value={value} variant="outlined" sx={{minWidth: 0}}>
       <Badge badgeContent={
         <Tooltip title={tooltip} disableInteractive>
           <QuestionMark sx={{width: 16, height: 16}}/>
         </Tooltip>
       }>
-        {children}
+        <Box component="span" sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          filter: `drop-shadow(0 0 10px color-mix(in srgb, ${AFFECT_COLOR[value.affect]} ${disabled ? 0 : 75}%, transparent))`,
+        }}>
+          {children}
+        </Box>
       </Badge>
     </ToggleButton>
   );

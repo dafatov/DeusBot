@@ -1,7 +1,5 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
@@ -22,11 +20,6 @@ public record ShufflePlayersAction() implements CrossWardAction {
         checkLocked(gameSession);
         checkHost(gameSession, player);
 
-        List<CrossWardPlayer> players = gameSession.getPlayerList();
-        List<CrossWardPlayer> shuffled = new ArrayList<>(players);
-
-        shuffle(shuffled, current());
-        players.clear();
-        players.addAll(shuffled);
+        shuffle(gameSession.getActivePlayers(), current());
     }
 }

@@ -15,6 +15,7 @@ public class StateDto {
     private final PhaseDto phase;
     private final boolean locked;
     private final String currentPlayer;
+    private final int currentEnergy;
 
     public enum PhaseDto {
         WAITING, PLAYING, FINISHED

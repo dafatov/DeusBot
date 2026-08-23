@@ -3,10 +3,11 @@ import {Typography} from '@mui/material';
 import {useMemo} from 'react';
 import {SpellButton} from './SpellButton';
 
-export const Crucifix = () => {
+export const Crucifix = ({disabled}) => {
   const value = useMemo(() => ({
     group: 'area',
     type: 'crucifix',
+    affect: 'end_turn',
     radius: 0,
     onCellClick: ({x, y}) => ({
       group: 'area',
@@ -25,7 +26,7 @@ export const Crucifix = () => {
   }, []);
 
   return (
-    <SpellButton tooltip={tooltip} value={value}>
+    <SpellButton tooltip={tooltip} value={value} disabled={disabled}>
       <Church sx={{width: 48, height: 48}}/>
     </SpellButton>
   );

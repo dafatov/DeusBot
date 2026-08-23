@@ -49,7 +49,7 @@ public record SetSpectatorAction(boolean spectator) implements CrossWardAction {
         final double goldenRatio = (sqrt(5) - 1) / 2;
         float hue = (float) ((index * goldenRatio + seed * 0.618) % 1.0);
         float saturation = 0.85f;
-        float brightness = 0.65f;
+        float brightness = 0.45f;
 
         return getHSBColor(hue, saturation, brightness);
     }

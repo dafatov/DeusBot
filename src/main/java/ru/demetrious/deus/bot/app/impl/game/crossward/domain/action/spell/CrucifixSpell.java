@@ -16,7 +16,6 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Word;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.isNull;
-import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.endPlayerPhase;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.SCORE_COEFFICIENT_FUNCTION;
 
 @Slf4j
@@ -27,12 +26,12 @@ public record CrucifixSpell(int x, int y) implements Spell {
     private static final int[][] DIRECTIONS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
     @Override
-    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         Position startPos = new Position(x, y);
         Cell startCell = gameSession.getGrid().get(startPos);
 
         if (isNull(startCell) || startCell.isRevealed()) {
-            return;
+            return false;
         }
 
         Function<Word, Integer> scoreCoefficient = SCORE_COEFFICIENT_FUNCTION.apply(player);
@@ -51,7 +50,7 @@ public record CrucifixSpell(int x, int y) implements Spell {
         }
 
         player.setScore(totalScore);
-        endPlayerPhase(gameSession, ctx);
+        return true;
     }
 
     // =========================================================================================================================================================
