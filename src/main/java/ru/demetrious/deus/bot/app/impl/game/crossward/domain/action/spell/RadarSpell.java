@@ -28,7 +28,7 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
     );
 
     @Override
-    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         int radius = TAG_RADIUS.entrySet().stream()
             .filter(t -> gameSession.getLetterTags().get(t.getKey()).contains(letter))
             .findFirst()
@@ -46,5 +46,6 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
             }
         }
         player.setScore(score);
+        return false;
     }
 }

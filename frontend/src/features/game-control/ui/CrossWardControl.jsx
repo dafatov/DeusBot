@@ -5,7 +5,7 @@ import {useSocket} from '@shared/lib/socket/hooks';
 import {shufflePlayers, startGame, toggleLocked, togglePause} from '../model/crossWardControlService';
 
 export const CrossWardControl = () => {
-  const {gameId, phase, locked, paused} = useGame();
+  const {gameId, phase, locked, paused, players} = useGame();
   const {send} = useSocket();
 
   return (
@@ -17,11 +17,12 @@ export const CrossWardControl = () => {
       flexDirection: 'row-reverse',
       gap: t.spacing(),
       padding: t.spacing(),
+      opacity: 0.8,
     })}>
-      <Fab color="primary" disabled={locked} onClick={() => startGame(send, gameId)}>
+      <Fab color="primary" disabled={locked || players?.length <= 0} onClick={() => startGame(send, gameId)}>
         {phase === 'WAITING' || phase === 'FINISHED' ? <PlayArrowOutlined/> : <RestartAlt/>}
       </Fab>
-      <Fab color="primary" disabled={locked} onClick={() => shufflePlayers(send, gameId)}>
+      <Fab color="primary" disabled={locked || players?.length <= 0} onClick={() => shufflePlayers(send, gameId)}>
         <Shuffle/>
       </Fab>
       <Fab color="primary" onClick={() => toggleLocked(send, gameId)}>

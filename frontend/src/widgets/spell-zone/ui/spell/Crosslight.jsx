@@ -3,10 +3,11 @@ import {Typography} from '@mui/material';
 import {useMemo} from 'react';
 import {SpellButton} from './SpellButton';
 
-export const Crosslight = () => {
+export const Crosslight = ({disabled}) => {
   const value = useMemo(() => ({
     group: 'word',
     type: 'crosslight',
+    affect: 'none',
     onCellClick: ({wordId}) => ({
       group: 'word',
       type: 'crosslight',
@@ -23,7 +24,7 @@ export const Crosslight = () => {
   }, []);
 
   return (
-    <SpellButton tooltip={tooltip} value={value}>
+    <SpellButton tooltip={tooltip} value={value} disabled={disabled}>
       <Microsoft sx={{width: 48, height: 48}}/>
     </SpellButton>
   );

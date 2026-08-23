@@ -12,6 +12,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Spell;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPaused;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkPhase;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.checkTurn;
+import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction.endPlayerPhase;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
 
 @Slf4j
@@ -22,7 +23,23 @@ public record UseSpellAction(Spell spell) implements CrossWardAction {
         checkPaused(gameSession);
         checkPhase(gameSession, PLAYING);
         checkTurn(gameSession, player);
+        checkSpellCost(gameSession, spell);
 
-        spell.use(gameSession, player, ctx);
+        boolean needEndTurn = spell.use(gameSession, player, ctx);
+
+        gameSession.getState().setCurrentEnergy(gameSession.getState().getCurrentEnergy() - spell.getCost());
+        if (needEndTurn) {
+            endPlayerPhase(gameSession, ctx);
+        }
+    }
+
+    // =========================================================================================================================================================
+    // = Implementation
+    // =========================================================================================================================================================
+
+    private static void checkSpellCost(CrossWardInstance gameSession, Spell spell) throws ActionException {
+        if (gameSession.getState().getCurrentEnergy() < spell.getCost()) {
+            throw new ActionException("Can't use this action because the current energy is too low");
+        }
     }
 }

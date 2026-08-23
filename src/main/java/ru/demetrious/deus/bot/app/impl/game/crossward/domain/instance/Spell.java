@@ -25,5 +25,9 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
     @Type(value = CrucifixSpell.class, name = "crucifix"),
 })
 public interface Spell {
-    void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException;
+    boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException;
+
+    default int getCost() {
+        return 1;
+    }
 }

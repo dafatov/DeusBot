@@ -11,7 +11,6 @@ import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
 import {getWordEndpoints} from '../lib/utils/getWordEndpoints';
 import {Canvas} from './Canvas';
 
-//TODO отображать какими буквами клетка точно не является
 export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, activeSpell, selectedWord, setSelectedWord, historyVisible}) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging} = usePanZoom();

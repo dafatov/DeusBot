@@ -16,6 +16,8 @@ import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
 import {useState} from 'react';
 import {FREQUENCY_RADIUS} from '../../spell-zone/model/constants';
 
+/// TODO проблемы с версткой
+///
 export const HistoryZone = ({historyVisible, setHistoryVisible}) => {
   const {grid: {shift}, history, findPlayer, letterTags} = useGame();
   const [opens, setOpens] = useState({});

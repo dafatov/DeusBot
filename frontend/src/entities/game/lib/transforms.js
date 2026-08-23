@@ -42,6 +42,7 @@ export const transformCrossWard = game => {
     paused: !!game?.timer?.remaining,
     timer: game?.timer?.timer ?? game?.timer?.remaining,
     currentPlayer: game?.state?.currentPlayer,
+    currentEnergy: game?.state?.currentEnergy,
     grid,
     spectators: (game?.playerList ?? []).filter(p => p.spectator),
     me: {

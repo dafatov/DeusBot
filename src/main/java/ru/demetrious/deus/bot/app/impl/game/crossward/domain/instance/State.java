@@ -12,6 +12,7 @@ public class State {
     private Phase phase = WAITING;
     private boolean locked = false;
     private CrossWardPlayer currentPlayer;
+    private int currentEnergy;
 
     public enum Phase {
         WAITING, PLAYING, FINISHED

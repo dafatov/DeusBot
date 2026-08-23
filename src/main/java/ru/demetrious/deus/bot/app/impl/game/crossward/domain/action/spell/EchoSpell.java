@@ -26,7 +26,7 @@ public record EchoSpell(int wordId) implements Spell {
     );
 
     @Override
-    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         Word word = gameSession.getWords().stream()
             .filter(w -> w.getOrder() == wordId)
             .findFirst()
@@ -37,5 +37,6 @@ public record EchoSpell(int wordId) implements Spell {
             .findFirst()
             .map(Entry::getKey)
             .ifPresent(t -> cell.getTags().add(t)));
+        return false;
     }
 }

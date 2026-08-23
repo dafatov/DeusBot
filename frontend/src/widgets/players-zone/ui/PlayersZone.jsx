@@ -1,7 +1,7 @@
 import {useGame} from '@entities/game/lib/hooks';
 import {setSpectator} from '@features/set-spectator/model/setSpectatorService';
-import {ArrowRightAlt, EmojiEventsOutlined} from '@mui/icons-material';
-import {alpha, Button, Divider, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Paper, Stack, Typography} from '@mui/material';
+import {Bolt, BoltOutlined, EmojiEventsOutlined} from '@mui/icons-material';
+import {alpha, Button, Divider, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Paper, Rating, Stack, Typography} from '@mui/material';
 import beepSound from '@shared/assets/sample/beep.wav';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {DiscordAvatar} from '@shared/ui/DiscordAvatar';
@@ -12,7 +12,7 @@ import {skipTurn} from '../../cross-ward/model/submitWordService';
 
 export const PlayersZone = ({}) => {
   const {send} = useSocket();
-  const {gameId, me: {isSpectator}, phase, players, locked, currentPlayer, timer, paused} = useGame();
+  const {gameId, me: {isSpectator, isCurrentPlayer}, phase, players, locked, currentPlayer, currentEnergy, timer, paused} = useGame();
   const {minutes, seconds, restart, isRunning} = useTimer({expiryTimestamp: new Date(), autoStart: false});
   // noinspection JSCheckFunctionSignatures
   const [play] = useSound(beepSound, {volume: 0.1});
@@ -82,7 +82,17 @@ export const PlayersZone = ({}) => {
       <List>
         {players.map(player => (
           <ListItem key={player.id} sx={{backgroundColor: alpha(player.color, 0.5)}}>
-            <ListItemIcon>{player.id === currentPlayer && (phase === 'PLAYING' && <ArrowRightAlt/> || phase === 'FINISHED' &&
+            <ListItemIcon>{player.id === currentPlayer && (phase === 'PLAYING' &&
+              <Rating
+                readOnly
+                icon={<Bolt sx={{color: '#50ef50', width: '24px', height: '24px'}}/>}
+                emptyIcon={<BoltOutlined sx={{width: '24px', height: '24px'}}/>}
+                value={currentEnergy}
+                max={2}
+                defaultValue={currentEnergy}
+                size="small"
+              />
+              || phase === 'FINISHED' &&
               <EmojiEventsOutlined/>)}</ListItemIcon>
             <ListItemAvatar>
               <DiscordAvatar
@@ -95,18 +105,27 @@ export const PlayersZone = ({}) => {
             <ListItemText>{player.score}</ListItemText>
           </ListItem>
         ))}
-        {isSpectator && !locked &&
-          <Button onClick={handleBecomePlayerClick} color="primary" sx={t => ({
+        {isSpectator && !locked
+          ? <Button onClick={handleBecomePlayerClick} color="primary" sx={t => ({
             textAlign: 'center',
             width: '100%',
             minHeight: '40px',
             padding: t.spacing(2)
           })}>Присоединиться</Button>
+          : players?.length <= 0 && <Typography sx={t => ({
+          minHeight: '56.5px',
+          justifyContent: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          color: t.palette.primary.main
+        })}>Отсутствуют</Typography>
         }
       </List>
-      {phase === 'PLAYING' && <><Divider/>
-        <Button onClick={handleSkipTurnClick} color="primary"
-                sx={t => ({textAlign: 'center', width: '100%', padding: t.spacing()})}>Пропустить</Button></>}
+      {phase === 'PLAYING' && isCurrentPlayer && <>
+        <Divider/>
+        <Button disabled={paused} onClick={handleSkipTurnClick} color="primary"
+                sx={t => ({textAlign: 'center', width: '100%', padding: t.spacing()})}>Пропустить</Button>
+      </>}
     </Paper>
   );
 };

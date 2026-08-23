@@ -24,7 +24,7 @@ public record LonerSpell(int x, int y) implements Spell {
     private static final int RADIUS = 3;
 
     @Override
-    public void use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
         List<Cell> cells = getCellsInRadius(gameSession);
         Map<Character, Long> letterFrequency = cells.stream()
             .collect(groupingBy(Cell::getLetter, counting()));
@@ -34,6 +34,7 @@ public record LonerSpell(int x, int y) implements Spell {
             .findFirst();
 
         targetCell.ifPresent(cell -> player.setScore(player.getScore() + cell.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player))));
+        return false;
     }
 
     // =========================================================================================================================================================

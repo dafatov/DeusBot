@@ -3,10 +3,11 @@ import {Typography} from '@mui/material';
 import {useMemo} from 'react';
 import {SpellButton} from './SpellButton';
 
-export const Loner = () => {
+export const Loner = ({disabled}) => {
   const value = useMemo(() => ({
     group: 'area',
     type: 'loner',
+    affect: 'none',
     radius: 3,
     onCellClick: ({x, y}) => ({
       group: 'area',
@@ -25,7 +26,7 @@ export const Loner = () => {
   }, []);
 
   return (
-    <SpellButton tooltip={tooltip} value={value}>
+    <SpellButton tooltip={tooltip} value={value} disabled={disabled}>
       <Man4 sx={{width: 48, height: 48}}/>
     </SpellButton>
   );

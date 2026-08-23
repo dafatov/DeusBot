@@ -11,6 +11,7 @@ import {SpellButton} from './SpellButton';
 const createSpell = (letter, radius) => ({
   group: 'area',
   type: 'radar',
+  affect: 'none',
   radius,
   letter,
   onCellClick: ({x, y}) => ({
@@ -22,7 +23,7 @@ const createSpell = (letter, radius) => ({
   }),
 });
 
-export const Radar = ({activeSpell, setActiveSpell}) => {
+export const Radar = ({activeSpell, setActiveSpell, disabled}) => {
   const {letterTags} = useGame();
 
   const [defaultLetter, defaultRadius] = useMemo(() => findDefaultLetterAndRadius(letterTags), [letterTags]);
@@ -55,12 +56,13 @@ export const Radar = ({activeSpell, setActiveSpell}) => {
   };
 
   return (
-    <SpellButton tooltip={tooltip} value={spell}>
+    <SpellButton tooltip={tooltip} value={spell} disabled={disabled}>
       <Badge
         anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
         onMouseDown={(e) => e.stopPropagation()}
         badgeContent={
           <IconButton
+            disabled={disabled}
             onClick={(e) => {
               setAnchorEl(e.currentTarget);
               e.stopPropagation();
