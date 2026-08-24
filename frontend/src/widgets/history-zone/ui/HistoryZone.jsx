@@ -155,6 +155,8 @@ export const HistoryZone = ({historyVisible, setHistoryVisible}) => {
       zIndex: 2,
       minWidth: '200px',
       opacity: 0.8,
+      maxHeight: '50vh',
+      overflow: 'auto',
     }}>
       <List>
         {history
