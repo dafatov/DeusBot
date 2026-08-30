@@ -11,7 +11,17 @@ export const SpellButton = ({children, value, disabled, tooltip}) => {
   const Icon = value?.type ? SPELL_ICON[value.type] : null;
 
   return (
-    <ToggleButton disabled={disabled} color="primary" value={value} variant="outlined" sx={{minWidth: 0}}>
+    <ToggleButton
+      disabled={disabled}
+      color="primary"
+      value={value}
+      variant="outlined"
+      sx={{
+        minWidth: 0,
+        '&.Mui-disabled': {
+          pointerEvents: 'auto',
+        }
+      }}>
       <Badge
         badgeContent={
           <Tooltip title={tooltip} disableInteractive>
