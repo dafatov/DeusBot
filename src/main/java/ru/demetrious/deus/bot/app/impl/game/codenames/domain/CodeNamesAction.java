@@ -35,7 +35,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CODE_NAMES;
     @Type(value = SetLockedAction.class, name = "set_locked"),
     @Type(value = SetPauseAction.class, name = "set_pause"),
 })
-public interface CodeNamesAction extends Action<CodeNamesPlayer, CodeNamesInstance, CodeNamesActionContext> {
+public interface CodeNamesAction extends Action<CodeNamesPlayer, CodeNamesInstance, CodeNamesActionContext, CodeNamesAction> {
     @Override
     default String getGame() {
         return CODE_NAMES;

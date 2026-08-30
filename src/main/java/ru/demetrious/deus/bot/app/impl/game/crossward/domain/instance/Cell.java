@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 
 @Accessors(chain = true)
 @Data
@@ -16,6 +17,7 @@ public class Cell {
     private final Position position;
     private final Character letter;
     private final Set<Tag> tags = new HashSet<>();
+    private final List<Event> history = new ArrayList<>();
     private boolean revealed = false;
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -36,6 +38,7 @@ public class Cell {
             .sum();
 
         revealed = true;
+        history.clear();
         return points;
     }
 }

@@ -13,9 +13,9 @@ public interface Gamebox {
 
     void joinGame(String gameId);
 
-    Optional<? extends Pair<? extends Instance<?, ?, ?>, ? extends Player>> findByPlayer(String userId);
+    Optional<? extends Pair<? extends Instance<?, ?>, ? extends Player>> findByPlayer(String userId);
 
-    void performAction(String gameId, String userId, Action<?, ?, ?> action) throws ActionException;
+    void performAction(String gameId, String userId, Action<?, ?, ?, ?> action) throws ActionException;
 
     void removeGame(String gameId);
 }

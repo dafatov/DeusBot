@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
@@ -26,7 +28,7 @@ public record EchoSpell(int wordId) implements Spell {
     );
 
     @Override
-    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         Word word = gameSession.getWords().stream()
             .filter(w -> w.getOrder() == wordId)
             .findFirst()
@@ -36,7 +38,10 @@ public record EchoSpell(int wordId) implements Spell {
             .filter(entry -> entry.getValue().contains(cell.getLetter()))
             .findFirst()
             .map(Entry::getKey)
-            .ifPresent(t -> cell.getTags().add(t)));
+            .ifPresent(t -> {
+                cell.getTags().add(t);
+                cell.getHistory().addFirst(event);
+            }));
         return false;
     }
 }

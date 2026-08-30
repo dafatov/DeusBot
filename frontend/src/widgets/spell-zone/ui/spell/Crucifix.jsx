@@ -1,4 +1,3 @@
-import {Church} from '@mui/icons-material';
 import {Typography} from '@mui/material';
 import {useMemo} from 'react';
 import {SpellButton} from './SpellButton';
@@ -26,8 +25,6 @@ export const Crucifix = ({disabled}) => {
   }, []);
 
   return (
-    <SpellButton tooltip={tooltip} value={value} disabled={disabled}>
-      <Church sx={{width: 48, height: 48}}/>
-    </SpellButton>
+    <SpellButton tooltip={tooltip} value={value} disabled={disabled}/>
   );
 };

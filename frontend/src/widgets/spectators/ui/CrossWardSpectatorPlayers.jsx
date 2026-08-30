@@ -8,7 +8,7 @@ export const CrossWardSpectatorPlayers = () => {
   const {gameId, locked, spectators, me: {isSpectator}, phase} = useGame();
 
   return (
-    <Paper square sx={theme => ({padding: theme.spacing(1), minHeight: '44px'})}>
+    <Paper square sx={t => ({padding: t.spacing(), minHeight: '44px'})}>
       <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
         <CopyText text={gameId}/>
         <AvatarGroup max={Infinity}>

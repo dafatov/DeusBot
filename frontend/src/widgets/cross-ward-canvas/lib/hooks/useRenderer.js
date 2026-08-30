@@ -4,7 +4,7 @@ import {getCellBackgroundColor} from '../utils/getCellBackgroundColor';
 import {getCellEdgeColor} from '../utils/getCellEdgeColor';
 import {getVisibleRange} from '../utils/getVisibleRange';
 import {getWordEndpoints} from '../utils/getWordEndpoints';
-import {getWordId} from '../utils/getWordId';
+import {getWordId} from '../utils/getWordInfo';
 
 const NEUTRAL_WORD_COLOR = '#000000';
 const PREVIEW_ALPHA = 0.5;
@@ -33,7 +33,7 @@ export const useRenderer = (
   manualLetters,
   activeCell,
   activeSpell,
-  historyVisible,
+  historyHighlight,
 ) => {
   const drawWordSelection = useCallback((ctx, wordId, preview = true) => {
     const word = words?.[wordId];
@@ -122,17 +122,17 @@ export const useRenderer = (
   }, [cellSize, words]);
 
   const drawHistory = useCallback(ctx => {
-    if (!historyVisible) return;
+    if (!historyHighlight) return;
 
-    switch (historyVisible.type) {
+    switch (historyHighlight.type) {
       case 'area':
-        drawArea(ctx, historyVisible);
+        drawArea(ctx, historyHighlight);
         return;
       case 'word':
-        drawWordSelection(ctx, historyVisible?.wordId);
+        drawWordSelection(ctx, historyHighlight?.wordId);
         return;
     }
-  }, [historyVisible, drawArea, drawWordSelection]);
+  }, [historyHighlight, drawArea, drawWordSelection]);
 
   const createEdges = useCallback((x, y, isFirstCol, isLastCol, right, isFirstRow, isLastRow, bottom) => [
     {isV: true, x1: x, y1: y, x2: x, y2: y + cellSize, draw: isFirstCol, neighbor: null},

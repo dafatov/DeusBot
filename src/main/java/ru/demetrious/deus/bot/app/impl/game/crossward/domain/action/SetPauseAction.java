@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
 
 import lombok.Builder;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
@@ -16,7 +17,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 @Builder
 public record SetPauseAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         checkLocked(gameSession);
         checkHost(gameSession, player);
         checkPhase(gameSession, PLAYING);

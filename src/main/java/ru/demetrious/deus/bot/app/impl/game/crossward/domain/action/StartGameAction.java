@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
@@ -40,7 +41,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag
 @Builder
 public record StartGameAction() implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         checkLocked(gameSession);
         checkHost(gameSession, player);
         checkPlayers(gameSession);

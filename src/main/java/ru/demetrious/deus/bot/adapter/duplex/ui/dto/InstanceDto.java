@@ -7,10 +7,10 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public abstract class InstanceDto<P extends PlayerDto, A extends ActionDto> {
+public abstract class InstanceDto<P extends PlayerDto> {
     private final String key;
     private final String hostId;
     private final Set<P> playerList;
-    private final List<EventDto<A>> history;
+    private final List<EventDto> history;
     private final TimerDto timer;
 }

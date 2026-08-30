@@ -11,8 +11,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import ru.demetrious.deus.bot.app.api.game.NotifyGameStateOutbound;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Action;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionContext;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
-import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Instance;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Setting;
@@ -24,7 +24,7 @@ import static org.springframework.security.core.context.SecurityContextHolder.ge
 import static ru.demetrious.deus.bot.utils.JacksonUtils.writeValueAsString;
 
 @Slf4j
-public abstract class Processor<G extends Instance<S, P, A>, S extends Setting, P extends Player, C extends ActionContext<G>, A extends Action<P, G, C>> {
+public abstract class Processor<G extends Instance<S, P>, S extends Setting, P extends Player, C extends ActionContext<G>, A extends Action<P, G, C, A>> {
     private final ConcurrentMap<String, G> games = new ConcurrentHashMap<>();
     private final NotifyGameStateOutbound notifyGameStateOutbound;
     private final Class<A> actionClass;
@@ -83,7 +83,7 @@ public abstract class Processor<G extends Instance<S, P, A>, S extends Setting, 
             .findFirst();
     }
 
-    public void performAction(String key, String userId, Action<?, ?, ?> rawAction) throws ActionException {
+    public void performAction(String key, String userId, Action<?, ?, ?, ?> rawAction) throws ActionException {
         G game = games.get(key);
         A action = actionClass.cast(rawAction);
         P player = game.getPlayerList().stream()
@@ -91,8 +91,7 @@ public abstract class Processor<G extends Instance<S, P, A>, S extends Setting, 
             .findFirst()
             .orElseThrow(() -> new ActionException("Player is not in game"));
 
-        action.perform(game, player, context);
-        game.getHistory().addFirst(new Event<>(action, player));
+        action.perform(game, player, context, game.addEvent(id -> new ActionEvent<>(id, action, player)));
         notifyGameStateOutbound.notifyGameState(game);
     }
 

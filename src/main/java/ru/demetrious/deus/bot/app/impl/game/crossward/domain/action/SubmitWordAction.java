@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
 
 import lombok.Builder;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
@@ -23,7 +24,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 public record SubmitWordAction(int wordId, String word) implements CrossWardAction {
 
     @Override
-    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, PLAYING);
         checkTurn(gameSession, player);
@@ -34,6 +35,7 @@ public record SubmitWordAction(int wordId, String word) implements CrossWardActi
             .orElseThrow(() -> new ActionException("Word not found"));
 
         if (!equalsIgnoreCase(word.getText(), this.word)) {
+            word.getHistory().addFirst(event);
             endPlayerPhase(gameSession, ctx);
             return;
         }

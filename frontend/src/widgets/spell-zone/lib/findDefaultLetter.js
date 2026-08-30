@@ -1,4 +1,4 @@
-import {FREQUENCY_RADIUS} from '../model/constants';
+import {FREQUENCY_RADIUS} from '@entities/game/model/crossward/constants';
 
 export const findDefaultLetterAndRadius = letterTags => {
   if (!letterTags) {

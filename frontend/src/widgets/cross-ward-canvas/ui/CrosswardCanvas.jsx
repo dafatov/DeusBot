@@ -6,12 +6,23 @@ import {useCellHover} from '../lib/hooks/useCellHover';
 import {useKeyboardEvents} from '../lib/hooks/useKeyboardEvents';
 import {useMouseEvents} from '../lib/hooks/useMouseEvents';
 import {useRenderer} from '../lib/hooks/useRenderer';
+import {useTooltip} from '../lib/hooks/useTooltip';
 import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
 import {getWordEndpoints} from '../lib/utils/getWordEndpoints';
 import {Canvas} from './Canvas';
+import {Tooltip} from './Tooltip';
 
-export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, activeSpell, selectedWord, setSelectedWord, historyVisible}) => {
+export const CrosswordCanvas = ({
+                                  cellSize = 40,
+                                  onWordSubmit,
+                                  onSpellClick,
+                                  activeSpell,
+                                  selectedWord,
+                                  setSelectedWord,
+                                  historyHighlight,
+                                  setHistoryHighlight
+                                }) => {
   const canvasRef = useRef(null);
   const {containerRef, scale, offsetX, offsetY, resetView, moveToView, isDragging} = usePanZoom();
   const {me: {color}, grid: {cells: cellsMap, size: {x: rows, y: cols}, shift}, words, startedAt} = useGame();
@@ -32,6 +43,8 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, acti
   const {onKeyDown} = useKeyboardEvents(onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown);
 
   const {hoveredCell, onHover} = useCellHover();
+
+  const {tooltipData, onTooltipEnter, onTooltipLeave} = useTooltip(hoveredCell, activeSpell, isDragging);
 
   const {onClick, onMouseMove, onMouseLeave} = useMouseEvents(
     activeSpell ? handleSpellCellClick : handleWordSelectionCellClick,
@@ -60,7 +73,7 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, acti
     manualLetters,
     activeCell,
     activeSpell,
-    historyVisible,
+    historyHighlight,
   );
 
   useEffect(() => {
@@ -71,14 +84,14 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, acti
   }, []);
 
   useEffect(() => {
-    if (!historyVisible) {
+    if (!historyHighlight) {
       return;
     }
 
-    let x = historyVisible?.x;
-    let y = historyVisible?.y;
-    if (historyVisible.wordId) {
-      const {first, last} = getWordEndpoints(words[historyVisible.wordId].cells);
+    let x = historyHighlight?.x;
+    let y = historyHighlight?.y;
+    if (historyHighlight.wordId) {
+      const {first, last} = getWordEndpoints(words[historyHighlight.wordId].cells);
 
       x = (first.x + last.x) / 2 - shift.x;
       y = (first.y + last.y) / 2 - shift.y;
@@ -89,16 +102,26 @@ export const CrosswordCanvas = ({cellSize = 40, onWordSubmit, onSpellClick, acti
     }
 
     moveToView(x * cellSize, y * cellSize);
-  }, [historyVisible, moveToView, words, shift]);
+  }, [historyHighlight, moveToView, words, shift]);
 
   return (
-    <Canvas
-      ref={canvasRef}
-      onClick={onClick}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      onKeyDown={onKeyDown}
-      cursor={!isDragging && hoveredCell ? 'pointer' : 'inherit'}
-    />
+    <>
+      <Canvas
+        ref={canvasRef}
+        onClick={onClick}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+        onKeyDown={onKeyDown}
+        cursor={!isDragging && hoveredCell ? 'pointer' : 'inherit'}
+      />
+      <Tooltip
+        data={tooltipData}
+        cellSize={cellSize}
+        onMouseEnter={onTooltipEnter}
+        onMouseLeave={onTooltipLeave}
+        historyHighlight={historyHighlight}
+        setHistoryHighlight={setHistoryHighlight}
+      />
+    </>
   );
 };

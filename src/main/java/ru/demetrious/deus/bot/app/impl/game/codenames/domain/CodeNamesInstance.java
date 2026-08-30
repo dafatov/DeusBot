@@ -18,7 +18,7 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Sta
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CodeNamesInstance extends Instance<CodeNamesSetting, CodeNamesPlayer, CodeNamesAction> {
+public class CodeNamesInstance extends Instance<CodeNamesSetting, CodeNamesPlayer> {
     private final State state = new State();
     private final Set<Word> wordList = new HashSet<>();
     private final List<Hint> hintList = new LinkedList<>();

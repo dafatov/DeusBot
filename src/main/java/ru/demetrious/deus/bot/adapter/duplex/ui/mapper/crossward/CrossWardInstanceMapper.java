@@ -9,6 +9,8 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.SubclassMapping;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.ActionEventDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.EventDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceDto;
@@ -19,6 +21,7 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardInstanceD
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardPlayerDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.StateDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
@@ -51,20 +54,30 @@ public interface CrossWardInstanceMapper {
     @Mapping(target = "letter", source = "cell.letter", conditionQualifiedByName = "needMapLetter")
     @Mapping(target = "words", source = "cell.words")
     @Mapping(target = "tags", source = "cell.tags")
+    @Mapping(target = "history", source = "cell.history", qualifiedByName = "mapToIds")
     PositionCellDto map(Position position, Cell cell, @Context Player player, @Context boolean isFinished);
 
     OrientationDto map(Word.Orientation orientation);
 
     @Mapping(target = "background", ignore = true)
     @Mapping(target = "border", source = "owner.color")
+    @Mapping(target = "history", source = "history", qualifiedByName = "mapToIds")
     WordDto map(Word word);
 
     @Mapping(target = "x", source = "position.x")
     @Mapping(target = "y", source = "position.y")
     CellDto map(Cell cell);
 
+    @SubclassMapping(target = ActionEventDto.class, source = ActionEvent.class)
+    EventDto map(Event event);
+
     @Mapping(target = "issuerId", source = "issuer.id")
-    EventDto<CrossWardActionDto> map(Event<CrossWardAction, CrossWardPlayer> event);
+    ActionEventDto<CrossWardActionDto> map(ActionEvent<CrossWardAction, CrossWardPlayer> actionEvent);
+
+    @Named("mapToIds")
+    default List<Integer> mapToIds(List<Event> value) {
+        return value.stream().map(Event::getId).toList();
+    }
 
     // =========================================================================================================================================================
     // = Implementation

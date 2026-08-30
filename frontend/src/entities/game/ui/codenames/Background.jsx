@@ -1,5 +1,5 @@
 import {Box} from '@mui/material';
-import {useGame} from '../lib/hooks';
+import {useGame} from '../../lib/hooks';
 
 export const Background = ({children}) => {
   const {score, team, phase} = useGame();

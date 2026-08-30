@@ -1,5 +1,5 @@
+import {FREQUENCY_RADIUS} from '@entities/game/model/crossward/constants';
 import {Box, Button, Grid, Typography} from '@mui/material';
-import {FREQUENCY_RADIUS} from '../../../model/constants';
 
 const groups = [
   {key: 'FREQUENCY_HIGH', label: 'Высокая частота'},

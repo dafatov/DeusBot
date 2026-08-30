@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
 
 import static java.lang.Math.toIntExact;
@@ -17,6 +18,7 @@ public class Word {
     private final Orientation orientation;
     private final Position start;
     private final List<Cell> cells = new ArrayList<>();
+    private final List<Event> history = new ArrayList<>();
     private CrossWardPlayer owner;
     private int order;
     private boolean revealed = false;
@@ -39,6 +41,7 @@ public class Word {
         }
 
         revealed = true;
+        history.clear();
 
         int initial = toIntExact(cells.stream().filter(Cell::isRevealed).count());
         int points = cells.stream()

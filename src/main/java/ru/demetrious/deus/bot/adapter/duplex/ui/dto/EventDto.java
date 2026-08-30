@@ -1,7 +1,8 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.dto;
 
-import lombok.Builder;
+import lombok.Data;
 
-@Builder
-public record EventDto<A extends ActionDto>(A action, String issuerId) {
+@Data
+public abstract class EventDto {
+    private int id;
 }

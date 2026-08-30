@@ -4,5 +4,5 @@ import ru.demetrious.deus.bot.app.impl.game.common.domain.Instance;
 
 @FunctionalInterface
 public interface NotifyGameStateOutbound {
-    void notifyGameState(Instance<?, ?, ?> gameSession);
+    void notifyGameState(Instance<?, ?> gameSession);
 }
