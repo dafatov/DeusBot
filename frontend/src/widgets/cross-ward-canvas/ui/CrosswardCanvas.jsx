@@ -101,8 +101,23 @@ export const CrosswordCanvas = ({
       return;
     }
 
-    moveToView(x * cellSize, y * cellSize);
-  }, [historyHighlight, moveToView, words, shift]);
+    const worldX = x * cellSize;
+    const worldY = y * cellSize;
+    const rect = containerRef.current?.getBoundingClientRect();
+
+    if (!rect) {
+      return;
+    }
+
+    if (worldX * scale + offsetX >= 0
+      && worldX * scale + offsetX <= rect.width
+      && worldY * scale + offsetY >= 0
+      && worldY * scale + offsetY <= rect.height) {
+      return;
+    }
+
+    moveToView(worldX, worldY);
+  }, [historyHighlight, moveToView, words, shift, containerRef, cellSize]);
 
   return (
     <>
