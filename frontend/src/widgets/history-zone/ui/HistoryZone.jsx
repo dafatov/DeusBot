@@ -2,10 +2,11 @@ import {useGame} from '@entities/game/lib/hooks';
 import {HistoryItem} from '@entities/game/ui/crossward/HistoryItem';
 import {buildHistoryItems} from '@entities/game/utils/crossward/buildHistoryItemProps';
 import {List, Paper} from '@mui/material';
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 
 export const HistoryZone = ({historyHighlight, setHistoryHighlight}) => {
-  const {grid: {shift}, history: historyMap, findPlayer, letterTags} = useGame();
+  const {grid: {shift}, history: historyMap, findPlayer, letterTags, me: {isCurrentPlayer}} = useGame();
+  const lastHistoryId = useRef(null);
 
   const history = useMemo(() => buildHistoryItems(
     setHistoryHighlight,
@@ -15,6 +16,17 @@ export const HistoryZone = ({historyHighlight, setHistoryHighlight}) => {
     letterTags,
     Array.from(historyMap.values())
   ), [setHistoryHighlight, setHistoryHighlight, findPlayer, letterTags, shift, historyMap, historyHighlight]);
+
+  useEffect(() => {
+    const lastId = Math.max(...history.map(g => g.key));
+
+    if (isCurrentPlayer || lastId <= (lastHistoryId.current ?? -Infinity)) {
+      return;
+    }
+
+    history.find(f => f.key === lastId).onClick();
+    lastHistoryId.current = lastId;
+  }, [history, lastHistoryId, isCurrentPlayer]);
 
   return (
     <Paper sx={{
