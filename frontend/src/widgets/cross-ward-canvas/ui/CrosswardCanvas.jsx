@@ -1,11 +1,11 @@
 import {useGame} from '@entities/game/lib/hooks';
 import {usePanZoom} from '@shared/lib/pan-zoom/hooks';
 import React, {useEffect, useRef} from 'react';
-import {useAreaSpell} from '../lib/hooks/useAreaSpell';
 import {useCellHover} from '../lib/hooks/useCellHover';
 import {useKeyboardEvents} from '../lib/hooks/useKeyboardEvents';
 import {useMouseEvents} from '../lib/hooks/useMouseEvents';
 import {useRenderer} from '../lib/hooks/useRenderer';
+import {useSpell} from '../lib/hooks/useSpell';
 import {useTooltip} from '../lib/hooks/useTooltip';
 import {useWordSelection} from '../lib/hooks/useWordSelection';
 import {useWordSelectionInput} from '../lib/hooks/useWordSelectionInput';
@@ -29,7 +29,7 @@ export const CrosswordCanvas = ({
 
   const {onCellClick: handleWordSelectionCellClick} = useWordSelection(setSelectedWord);
 
-  const {onCellClick: handleSpellCellClick} = useAreaSpell(onSpellClick);
+  const {onCellClick: handleSpellCellClick} = useSpell(onSpellClick);
 
   const {
     onLetterDown,
