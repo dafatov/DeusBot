@@ -29,7 +29,8 @@ export const CrossWardContent = () => {
     const {x, y, group, ...others} = request;
 
     if (others.type && (group === 'area' && x != null && y != null || group === 'word' && others.wordId != null)) {
-      useSpell(send, gameId, {...others, x: x + shift.x, y: y + shift.y});
+      useSpell(send, gameId, {...others, x: x + shift.x, y: y + shift.y})
+        .then(() => setActiveSpell(null));
     } else {
       console.warn('Failed validation activeSpell using', data);
     }
