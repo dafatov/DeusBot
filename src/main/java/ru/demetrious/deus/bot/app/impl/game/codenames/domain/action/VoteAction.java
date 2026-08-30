@@ -12,6 +12,7 @@ import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Tea
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vote;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word.Reveal;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
 import static java.time.Duration.ofSeconds;
@@ -29,7 +30,7 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Vot
 @Builder
 public record VoteAction(Vote vote) implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx, ActionEvent<CodeNamesAction, CodeNamesPlayer> event) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, GUESSING);
         checkTeamMate(player, gameSession.getState().getTeam());

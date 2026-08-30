@@ -12,7 +12,7 @@ import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.instance.TagDto;
 
 @Getter
 @SuperBuilder
-public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto, CrossWardActionDto> {
+public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto> {
     private final StateDto state;
     private final List<PositionCellDto> grid;
     private final Map<Integer, WordDto> words;
@@ -20,11 +20,12 @@ public class CrossWardInstanceDto extends InstanceDto<CrossWardPlayerDto, CrossW
     private final Map<TagDto, Set<Character>> letterTags;
 
     @Builder
-    public record PositionCellDto(int x, int y, boolean revealed, Character letter, Set<TagDto> tags, Map<OrientationDto, Integer> words) {
+    public record PositionCellDto(int x, int y, boolean revealed, Character letter, Set<TagDto> tags, List<Integer> history,
+                                  Map<OrientationDto, Integer> words) {
     }
 
     @Builder
-    public record WordDto(String background, String border, boolean revealed, Set<CellDto> cells) {
+    public record WordDto(String background, String border, boolean revealed, List<Integer> history, Set<CellDto> cells) {
     }
 
     @Builder

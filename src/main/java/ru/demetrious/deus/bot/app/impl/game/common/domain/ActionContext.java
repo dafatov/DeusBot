@@ -32,7 +32,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = CrossWardActionContext.class, name = CROSS_WARD),
 })
 @RequiredArgsConstructor
-public abstract class ActionContext<G extends Instance<?, ?, ?>> {
+public abstract class ActionContext<G extends Instance<?, ?>> {
     @Getter
     private final GetGamePackWordsOutbound dictionary;
     private final NotifyGameStateOutbound notifyGameStateOutbound;

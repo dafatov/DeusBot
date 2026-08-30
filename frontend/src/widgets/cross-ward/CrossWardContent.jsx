@@ -1,6 +1,7 @@
 import {useGame} from '@entities/game/lib/hooks';
 import {CrossWardControl} from '@features/game-control';
 import {Stack} from '@mui/material';
+import {useAutoResetState} from '@shared/lib/auto-reset-state/hooks';
 import {PanZoomProvider} from '@shared/lib/pan-zoom/PanZoomProvider';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {useState} from 'react';
@@ -17,7 +18,7 @@ export const CrossWardContent = () => {
 
   const [activeSpell, setActiveSpell] = useState(null);
   const [selectedWord, setSelectedWord] = useState();
-  const [historyVisible, setHistoryVisible] = useState();
+  const [historyHighlight, setHistoryHighlight] = useAutoResetState(2000);
 
   const handleWordSubmit = (wordId, word) => {
     return submitWord(send, gameId, wordId, word);
@@ -41,7 +42,7 @@ export const CrossWardContent = () => {
         ? <SpellZone activeSpell={activeSpell} setActiveSpell={setActiveSpell}/>
         : <></>}
       {phase !== 'WAITING'
-        ? <HistoryZone historyVisible={historyVisible} setHistoryVisible={setHistoryVisible}/>
+        ? <HistoryZone historyHighlight={historyHighlight} setHistoryHighlight={setHistoryHighlight}/>
         : <></>}
       <PlayersZone/>
       <PanZoomProvider>
@@ -51,7 +52,8 @@ export const CrossWardContent = () => {
           onSpellClick={handleSpellClick}
           selectedWord={selectedWord}
           setSelectedWord={setSelectedWord}
-          historyVisible={historyVisible}
+          historyHighlight={historyHighlight}
+          setHistoryHighlight={setHistoryHighlight}
         />
       </PanZoomProvider>
       {isHost

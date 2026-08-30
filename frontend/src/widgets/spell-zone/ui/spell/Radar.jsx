@@ -1,10 +1,10 @@
 import {useGame} from '@entities/game/lib/hooks';
-import {AdsClick, LocationSearching} from '@mui/icons-material';
+import {FREQUENCY_RADIUS, SPELL_ICON} from '@entities/game/model/crossward/constants';
+import {AdsClick} from '@mui/icons-material';
 import {Badge, Box, IconButton, Popover, Typography} from '@mui/material';
 import {useMemo, useState} from 'react';
 import {findDefaultLetterAndRadius} from '../../lib/findDefaultLetter';
 import {getRadiusForLetter} from '../../lib/getRadiusForLetter';
-import {FREQUENCY_RADIUS} from '../../model/constants';
 import {LetterGridPopover} from './radar/LetterGridPopover';
 import {SpellButton} from './SpellButton';
 
@@ -73,7 +73,7 @@ export const Radar = ({activeSpell, setActiveSpell, disabled}) => {
         }
       >
         <Box sx={{position: 'relative', display: 'inline-flex'}}>
-          <LocationSearching sx={{width: 48, height: 48}}/>
+          <SPELL_ICON.radar sx={{width: 48, height: 48}}/>
           <Typography
             color="inherit"
             sx={{

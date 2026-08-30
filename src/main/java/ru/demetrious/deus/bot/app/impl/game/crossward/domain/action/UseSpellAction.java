@@ -2,6 +2,7 @@ package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
@@ -19,13 +20,13 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Sta
 @Builder
 public record UseSpellAction(Spell spell) implements CrossWardAction {
     @Override
-    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public void perform(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         checkPaused(gameSession);
         checkPhase(gameSession, PLAYING);
         checkTurn(gameSession, player);
         checkSpellCost(gameSession, spell);
 
-        boolean needEndTurn = spell.use(gameSession, player, ctx);
+        boolean needEndTurn = spell.use(gameSession, player, ctx, event);
 
         gameSession.getState().setCurrentEnergy(gameSession.getState().getCurrentEnergy() - spell.getCost());
         if (needEndTurn) {

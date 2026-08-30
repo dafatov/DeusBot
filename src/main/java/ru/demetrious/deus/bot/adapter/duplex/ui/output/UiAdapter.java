@@ -19,7 +19,7 @@ public class UiAdapter implements NotifyGameStateOutbound, NotifyGameErrorOutbou
     private final ErrorMapper errorMapper;
 
     @Override
-    public void notifyGameState(Instance<?, ?, ?> gameSession) {
+    public void notifyGameState(Instance<?, ?> gameSession) {
         gameSession.getPlayerList().forEach(player -> simpMessagingTemplate.convertAndSendToUser(
             player.getId(),
             "/game/%s".formatted(gameSession.getKey()),

@@ -6,6 +6,7 @@ import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionContext;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
 import static java.util.Collections.shuffle;
@@ -20,7 +21,7 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPla
 @Builder
 public record ShufflePlayersAction() implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx, ActionEvent<CodeNamesAction, CodeNamesPlayer> event) throws ActionException {
         checkLocked(gameSession);
         checkHost(gameSession, player);
 

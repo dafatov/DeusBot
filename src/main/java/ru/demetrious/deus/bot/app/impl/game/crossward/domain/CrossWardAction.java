@@ -35,7 +35,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CROSS_WARD;
     @Type(value = SkipTurnAction.class, name = "skip_turn"),
     @Type(value = UseSpellAction.class, name = "use_spell"),
 })
-public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstance, CrossWardActionContext> {
+public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstance, CrossWardActionContext, CrossWardAction> {
     @Override
     default String getGame() {
         return CROSS_WARD;

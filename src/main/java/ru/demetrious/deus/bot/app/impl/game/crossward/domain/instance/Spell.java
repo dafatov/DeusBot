@@ -3,7 +3,9 @@ package ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
@@ -25,7 +27,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
     @Type(value = CrucifixSpell.class, name = "crucifix"),
 })
 public interface Spell {
-    boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException;
+    boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException;
 
     default int getCost() {
         return 1;

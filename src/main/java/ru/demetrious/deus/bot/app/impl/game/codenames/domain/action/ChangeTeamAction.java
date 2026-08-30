@@ -6,6 +6,7 @@ import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesActionCont
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 
 import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction.checkLocked;
@@ -13,7 +14,7 @@ import static ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAct
 @Builder
 public record ChangeTeamAction(Team team, boolean captain) implements CodeNamesAction {
     @Override
-    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx) throws ActionException {
+    public void perform(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx, ActionEvent<CodeNamesAction, CodeNamesPlayer> event) throws ActionException {
         checkLocked(gameSession);
 
         if (captain && gameSession.getPlayerList().stream().anyMatch(p -> p.getTeam().equals(team) && p.isCaptain())) {

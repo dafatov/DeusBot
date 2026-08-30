@@ -1,5 +1,5 @@
 import {useCallback} from 'react';
-import {getWordId} from '../utils/getWordId';
+import {getWordId} from '../utils/getWordInfo';
 
 export const useWordSelection = (setSelectedWord) => {
   const onCellClick = useCallback(data => {

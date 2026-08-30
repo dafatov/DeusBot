@@ -8,17 +8,13 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import ru.demetrious.deus.bot.adapter.duplex.ui.dto.EventDto;
-import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesActionDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesInstanceDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesPlayerDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.instance.WordDto;
 import ru.demetrious.deus.bot.adapter.duplex.ui.mapper.TimerMapper;
-import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesInstance;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.instance.Word;
-import ru.demetrious.deus.bot.app.impl.game.common.domain.Event;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 
 import static java.util.Objects.nonNull;
@@ -42,9 +38,6 @@ public interface CodeNamesInstanceMapper {
     WordDto map(Word word, @Context Player player, @Context boolean isFinished);
 
     TeamDto map(Team team);
-
-    @Mapping(target = "issuerId", source = "issuer.id")
-    EventDto<CodeNamesActionDto> map(Event<CodeNamesAction, CodeNamesPlayer> event);
 
     // =========================================================================================================================================================
     // = Implementation

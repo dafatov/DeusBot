@@ -2,7 +2,9 @@ package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action.spell;
 
 import java.util.Map;
 import lombok.Builder;
+import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
+import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardActionContext;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardInstance;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardPlayer;
@@ -13,7 +15,7 @@ import ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag;
 
 import static java.util.Map.Entry;
 import static java.util.Map.of;
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.SCORE_COEFFICIENT_FUNCTION;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_HIGH;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.Tag.FREQUENCY_LOW;
@@ -28,7 +30,7 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
     );
 
     @Override
-    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx) throws ActionException {
+    public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         int radius = TAG_RADIUS.entrySet().stream()
             .filter(t -> gameSession.getLetterTags().get(t.getKey()).contains(letter))
             .findFirst()
@@ -40,8 +42,14 @@ public record RadarSpell(int x, int y, Character letter) implements Spell {
             for (int j = y - radius; j <= y + radius; j++) {
                 Cell cell = gameSession.getGrid().get(new Position(i, j));
 
-                if (nonNull(cell) && letter.equals(cell.getLetter())) {
+                if (isNull(cell) || cell.isRevealed()) {
+                    continue;
+                }
+
+                if (letter.equals(cell.getLetter())) {
                     score += cell.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player));
+                } else {
+                    cell.getHistory().addFirst(event);
                 }
             }
         }
