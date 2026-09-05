@@ -10,11 +10,13 @@ const NEUTRAL_WORD_COLOR = '#000000';
 const PREVIEW_ALPHA = 0.5;
 
 const drawLine = (ctx, x1, y1, x2, y2, color) => {
+  ctx.save();
   ctx.strokeStyle = color;
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
   ctx.stroke();
+  ctx.restore();
 };
 
 export const useRenderer = (
@@ -103,8 +105,21 @@ export const useRenderer = (
   const drawCarriage = useCallback(ctx => {
     if (!activeCell) return;
 
-    drawSymbol(ctx, activeCell.x - shift.x, activeCell.y - shift.y, '>', color);
-  }, [activeCell, shift, color, drawSymbol]);
+    const x = activeCell.x - shift.x;
+    const y = activeCell.y - shift.y;
+
+    const left = x * cellSize;
+    const right = (x + 1) * cellSize;
+    const top = y * cellSize;
+    const bottom = (y + 1) * cellSize;
+    const small = cellSize / 8;
+    const large = cellSize / 4;
+
+    drawLine(ctx, left + small, top + small, left + large, top + large, color);
+    drawLine(ctx, right - small, bottom - small, right - large, bottom - large, color);
+    drawLine(ctx, right - small, top + small, right - large, top + large, color);
+    drawLine(ctx, left + small, bottom - small, left + large, bottom - large, color);
+  }, [activeCell, shift, cellSize, color]);
 
   const drawLetter = useCallback((ctx, current, j, i) => {
     const manualLetter = manualLetters?.[`${j + shift.x},${i + shift.y}`];

@@ -14,15 +14,26 @@ export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shi
   const manualLetters = useMemo(() => (storageValue?.started_at === startedAt && storageValue?.data) || {}
     , [storageValue, startedAt]);
 
-  const saveManualLetters = useCallback(arg => {
-    const newLetters = typeof arg === 'function' ? arg(manualLetters) : arg;
+  const sortedCells = useMemo(() => words[selectedWord]?.cells
+      .toSorted((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x)
+    , [words[selectedWord]]);
 
-    if (newLetters === manualLetters) {
-      return;
+  const cursorIndex = useMemo(() => {
+    return sortedCells?.findIndex(c => !manualLetters[`${c.x},${c.y}`]);
+  }, [sortedCells, manualLetters, cells, shift]);
+
+  const activeCell = useMemo(() => sortedCells?.[cursorIndex]
+    , [cursorIndex, sortedCells]);
+
+  const saveManualLetters = useCallback(arg => setStorageValue(manualLetters => {
+    const newLetters = typeof arg === 'function' ? arg(manualLetters.data) : arg;
+
+    if (newLetters === manualLetters.data) {
+      return manualLetters;
     }
 
-    setStorageValue({started_at: startedAt, data: newLetters});
-  }, [startedAt, setStorageValue, manualLetters]);
+    return {started_at: startedAt, data: newLetters};
+  }), [startedAt, setStorageValue]);
 
   useEffect(() => {
     if (storageValue && storageValue.started_at !== startedAt) {
@@ -30,19 +41,13 @@ export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shi
     }
   }, [startedAt, storageValue, saveManualLetters]);
 
-  const sortedCells = useMemo(() => words[selectedWord]?.cells
-      .toSorted((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x)
-    , [words[selectedWord]]);
-
-  const activeCell = useMemo(() => sortedCells?.find(c => !manualLetters[`${c.x},${c.y}`] && !cells.get(`${c.x - shift.x},${c.y - shift.y}`)?.revealed)
-    , [sortedCells, cells, manualLetters, shift]);
-
   useEffect(() => {
     saveManualLetters(manualLetters => {
       const keysToRemove = Object.keys(manualLetters).filter(key => {
         const [x, y] = key.split(',');
+        const cellWords = cells.get(`${x - shift.x},${y - shift.y}`)?.words;
 
-        return cells.get(`${x - shift.x},${y - shift.y}`)?.revealed === true;
+        return Object.values(cellWords).every(w => words[w]?.revealed);
       });
 
       return keysToRemove.reduce((acc, key) => {
@@ -50,7 +55,7 @@ export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shi
         return rest;
       }, manualLetters);
     });
-  }, [cells, shift, saveManualLetters]);
+  }, [cells, words, shift, saveManualLetters]);
 
   const onLetterDown = useCallback(letter => {
     if (!selectedWord) return;
@@ -59,8 +64,14 @@ export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shi
 
     if (!word || word.revealed || !activeCell) return;
 
+    const cell = cells.get(`${activeCell.x - shift.x},${activeCell.y - shift.y}`);
+
+    if (cell?.revealed && cell.letter.toLowerCase() !== letter.toLowerCase()) {
+      return;
+    }
+
     saveManualLetters(manualLetters => ({...manualLetters, [`${activeCell.x},${activeCell.y}`]: letter.toLowerCase()}));
-  }, [selectedWord, words, activeCell, saveManualLetters]);
+  }, [selectedWord, words, cells, shift, activeCell, saveManualLetters]);
 
   const onBackspaceDown = useCallback(isCtrl => {
     if (!selectedWord) return;
@@ -100,7 +111,7 @@ export const useWordSelectionInput = (startedAt, selectedWord, words, cells, shi
 
     onWordSubmit(selectedWord, word)
       .then(() => clearSelectedManualLetters(saveManualLetters, sortedCells));
-  }, [sortedCells, manualLetters, cells, selectedWord, onWordSubmit, saveManualLetters]);
+  }, [sortedCells, manualLetters, cells, shift, selectedWord, onWordSubmit, saveManualLetters]);
 
   return {onLetterDown, onBackspaceDown, onSpaceDown, onEnterDown, manualLetters, activeCell};
 };
