@@ -1,10 +1,8 @@
 package ru.demetrious.deus.bot.app.impl.game.common;
 
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -18,6 +16,9 @@ import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Setting;
 
 import static java.util.Optional.ofNullable;
+import static java.util.concurrent.CompletableFuture.delayedExecutor;
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.RandomStringUtils.secure;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
@@ -42,7 +43,13 @@ public abstract class Processor<G extends Instance<S, P>, S extends Setting, P e
 
     public abstract G createNewGame(String key, String hostId, S setting);
 
-    public abstract P createNewPlayer(String id, String name, String avatar);
+    public abstract P createNewPlayer(G game, String id, String name, String avatar);
+
+    public void onPlayerDisconnect(G game, P player) throws ActionException {
+        if (game.getHostId().equals(player.getId())) {
+            game.setHostId(game.getPlayerList().getFirst().getId());
+        }
+    }
 
     public String createNewGame(Setting setting) {
         String key = secure().nextAlphanumeric(6);
@@ -55,7 +62,7 @@ public abstract class Processor<G extends Instance<S, P>, S extends Setting, P e
     public void joinGame(String key) {
         G game = games.get(key);
         OAuth2AuthenticatedPrincipal principal = findPrincipal();
-        P newPlayer = createNewPlayer(principal.getName(), principal.getAttribute("global_name"), principal.getAttribute("avatar"));
+        P newPlayer = createNewPlayer(game, principal.getName(), principal.getAttribute("global_name"), principal.getAttribute("avatar"));
 
         log.debug("Joined with id={}", newPlayer.getId());
         boolean added = game.getPlayerList().add(newPlayer);
@@ -75,12 +82,46 @@ public abstract class Processor<G extends Instance<S, P>, S extends Setting, P e
         games.remove(key);
     }
 
-    public Optional<Pair<G, P>> findPlayer(String userId) {
-        return games.values().stream()
-            .flatMap(g -> g.getPlayerList().stream()
-                .filter(p -> p.getId().equals(userId))
-                .map(p -> Pair.of(g, p)))
-            .findFirst();
+    public void connect(String userId) {
+        games.values().forEach(game -> game.getPlayerList().stream()
+            .filter(p -> userId.equals(p.getId()))
+            .findFirst()
+            .ifPresent(player -> {
+                if (!player.isDisconnected()) {
+                    return;
+                }
+
+                log.debug("Cancel Disconnect Timer for {}", player.getId());
+                player.getDisconnectCompletableFuture().cancel(true);
+                player.setDisconnectCompletableFuture(null);
+                notifyGameStateOutbound.notifyGameState(game);
+            }));
+    }
+
+    public void disconnect(String userId) {
+        games.values().forEach(game -> game.getPlayerList().stream()
+            .filter(p -> userId.equals(p.getId()))
+            .findFirst()
+            .ifPresent(player -> {
+                player.setDisconnectCompletableFuture(runAsync(() -> {
+                    game.removePlayer(player);
+
+                    log.debug("Disconnect for {}", player.getId());
+                    if (game.getPlayerList().isEmpty()) {
+                        log.debug("Remove game cause no players: {}", game.getKey());
+                        removeGame(game.getKey());
+                        return;
+                    }
+
+                    try {
+                        onPlayerDisconnect(game, player);
+                    } catch (ActionException e) {
+                        log.error("onPlayerDisconnect failed while disconnected for {}", player.getId(), e);
+                    }
+                    notifyGameStateOutbound.notifyGameState(game);
+                }, delayedExecutor(30, SECONDS, context.getVirtualThreadPerTaskExecutor())));
+                notifyGameStateOutbound.notifyGameState(game);
+            }));
     }
 
     public void performAction(String key, String userId, Action<?, ?, ?, ?> rawAction) throws ActionException {

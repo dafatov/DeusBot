@@ -81,7 +81,7 @@ export const useRenderer = (
     if (!area?.radius && area.radius !== 0) return;
 
     ctx.save();
-    ctx.strokeStyle = alpha(area.color, PREVIEW_ALPHA);
+    ctx.strokeStyle = alpha(area?.color ?? NEUTRAL_WORD_COLOR, PREVIEW_ALPHA);
     ctx.lineWidth = 2;
     ctx.strokeRect(
       (area.x - area.radius) * cellSize,

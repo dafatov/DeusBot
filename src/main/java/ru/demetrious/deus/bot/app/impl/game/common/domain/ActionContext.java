@@ -36,6 +36,7 @@ public abstract class ActionContext<G extends Instance<?, ?>> {
     @Getter
     private final GetGamePackWordsOutbound dictionary;
     private final NotifyGameStateOutbound notifyGameStateOutbound;
+    @Getter
     private final ExecutorService virtualThreadPerTaskExecutor;
 
     public void startTimer(G gameSession, Duration delay, Runnable task) {

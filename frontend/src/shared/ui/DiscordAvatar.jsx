@@ -39,8 +39,8 @@ export const DiscordAvatar = ({id, name, avatar, mini, disconnected}) => {
     >
       <Avatar
         sx={mini ? {width: 16, height: 16} : {}}
-        alt={name}
-        src={`${import.meta.env.VITE_DISCORD_CDN_URL}/avatars/${id}/${avatar}.png`}
+        alt={name ?? ''}
+        src={id && avatar ? `${import.meta.env.VITE_DISCORD_CDN_URL}/avatars/${id}/${avatar}.png` : null}
       />
     </StyledBadge>
   );
