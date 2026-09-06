@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.app.impl.game.crossward.domain.action;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionEvent;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
 import ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAction;
@@ -19,7 +20,7 @@ import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardAct
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.CrossWardSetting.SCORE_COEFFICIENT_FUNCTION;
 import static ru.demetrious.deus.bot.app.impl.game.crossward.domain.instance.State.Phase.PLAYING;
 
-
+@Slf4j
 @Builder
 public record SubmitWordAction(int wordId, String word) implements CrossWardAction {
 
@@ -40,10 +41,24 @@ public record SubmitWordAction(int wordId, String word) implements CrossWardActi
             return;
         }
 
-        player.setScore(player.getScore() + word.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player)));
+        player.setScore(player.getScore() + resolveExtraScore(word.reveal(SCORE_COEFFICIENT_FUNCTION.apply(player)), gameSession.getState().getCurrentStreak()));
         if (tryFinishGame(gameSession, ctx, player)) {
             return;
         }
+        gameSession.getState().setCurrentStreak(gameSession.getState().getCurrentStreak() + 1);
         ctx.extendTimer(gameSession, ofSeconds(10));
+    }
+
+    // =========================================================================================================================================================
+    // = Implementation
+    // =========================================================================================================================================================
+
+    private static int resolveExtraScore(int wordScore, int currentStreak) {
+        log.trace("resolveExtraScore(wordScore={}, currentStreak={})", wordScore, currentStreak);
+        if (currentStreak < 3) {
+            return wordScore;
+        }
+
+        return wordScore + currentStreak;
     }
 }
