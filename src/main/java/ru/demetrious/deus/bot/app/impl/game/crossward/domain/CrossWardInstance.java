@@ -36,7 +36,7 @@ public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlaye
     private final List<Word> words = new ArrayList<>();
 
     public CrossWardInstance(String key, String hostId, CrossWardSetting setting) {
-        super(key, hostId, setting);
+        super(key, setting, hostId);
     }
 
     @Override
@@ -45,9 +45,9 @@ public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlaye
     }
 
     @Override
-    public void removePlayer(String userId) {
-        activePlayers.removeIf(p -> p.getId().equals(userId));
-        super.removePlayer(userId);
+    public void removePlayer(CrossWardPlayer player) {
+        activePlayers.remove(player);
+        super.removePlayer(player);
     }
 
     public void placeStartWords() {

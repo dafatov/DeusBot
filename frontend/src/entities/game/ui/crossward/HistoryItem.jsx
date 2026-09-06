@@ -14,10 +14,9 @@ export const HistoryItem = ({icon: Icon, text, show, onClick, player}) => (
       <Badge badgeContent={
         <DiscordAvatar
           mini
-          disconnected
-          id={player.id}
-          name={player.name}
-          avatar={player.avatar}
+          id={player?.id}
+          name={player?.name}
+          avatar={player?.avatar}
         />
       }>
         <Icon/>
