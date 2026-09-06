@@ -49,6 +49,7 @@ public interface CrossWardAction extends Action<CrossWardPlayer, CrossWardInstan
 
         gameSession.getState().setCurrentPlayer(gameSession.getActivePlayers().get(nextIndex));
         gameSession.getState().setCurrentEnergy(2);
+        gameSession.getState().setCurrentStreak(0);
         gameSession.placeWord();
         ctx.startTimer(gameSession, ofMinutes(2), asRunnable(() -> endPlayerPhase(gameSession, ctx)));
     }

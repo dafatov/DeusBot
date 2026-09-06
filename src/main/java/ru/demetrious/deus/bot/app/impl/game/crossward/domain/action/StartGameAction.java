@@ -52,6 +52,7 @@ public record StartGameAction() implements CrossWardAction {
         gameSession.getState().setLocked(true);
         gameSession.getState().setCurrentPlayer(gameSession.getPlayerList().getFirst());
         gameSession.getState().setCurrentEnergy(2);
+        gameSession.getState().setCurrentStreak(0);
         gameSession.getPlayerList().forEach(p -> p.setScore(0));
         gameSession.getHistory().clear();
         gameSession.placeWord();
