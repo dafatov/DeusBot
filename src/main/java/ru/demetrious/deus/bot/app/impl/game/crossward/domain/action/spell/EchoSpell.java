@@ -30,7 +30,7 @@ public record EchoSpell(int wordId) implements Spell {
     @Override
     public boolean use(CrossWardInstance gameSession, CrossWardPlayer player, CrossWardActionContext ctx, ActionEvent<CrossWardAction, CrossWardPlayer> event) throws ActionException {
         Word word = gameSession.getWords().stream()
-            .filter(w -> w.getOrder() == wordId)
+            .filter(w -> w.getId() == wordId)
             .findFirst()
             .orElseThrow(() -> new ActionException("Word not found"));
 

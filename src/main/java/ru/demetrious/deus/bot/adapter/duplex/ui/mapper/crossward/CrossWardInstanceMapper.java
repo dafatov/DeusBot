@@ -100,11 +100,11 @@ public interface CrossWardInstanceMapper {
     }
 
     default Map<OrientationDto, Integer> mapId(List<Word> value) {
-        return value.stream().collect(toMap(w -> map(w.getOrientation()), Word::getOrder));
+        return value.stream().collect(toMap(w -> map(w.getOrientation()), Word::getId));
     }
 
     default Map<Integer, WordDto> map(List<Word> value) {
-        return value.stream().collect(toMap(Word::getOrder, this::map));
+        return value.stream().collect(toMap(Word::getId, this::map));
     }
 
     default String mapColor(@Nullable Color color) {

@@ -107,7 +107,7 @@ public class CrosswordUtils {
     private static Word placeWord(String text, PlacementVariant variant, List<Word> words, Map<Position, Cell> grid) {
         Position position = variant.start();
         Orientation orientation = variant.orientation();
-        Word word = new Word(text, orientation, position);
+        Word word = new Word(words.size() + 1, text, orientation, position);
         List<Cell> wordCells = new ArrayList<>();
 
         char[] letters = word.getText().toCharArray();

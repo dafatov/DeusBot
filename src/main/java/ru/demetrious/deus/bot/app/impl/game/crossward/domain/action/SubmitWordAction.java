@@ -31,7 +31,7 @@ public record SubmitWordAction(int wordId, String word) implements CrossWardActi
         checkTurn(gameSession, player);
 
         Word word = gameSession.getWords().stream()
-            .filter(g -> g.getOrder() == wordId)
+            .filter(g -> g.getId() == wordId)
             .findFirst()
             .orElseThrow(() -> new ActionException("Word not found"));
 
