@@ -14,13 +14,13 @@ import static java.util.Objects.nonNull;
 @Accessors(chain = true)
 @Data
 public class Word {
+    private final int id;
     private final String text;
     private final Orientation orientation;
     private final Position start;
     private final List<Cell> cells = new ArrayList<>();
     private final List<Event> history = new ArrayList<>();
     private CrossWardPlayer owner;
-    private int order;
     private boolean revealed = false;
 
     public enum Orientation {

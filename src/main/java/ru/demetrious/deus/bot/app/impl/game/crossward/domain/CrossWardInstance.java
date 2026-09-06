@@ -74,7 +74,6 @@ public class CrossWardInstance extends Instance<CrossWardSetting, CrossWardPlaye
                     log.trace("[Added] {}", word.getText());
                     index.getAndIncrement();
                     word.setOwner(owner);
-                    word.setOrder(getWords().size());
                     word.setRevealed(revealed);
                     word.getCells().forEach(cell -> cell.setRevealed(cell.isRevealed() || revealed));
                 }, () -> getAvailableWords().add(text));
