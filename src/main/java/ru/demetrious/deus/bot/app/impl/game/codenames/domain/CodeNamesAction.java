@@ -2,7 +2,6 @@ package ru.demetrious.deus.bot.app.impl.game.codenames.domain;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import java.util.Optional;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.CodeNamesPlayer.Team;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.AddHintAction;
 import ru.demetrious.deus.bot.app.impl.game.codenames.domain.action.ChangeTeamAction;
@@ -36,7 +35,7 @@ import static ru.demetrious.deus.bot.domain.game.GameType.CODE_NAMES;
     @Type(value = SetLockedAction.class, name = "set_locked"),
     @Type(value = SetPauseAction.class, name = "set_pause"),
 })
-public interface CodeNamesAction extends Action<CodeNamesSetting, CodeNamesPlayer, CodeNamesInstance, CodeNamesActionContext> {
+public interface CodeNamesAction extends Action<CodeNamesPlayer, CodeNamesInstance, CodeNamesActionContext, CodeNamesAction> {
     @Override
     default String getGame() {
         return CODE_NAMES;
@@ -65,28 +64,20 @@ public interface CodeNamesAction extends Action<CodeNamesSetting, CodeNamesPlaye
         }
     }
 
-    static void checkHost(CodeNamesInstance gameSession, String userId) throws ActionException {
-        if (!gameSession.getHostId().equals(userId)) {
+    static void checkHost(CodeNamesInstance gameSession, CodeNamesPlayer player) throws ActionException {
+        if (!gameSession.getHostId().equals(player.getId())) {
             throw new ActionException("Only host can start game");
         }
     }
 
-    static void checkTeamCaptain(CodeNamesInstance gameSession, String userId) throws ActionException {
-        Optional<CodeNamesPlayer> captain = gameSession.getPlayerList().stream()
-            .filter(p -> p.getId().equals(userId) && p.isCaptain() && p.getTeam() == gameSession.getState().getTeam())
-            .findFirst();
-
-        if (captain.isEmpty()) {
+    static void checkTeamCaptain(CodeNamesInstance gameSession, CodeNamesPlayer player) throws ActionException {
+        if (!player.isCaptain() || player.getTeam() != gameSession.getState().getTeam()) {
             throw new ActionException("Only captain can add hint game");
         }
     }
 
-    static void checkTeamMate(CodeNamesInstance gameSession, String userId, Team team) throws ActionException {
-        Optional<CodeNamesPlayer> mate = gameSession.getPlayerList().stream()
-            .filter(p -> p.getId().equals(userId) && !p.isCaptain() && p.getTeam() == team)
-            .findFirst();
-
-        if (mate.isEmpty()) {
+    static void checkTeamMate(CodeNamesPlayer player, Team team) throws ActionException {
+        if (player.isCaptain() || !player.getTeam().equals(team)) {
             throw new ActionException("Only mate can guess hint game");
         }
     }

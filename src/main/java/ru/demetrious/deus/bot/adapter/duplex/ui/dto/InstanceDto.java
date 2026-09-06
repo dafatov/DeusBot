@@ -1,15 +1,16 @@
 package ru.demetrious.deus.bot.adapter.duplex.ui.dto;
 
+import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesPlayerDto;
 
 @Getter
 @SuperBuilder
-public abstract class InstanceDto<P extends CodeNamesPlayerDto> {
+public abstract class InstanceDto<P extends PlayerDto> {
     private final String key;
     private final String hostId;
     private final Set<P> playerList;
+    private final List<EventDto> history;
     private final TimerDto timer;
 }

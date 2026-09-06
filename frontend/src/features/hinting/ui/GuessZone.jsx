@@ -1,6 +1,6 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {Send} from '@mui/icons-material';
 import {IconButton, Stack, TextField} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 import {useRef, useState} from 'react';
 import {addHint} from '../model/hintService.js';

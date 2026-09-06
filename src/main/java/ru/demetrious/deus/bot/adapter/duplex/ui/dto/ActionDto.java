@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ru.demetrious.deus.bot.adapter.duplex.ui.dto.codenames.CodeNamesActionDto;
+import ru.demetrious.deus.bot.adapter.duplex.ui.dto.crossward.CrossWardActionDto;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
@@ -11,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = PROPERTY, property = "type")
 @JsonSubTypes({
     @Type(value = CodeNamesActionDto.class),
+    @Type(value = CrossWardActionDto.class),
 })
 public interface ActionDto {
 }

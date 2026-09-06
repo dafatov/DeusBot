@@ -2,17 +2,13 @@ package ru.demetrious.deus.bot.app.impl.game.common.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.impl.game.common.Processor;
 import ru.demetrious.deus.bot.app.impl.game.common.api.Gamebox;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Action;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionException;
-import ru.demetrious.deus.bot.app.impl.game.common.domain.Instance;
-import ru.demetrious.deus.bot.app.impl.game.common.domain.Player;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.Setting;
 
 import static java.util.function.Function.identity;
@@ -38,11 +34,13 @@ public class GameboxImpl implements Gamebox {
     }
 
     @Override
-    public Optional<Pair<? extends Instance<?, ?>, ? extends Player>> findByPlayer(String userId) {
-        return processors.values().stream()
-            .map(f -> f.findPlayer(userId))
-            .findFirst()
-            .flatMap(identity());
+    public void connect(String userId) {
+        processors.values().forEach(processor -> processor.connect(userId));
+    }
+
+    @Override
+    public void disconnect(String userId) {
+        processors.values().forEach(processor -> processor.disconnect(userId));
     }
 
     @Override
@@ -54,11 +52,6 @@ public class GameboxImpl implements Gamebox {
         }
 
         processor.performAction(gameId, userId, action);
-    }
-
-    @Override
-    public void removeGame(String gameId) {
-        findProcessor(gameId).removeGame(gameId);
     }
 
     // =========================================================================================================================================================

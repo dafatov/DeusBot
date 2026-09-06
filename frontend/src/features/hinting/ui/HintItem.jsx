@@ -1,7 +1,7 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {setHintGuessed} from '@features/hinting/model/hintService';
 import {RadioButtonCheckedOutlined, RadioButtonUncheckedOutlined} from '@mui/icons-material';
 import {ListItem, ListItemText, Rating} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useSocket} from '@shared/lib/socket/hooks';
 
 export const HintItem = ({hint, currentTeam}) => {
