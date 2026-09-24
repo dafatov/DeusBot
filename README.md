@@ -646,7 +646,41 @@ sudo certbot certonly --standalone -d <your.domain> --non-interactive --agree-to
 sudo mkdir -p /opt/ssl/<your.domain>
 sudo chown 10000:10000 /opt/ssl/<your.domain>
 sudo openssl pkcs12 -export -in /etc/letsencrypt/live/<your.domain>/fullchain.pem -inkey /etc/letsencrypt/live/<your.domain>/privkey.pem -out /opt/ssl/<your.domain>/keystore.p12 -name deus-bot -password pass:<password>
-sudo chown 10000:10000 /opt/ssl/deus.bot.nu/keystore.p12
+sudo chown 10000:10000 /opt/ssl/<your.domain>/keystore.p12
+sudo mkdir -p /etc/letsencrypt/renewal-hooks/deploy
+sudo tee /etc/letsencrypt/renewal-hooks/deploy/10-deus.sh > /dev/null <<'EOF'
+#!/bin/bash
+set -euo pipefail
+
+DOMAIN="<your.domain>"
+KEYSTORE="/opt/ssl/<your.domain>/keystore.p12"
+LOG="/var/log/<your.domain>-ssl-deploy.log"
+
+exec >>"$LOG" 2>&1
+echo "=== $(date) deploy-hook start (RENEWED_DOMAINS=${RENEWED_DOMAINS:-none}) ==="
+
+KEY_STORE_PASSWORD='<password>'
+
+/usr/bin/openssl pkcs12 -export \
+  -in "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" \
+  -inkey "/etc/letsencrypt/live/$DOMAIN/privkey.pem" \
+  -out "$KEYSTORE" \
+  -name deus-bot \
+  -passin pass:"$KEY_STORE_PASSWORD" \
+  -passout pass:"$KEY_STORE_PASSWORD"
+echo "openssl exit=$?"
+
+chown 10000:10000 "$KEYSTORE"
+echo "chown exit=$?"
+
+docker restart deus-bot      || echo "skip deus-bot"
+docker restart deus-bot-test || echo "skip deus-bot-test"
+
+sleep 5
+echo "Served cert: $(echo | /usr/bin/openssl s_client -connect 127.0.0.1:443 -servername "$DOMAIN" 2>/dev/null | /usr/bin/openssl x509 -noout -enddate)"
+echo "=== $(date) deploy-hook done ==="
+EOF
+sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/10-deus.sh
 ```
 
 #### Production
