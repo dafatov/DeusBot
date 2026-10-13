@@ -35,7 +35,7 @@ public class CodeNamesProcessor extends Processor<CodeNamesInstance, CodeNamesSe
     }
 
     @Override
-    public CodeNamesPlayer createNewPlayer(String id, String name, String avatar) {
+    public CodeNamesPlayer createNewPlayer(CodeNamesInstance game, String id, String name, String avatar) {
         return new CodeNamesPlayer(id, name, avatar);
     }
 }

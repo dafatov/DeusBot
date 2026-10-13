@@ -25,7 +25,7 @@ public class CodeNamesInstance extends Instance<CodeNamesSetting, CodeNamesPlaye
     private final Map<String, Vote> voteMap = new HashMap<>();
 
     public CodeNamesInstance(String key, String hostId, CodeNamesSetting setting) {
-        super(key, hostId, setting);
+        super(key, setting, hostId);
     }
 
     @Override
