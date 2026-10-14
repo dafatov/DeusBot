@@ -22,6 +22,7 @@ import static net.dv8tion.jda.api.requests.GatewayIntent.MESSAGE_CONTENT;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.ACTIVITY;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.EMOJI;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.SCHEDULED_EVENTS;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.SOUNDBOARD_SOUNDS;
 import static net.dv8tion.jda.api.utils.cache.CacheFlag.STICKER;
 
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class JDAConfig {
             .setAudioModuleConfig(new AudioModuleConfig()
                 .withDaveSessionFactory(new JDaveSessionFactory()))
             .setEventPool(newCachedThreadPool(), true)
-            .disableCache(ACTIVITY, EMOJI, SCHEDULED_EVENTS, STICKER)
+            .disableCache(ACTIVITY, EMOJI, SCHEDULED_EVENTS, SOUNDBOARD_SOUNDS, STICKER)
             .setEnabledIntents(GUILD_MEMBERS, GUILD_MESSAGES, GUILD_VOICE_STATES, MESSAGE_CONTENT)
             .setActivity(playing(format("/help | v{0}", version)))
             .setStatus(DO_NOT_DISTURB)

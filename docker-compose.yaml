@@ -27,6 +27,10 @@ services:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
     dns:
       - 8.8.8.8
+  yt-cipher:
+    image: ghcr.io/kikkia/yt-cipher:master
+    ports:
+      - "8001:8001"
 
 volumes:
   postgres-data:

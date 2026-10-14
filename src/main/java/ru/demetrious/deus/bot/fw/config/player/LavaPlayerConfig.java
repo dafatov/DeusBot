@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.cipher.RemoteCipherManager;
 import dev.lavalink.youtube.clients.AndroidMusic;
 import dev.lavalink.youtube.clients.AndroidVr;
 import dev.lavalink.youtube.clients.Ios;
@@ -25,6 +26,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class LavaPlayerConfig {
     @Value("${youtube.refresh-token}")
     private String youtubeRefreshToken;
+    @Value("${youtube.cipher-url}")
+    private String youtubeCipherUrl;
 
     @Bean
     public AudioPlayerManager audioPlayerManager() {
@@ -58,6 +61,7 @@ public class LavaPlayerConfig {
         );
 
         youtubeAudioSourceManager.useOauth2(youtubeRefreshToken, isNotBlank(youtubeRefreshToken));
+        youtubeAudioSourceManager.setCipherManager(new RemoteCipherManager(youtubeCipherUrl));
 
         return new AudioSourceManager[]{
             youtubeAudioSourceManager,
