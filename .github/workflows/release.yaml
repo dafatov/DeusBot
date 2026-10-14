@@ -252,6 +252,7 @@ jobs:
       REVERSE1999_WIKI_URL: ${{ vars.REVERSE1999_WIKI_URL }}
       SHIKIMORI_GRAPHQL_PATH: ${{ vars.SHIKIMORI_GRAPHQL_PATH }}
       SHIKIMORI_URL: ${{ vars.SHIKIMORI_URL }}
+      YT_CIPHER_URL: ${{ vars.YT_CIPHER_URL }}
 
     steps:
       - name: Stop and run docker container via SSH
@@ -301,6 +302,7 @@ jobs:
             REVERSE1999_WIKI_URL=${{ vars.REVERSE1999_WIKI_URL }}
             SHIKIMORI_GRAPHQL_PATH=${{ vars.SHIKIMORI_GRAPHQL_PATH }}
             SHIKIMORI_URL=${{ vars.SHIKIMORI_URL }}
+            YT_CIPHER_URL=${{ vars.YT_CIPHER_URL }}
             ENV_EOF
             
             docker run -d -p 443:8080 -m ${{ env.CONTAINER_MEMORY_LIMIT }} -v ${{ env.IMAGE_NAME }}-cache:/cache-data -v /opt/ssl/deus.bot.nu:/ssl/deus.bot.nu:ro \

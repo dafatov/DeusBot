@@ -43,6 +43,8 @@ REVERSE1999_POOLS=
 REVERSE1999_WIKI_URL=
 SHIKIMORI_GRAPHQL_PATH=
 SHIKIMORI_URL=
+YT_CIPHER_URL=
+
 VITE_DISCORD_CDN_URL=
 ```
 
@@ -51,7 +53,11 @@ VITE_DISCORD_CDN_URL=
 #### Общие
 
 ```bash
-docker run -it --restart always --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE=false -d -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+docker run -d --restart always --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE=false -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+```
+
+```bash
+docker run -d --restart always --name yt-cipher -p 8001:8001 ghcr.io/kikkia/yt-cipher:master
 ```
 
 <details>  
@@ -686,11 +692,11 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/10-deus.sh
 #### Production
 
 ```bash
-docker run --restart always --name deus-bot-db -p 5432:5432 -e POSTGRES_USER=deus-bot-user -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=deus-bot -d -v "/db/deus-bot-db":/var/lib/postgresql/data postgres:16.3-alpine
+docker run -d --restart always --name deus-bot-db -p 5432:5432 -e POSTGRES_USER=deus-bot-user -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=deus-bot -v "/db/deus-bot-db":/var/lib/postgresql/data postgres:16.3-alpine
 ```
 
 #### PreProduction
 
 ```bash
-docker run --restart always --name deus-test-bot-db -p 5433:5432 -e POSTGRES_USER=deus-test-bot-user -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=deus-test-bot -d -v "/db/deus-test-bot-db":/var/lib/postgresql/data postgres:16.3-alpine
+docker run -d --restart always --name deus-test-bot-db -p 5433:5432 -e POSTGRES_USER=deus-test-bot-user -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=deus-test-bot -v "/db/deus-test-bot-db":/var/lib/postgresql/data postgres:16.3-alpine
 ```
