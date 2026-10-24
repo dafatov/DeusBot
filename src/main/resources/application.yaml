@@ -132,6 +132,9 @@ feign:
     deus:
       url: ${DEUS_URL}
       path: /
+    reverse1999-fandom-wiki:
+      url: ${REVERSE1999_FANDOM_URL}
+      path: /wiki
     reverse1999-wiki:
       url: ${REVERSE1999_WIKI_URL}
       path: /

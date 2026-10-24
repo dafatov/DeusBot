@@ -1,6 +1,7 @@
 package ru.demetrious.deus.bot.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -28,6 +29,14 @@ public class JacksonUtils {
     public static <T> String writeValueAsString(T t) {
         try {
             return getMapper().writeValueAsString(t);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T parse(String value, TypeReference<T> typeReference) {
+        try {
+            return getMapper().readValue(value, typeReference);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
