@@ -5,7 +5,7 @@ import ru.demetrious.deus.bot.app.api.game.GetGamePackWordsOutbound;
 import ru.demetrious.deus.bot.app.api.game.NotifyGameStateOutbound;
 import ru.demetrious.deus.bot.app.impl.game.common.domain.ActionContext;
 
-public final class CodeNamesActionContext extends ActionContext<CodeNamesSetting, CodeNamesPlayer, CodeNamesInstance> {
+public final class CodeNamesActionContext extends ActionContext<CodeNamesInstance> {
     public CodeNamesActionContext(GetGamePackWordsOutbound dictionary,
                                   NotifyGameStateOutbound notifyGameStateOutbound,
                                   ExecutorService virtualThreadPerTaskExecutor) {

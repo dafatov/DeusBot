@@ -55,6 +55,7 @@ export const SocketProvider = ({children}) => {
       client.publish({destination, body, headers});
       resolve();
     } catch (e) {
+      showError('WebSocket connection error. Can\'t publish');
       reject(e);
     }
   }), []);

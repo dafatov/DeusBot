@@ -1,5 +1,6 @@
 package ru.demetrious.deus.bot.app.impl.command;
 
+import java.text.MessageFormat;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,9 +33,11 @@ public class GameCommandUseCase implements GameCommandInbound {
     public void execute() {
         notifyOutbound.notify(new MessageData().setEmbeds(List.of(new MessageEmbed()
             .setTitle("Игры")
-            .setDescription("""
-                - [Codenames](%s/ui/game/code-names)
+            .setDescription(MessageFormat.format("""
+                - [Codenames]({0}/ui/game/code-names)
                 -# Командная игра для двух сторон. Капитаны дают ассоциацию из одного слова и числа (например, «животное — 3»), чтобы намекнуть на нужные ячейки в сетке 5х5. Команды угадывают свои карточки-агенты, но должны избегать карты «убийца» (проигрыш). Побеждают те, кто первыми найдут всех своих шпионов.
-                """.formatted(appUrl)))));
+                - [Crossward]({0}/ui/game/cross-ward)
+                -# WIP.
+                """, appUrl)))));
     }
 }
