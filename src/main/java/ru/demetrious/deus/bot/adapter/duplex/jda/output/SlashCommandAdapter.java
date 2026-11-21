@@ -8,11 +8,13 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.adapter.duplex.jda.mapper.ModalDataMapper;
 import ru.demetrious.deus.bot.app.api.channel.GetChannelOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetAttachmentOptionOutbound;
+import ru.demetrious.deus.bot.app.api.command.GetChoiceOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetIntegerOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
@@ -22,8 +24,10 @@ import ru.demetrious.deus.bot.app.api.user.GetUserOptionOutbound;
 import ru.demetrious.deus.bot.domain.AttachmentOption;
 import ru.demetrious.deus.bot.domain.CommandData;
 import ru.demetrious.deus.bot.domain.ModalData;
+import ru.demetrious.deus.bot.domain.OptionChoice;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.EnumUtils.getEnumMap;
 import static org.springframework.context.annotation.ScopedProxyMode.TARGET_CLASS;
 import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 
@@ -32,7 +36,7 @@ import static ru.demetrious.deus.bot.fw.config.spring.SpringConfig.SCOPE_THREAD;
 @Scope(value = SCOPE_THREAD, proxyMode = TARGET_CLASS)
 @Component
 public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionInbound, SlashCommandInteractionEvent, SlashCommandInteraction>
-    implements GetLatencyOutbound, GetStringOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound<SlashCommandInteractionInbound>, GetIntegerOptionOutbound, GetChannelOptionOutbound,
+    implements GetLatencyOutbound, GetStringOptionOutbound, GetChoiceOptionOutbound, GetAttachmentOptionOutbound, ShowModalOutbound<SlashCommandInteractionInbound>, GetIntegerOptionOutbound, GetChannelOptionOutbound,
     GetUserOptionOutbound {
     private final ModalDataMapper modalDataMapper;
 
@@ -45,6 +49,13 @@ public class SlashCommandAdapter extends GenericAdapter<SlashCommandInteractionI
     public Optional<String> getStringOption(String name) {
         return getOption(name)
             .map(OptionMapping::getAsString);
+    }
+
+    @NullMarked
+    @Override
+    public <T extends Enum<T> & OptionChoice> Optional<T> getChoiceOption(String name, Class<T> type) {
+        return getStringOption(name)
+            .map(s -> getEnumMap(type, OptionChoice::getValue).get(s));
     }
 
     @Override

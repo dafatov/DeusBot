@@ -8,5 +8,5 @@ import ru.demetrious.deus.bot.domain.OptionChoice;
 public interface ReplyChoicesOutbound {
     int MAX_CHOICES = OptionData.MAX_CHOICES;
 
-    void replyChoices(List<OptionChoice> choiceList);
+    void replyChoices(List<? extends OptionChoice> choiceList);
 }

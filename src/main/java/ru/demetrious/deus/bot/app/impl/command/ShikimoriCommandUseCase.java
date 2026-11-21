@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,7 +14,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Component;
 import ru.demetrious.deus.bot.app.api.anime.GetAnimeOutbound;
 import ru.demetrious.deus.bot.app.api.anime.ImportAnimeOutbound;
-import ru.demetrious.deus.bot.app.api.command.GetStringOptionOutbound;
+import ru.demetrious.deus.bot.app.api.command.GetChoiceOptionOutbound;
 import ru.demetrious.deus.bot.app.api.command.ShikimoriCommandInbound;
 import ru.demetrious.deus.bot.app.api.interaction.SlashCommandInteractionInbound;
 import ru.demetrious.deus.bot.app.api.message.NotifyOutbound;
@@ -51,8 +52,6 @@ import static ru.demetrious.deus.bot.fw.config.security.AuthorizationComponent.S
 @Component
 public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriCommandInbound {
     private static final String STRING_OPTION_METHOD = "method";
-    private static final String METHOD_CHOICE_FILE = "file";
-    private static final String METHOD_CHOICE_ANILIST = "anilist";
     private static final String HTML_BODY_PATTERN = "<!DOCTYPE html><html lang=\"ru\"><head><meta charset=\"UTF-8\"><title>Статистика</title></head><body>%s</body></html>";
 
     private final GetAnimeOutbound getAnimeOutbound;
@@ -60,7 +59,7 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
     private final NotifyOutbound<SlashCommandInteractionInbound> notifyOutbound;
     private final AuthorizationComponent authorizationComponent;
     private final ImportAnimeOutbound importAnimeOutbound;
-    private final GetStringOptionOutbound getStringOptionOutbound;
+    private final GetChoiceOptionOutbound getChoiceOptionOutbound;
 
     @Value("${ANILIST_URL}")
     private String anilistUrl;
@@ -75,23 +74,16 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
                 .setName(STRING_OPTION_METHOD)
                 .setDescription("Метод экспорта")
                 .setRequired(true)
-                .setChoices(List.of(
-                    new OptionChoice()
-                        .setName("Импортировать на anilist.co")
-                        .setValue(METHOD_CHOICE_ANILIST),
-                    new OptionChoice()
-                        .setName("Получить файлом")
-                        .setValue(METHOD_CHOICE_FILE)
-                ))));
+                .setChoices(Method.values())));
     }
 
     @Override
     public boolean isDefer(Type type) {
         String userId = getUserIdOutbound.getUserId();
 
-        return getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD)
-            .map(method -> authorizationComponent.authorize(SHIKIMORI_REGISTRATION_ID, userId).isPresent() && (METHOD_CHOICE_FILE.equals(method)
-                || METHOD_CHOICE_ANILIST.equals(method) && authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId).isPresent()))
+        return getChoiceOptionOutbound.getChoiceOption(STRING_OPTION_METHOD, Method.class)
+            .map(method -> authorizationComponent.authorize(SHIKIMORI_REGISTRATION_ID, userId).isPresent() && (Method.FILE.equals(method)
+                || Method.ANILIST.equals(method) && authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId).isPresent()))
             .orElseThrow();
     }
 
@@ -105,10 +97,10 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
             return;
         }
 
-        String method = getStringOptionOutbound.getStringOption(STRING_OPTION_METHOD).orElseThrow();
+        Method method = getChoiceOptionOutbound.getChoiceOption(STRING_OPTION_METHOD, Method.class).orElseThrow();
         Optional<OAuth2AuthorizedClient> anilistUser = empty();
 
-        if (METHOD_CHOICE_ANILIST.equals(method)) {
+        if (Method.ANILIST.equals(method)) {
             anilistUser = authorizationComponent.authorize(ANILIST_REGISTRATION_ID, userId);
 
             if (anilistUser.isEmpty()) {
@@ -118,11 +110,11 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
         }
 
         MessageData messageData = switch (method) {
-            case METHOD_CHOICE_FILE -> new MessageData()
+            case Method.FILE -> new MessageData()
                 .setFiles(List.of(new MessageFile()
                     .setData(getAnimeListXml())
                     .setName("%s_animes.xml".formatted(shikimoriUser.get().getPrincipalName()))));
-            case METHOD_CHOICE_ANILIST -> {
+            case Method.ANILIST -> {
                 String anilistPrincipalName = anilistUser.get().getPrincipalName();
                 ImportAnimeContext importAnimeContext = importAnimeOutbound.execute(getAnimeOutbound.getAnimeList(), parseInt(anilistPrincipalName));
                 String description = prettifyContext(importAnimeContext, group -> mapGroupMarkdown(group, false));
@@ -144,7 +136,6 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
                         .setTimestamp(now())))
                     .setFiles(messageFileList);
             }
-            default -> throw new IllegalStateException("Unexpected value: " + method);
         };
 
         notifyOutbound.notify(messageData);
@@ -198,5 +189,15 @@ public class ShikimoriCommandUseCase extends PlayerCommand implements ShikimoriC
             .sorted(comparing(AnimeProjection::getTitle))
             .map(a -> "<li><a href=\"%s\">%s</a></li>".formatted(a.getUrl(), a.getTitle()))
             .collect(joining()), "</ul>");
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    private enum Method implements OptionChoice {
+        ANILIST("anilist", "Импортировать на anilist.co"),
+        FILE("file", "Получить файлом");
+
+        private final String value;
+        private final String name;
     }
 }

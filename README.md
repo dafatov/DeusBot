@@ -647,6 +647,7 @@ docker run -d --restart always --name yt-cipher -p 8001:8001 ghcr.io/kikkia/yt-c
 
 ###### Установка сертификата
 
+Не забудьте заменить <your.domain>, \<password> на реальные значения
 ```bash
 sudo apt install certbot openssl -y
 sudo certbot certonly --standalone -d <your.domain> --non-interactive --agree-tos -m <your@email.com>
@@ -659,14 +660,14 @@ sudo tee /etc/letsencrypt/renewal-hooks/deploy/10-deus.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -euo pipefail
 
-DOMAIN="<your.domain>"
-KEYSTORE="/opt/ssl/<your.domain>/keystore.p12"
-LOG="/var/log/<your.domain>-ssl-deploy.log"
+KEY_STORE_PASSWORD='<password>'
+
+DOMAIN=$(basename "$RENEWED_LINEAGE")
+KEYSTORE="/opt/ssl/${DOMAIN}/keystore.p12"
+LOG="/var/log/${DOMAIN}-ssl-deploy.log"
 
 exec >>"$LOG" 2>&1
 echo "=== $(date) deploy-hook start (RENEWED_DOMAINS=${RENEWED_DOMAINS:-none}) ==="
-
-KEY_STORE_PASSWORD='<password>'
 
 /usr/bin/openssl pkcs12 -export \
   -in "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" \

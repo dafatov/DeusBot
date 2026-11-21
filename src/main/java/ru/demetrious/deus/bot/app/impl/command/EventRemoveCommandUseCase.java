@@ -54,9 +54,9 @@ public class EventRemoveCommandUseCase implements EventRemoveCommandInbound {
 
     @Override
     public void onAutocomplete() {
-        List<OptionChoice> optionChoiceList = eventComponent.getEventKeyList().stream()
+        List<OptionChoice.Default> optionChoiceList = eventComponent.getEventKeyList().stream()
             .filter(title -> title.startsWith(getFocusedOptionOutbound.getFocusedOption().getValue()))
-            .map(title -> new OptionChoice()
+            .map(title -> new OptionChoice.Default()
                 .setName(title)
                 .setValue(title))
             .limit(MAX_CHOICES)

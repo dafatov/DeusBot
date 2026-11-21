@@ -65,13 +65,13 @@ public class AniguessrGuessCommandUseCase implements AniguessrGuessCommandInboun
     @Override
     public void onAutocomplete() {
         AutocompleteOption focusedOption = getFocusedOptionOutbound.getFocusedOption();
-        List<OptionChoice> optionList = List.of();
+        List<OptionChoice.Default> optionList = List.of();
 
         if (!aniguessrGamesHolder.getGames().isEmpty()) {
             optionList = getFranchiseOutbound.getFranchiseList().stream()
                 .flatMap(f -> f.getTitles().stream()
                     .filter(title -> containsIgnoreCase(title, focusedOption.getValue()))
-                    .map(t -> new OptionChoice()
+                    .map(t -> new OptionChoice.Default()
                         .setValue(f.getName())
                         .setName(t)))
                 .limit(MAX_CHOICES)

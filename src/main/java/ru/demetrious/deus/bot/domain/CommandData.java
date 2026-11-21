@@ -46,6 +46,7 @@ public class CommandData {
         PUBLICIST_SET("publicist", "set"),
         PUBLICIST_SHOW("publicist", "show"),
         QUEUE("queue"),
+        RANDOM("random"),
         REMOVE("remove"),
         REVERSE1999_CHARACTERS_EXPORT("reverse1999", "characters", "export"),
         REVERSE1999_CHARACTERS_IMPORT("reverse1999", "characters", "import"),

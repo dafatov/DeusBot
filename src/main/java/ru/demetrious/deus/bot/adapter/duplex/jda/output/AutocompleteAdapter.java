@@ -34,7 +34,7 @@ public class AutocompleteAdapter extends BaseAdapter<CommandAutoCompleteInteract
     }
 
     @Override
-    public void replyChoices(List<OptionChoice> choiceList) {
+    public void replyChoices(List<? extends OptionChoice> choiceList) {
         getEvent().replyChoices(commandDataMapper.mapChoice(choiceList)).queue();
     }
 

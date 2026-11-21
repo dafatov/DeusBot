@@ -85,9 +85,9 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
             return;
         }
 
-        List<OptionChoice> optionChoiceList = getReverseDataOutbound.getReverseData().getCharacters().entrySet().stream()
+        List<OptionChoice.Default> optionChoiceList = getReverseDataOutbound.getReverseData().getCharacters().entrySet().stream()
             .filter(characterEntry -> containsIgnoreCase(characterEntry.getValue().getName(), focusedOption.getValue()))
-            .map(characterEntry -> new OptionChoice()
+            .map(characterEntry -> new OptionChoice.Default()
                 .setName(characterEntry.getValue().getName())
                 .setValue(String.valueOf(characterEntry.getKey())))
             .limit(MAX_CHOICES)
@@ -116,7 +116,7 @@ public class Reverse1999CharactersSetCommandUseCase implements Reverse1999Charac
             .count()));
         int newCount = realCount - count;
 
-        pullsData.getCharacterCorrelationMap().compute(characterId, (key, oldValue) -> defaultIfZero(newCount));
+        pullsData.getCharacterCorrelationMap().compute(characterId, (_, _) -> defaultIfZero(newCount));
         log.debug("characterCorrelationMap={}", pullsData.getCharacterCorrelationMap());
         updatePullsDataOutbound.updatePullsData(pullsData);
         notifyOutbound.notify(new MessageData().setEmbeds(List.of(new MessageEmbed()
