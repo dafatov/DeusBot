@@ -55,6 +55,7 @@ public interface CodeNamesAction extends Action<CodeNamesPlayer, CodeNamesInstan
         gameSession.getState().setPhase(HINTING);
         gameSession.getState().setTeam(gameSession.getState().getTeam() == Team.BLUE ? Team.RED : Team.BLUE);
         gameSession.getState().setRound(gameSession.getState().getRound() + 1);
+        gameSession.getVoteMap().clear();
         ctx.startTimer(gameSession, ofMinutes(1), () -> endHintingPhaseTimeout(gameSession, ctx));
     }
 

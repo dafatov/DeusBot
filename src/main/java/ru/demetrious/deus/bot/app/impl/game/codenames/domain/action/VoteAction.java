@@ -75,10 +75,12 @@ public record VoteAction(Vote vote) implements CodeNamesAction {
             default -> throw new IllegalStateException("Unexpected vote value: " + vote);
         };
 
-        gameSession.getVoteMap().clear();
         if (isTrue(needSkipPhase)) {
             endGuessingPhase(gameSession, ctx);
+            return;
         }
+
+        gameSession.getVoteMap().clear();
     }
 
     private static Boolean resolveWordVoting(CodeNamesInstance gameSession, CodeNamesPlayer player, CodeNamesActionContext ctx, WordVote vote) throws ActionException {
