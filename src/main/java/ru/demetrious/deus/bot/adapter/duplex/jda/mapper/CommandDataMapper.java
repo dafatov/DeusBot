@@ -54,7 +54,7 @@ public interface CommandDataMapper {
         return optionDataResult;
     }
 
-    List<Command.Choice> mapChoice(List<OptionChoice> choices);
+    List<Command.Choice> mapChoice(List<? extends OptionChoice> choices);
 
     default Command.Choice mapChoice(OptionChoice choice) {
         return new Command.Choice(choice.getName(), choice.getValue());
