@@ -1,5 +1,5 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {Grid} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {useState} from 'react';
 import {SliderControl} from './SliderControl';
 import {WordCard} from './WordCard';

@@ -1,7 +1,7 @@
 import {WordTile} from '@entities/game';
+import {useGame} from '@entities/game/lib/hooks';
 import {VoteZone} from '@features/voting';
 import {Avatar, Paper} from '@mui/material';
-import {useGame} from '@shared/lib/game/hooks';
 import {COLORS} from '../config/colors';
 
 export const WordCard = ({word, visible}) => {

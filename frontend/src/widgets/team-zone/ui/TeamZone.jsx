@@ -1,3 +1,4 @@
+import {useGame} from '@entities/game/lib/hooks';
 import {PlayerCard} from '@entities/user';
 import {BecomeCaptainButton, BecomePlayerButton} from '@features/change-team';
 import {GuessZone} from '@features/hinting/ui/GuessZone';
@@ -5,7 +6,6 @@ import {HintItem} from '@features/hinting/ui/HintItem';
 import {VoteZone} from '@features/voting';
 import {Card, Divider, List, Typography} from '@mui/material';
 import beepSound from '@shared/assets/sample/beep.wav';
-import {useGame} from '@shared/lib/game/hooks';
 import {useEffect, useRef} from 'react';
 import {useTimer} from 'react-timer-hook';
 import useSound from 'use-sound';
