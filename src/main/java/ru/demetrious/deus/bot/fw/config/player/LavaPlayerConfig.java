@@ -28,6 +28,8 @@ public class LavaPlayerConfig {
     private String youtubeRefreshToken;
     @Value("${youtube.cipher-url}")
     private String youtubeCipherUrl;
+    @Value("${youtube.enabled}")
+    private boolean isEnabled;
 
     @Bean
     public AudioPlayerManager audioPlayerManager() {
@@ -48,6 +50,12 @@ public class LavaPlayerConfig {
     // ===================================================================================================================
 
     private AudioSourceManager[] getAudioSourceManagers() {
+        HttpAudioSourceManager httpAudioSourceManager = new HttpAudioSourceManager();
+
+        if (!isEnabled) {
+            return new AudioSourceManager[]{httpAudioSourceManager};
+        }
+
         YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(
             new Web(),
             new AndroidMusic(),
@@ -65,7 +73,7 @@ public class LavaPlayerConfig {
 
         return new AudioSourceManager[]{
             youtubeAudioSourceManager,
-            new HttpAudioSourceManager()
+            httpAudioSourceManager
         };
     }
 }

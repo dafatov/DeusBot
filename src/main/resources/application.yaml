@@ -184,5 +184,6 @@ discord:
   token: ${DISCORD_TOKEN}
 
 youtube:
+  enabled: true
   refresh-token: ${YOUTUBE_REFRESH_TOKEN}
   cipher-url: ${YT_CIPHER_URL}
